@@ -1,2 +1,2 @@
 # Smart-Weighing-Machine
-Weighing machine is connected to the Internet
+Weighing machine which is connected to the Internet
