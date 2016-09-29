@@ -1,0 +1,8 @@
+[
+  {
+    "outputFileName": "wwwroot/dist/css/AdminLTE.min.css",
+    "inputFiles": [
+      "wwwroot/dist/css/AdminLTE.css"
+    ]
+  }
+]

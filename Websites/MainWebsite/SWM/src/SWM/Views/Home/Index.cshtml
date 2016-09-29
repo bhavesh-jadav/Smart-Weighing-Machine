@@ -1,0 +1,34 @@
+﻿@model LoginViewModel
+<div class="login-box-body">
+    <p class="login-box-msg">Sign in to continue</p>
+    <form method="post" novalidate>
+        <div asp-validation-summary="ModelOnly"></div>
+        <div class="form-group has-feedback">
+            <input asp-for="UserEmail" type="email" class="form-control" placeholder="Email">
+            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            <span asp-validation-for="UserEmail"></span>
+        </div>
+        <div class="form-group has-feedback">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Password">
+            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            <span asp-validation-for="Password"></span>
+        </div>
+        <div class="row">
+            <div class="col-xs-8">
+                <div class="checkbox icheck">
+                    <label>
+                        <input asp-for="Remember" type="checkbox"> Remember Me
+                    </label>
+                </div>
+            </div>
+            <!-- /.col -->
+            <div class="col-xs-4">
+                <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+            </div>
+            <!-- /.col -->
+        </div>
+    </form>
+    <a asp-controller="Home" asp-action="PasswordReset">I forgot my password</a><br>
+    <a asp-controller="Home" asp-action="Contact">Any other difficulties? Click here</a>
+</div>
+<!-- /.login-box-body -->
