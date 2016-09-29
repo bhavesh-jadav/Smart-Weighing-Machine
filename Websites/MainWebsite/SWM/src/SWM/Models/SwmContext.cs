@@ -47,5 +47,6 @@ namespace SWM.Models
         public DbSet<SubscriptionType> SubscriptionType { get; set; }
         public DbSet<UserToSubscription> UserToSubscriptions { get; set; }
         public DbSet<SubscriptionCount> SubscriptionCounts { get; set; }
+        public DbSet<OtherData> OtherDatas { get; set; }
     }
 }

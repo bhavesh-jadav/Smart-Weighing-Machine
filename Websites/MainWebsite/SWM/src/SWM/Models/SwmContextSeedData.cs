@@ -41,19 +41,51 @@ namespace SWM.Models
 
                 await _roleManager.CreateAsync(role);
             }
-            if (await _userManager.FindByEmailAsync("abc@gmail.com") == null)
+            if (await _userManager.FindByEmailAsync("abc@lolol.com") == null)
             {
                 var user = new SwmUser()
                 {
-                    UserName = "Bhavesh",
-                    Email = "abc@gmail.com"
+                    UserName = "Bhavesh Jadav",
+                    Email = "abc@lolol.com"
                 };
 
                 await _userManager.CreateAsync(user, "Bhavesh");
-                if(!await _userManager.IsInRoleAsync(user, "admin"))
+                if (!await _userManager.IsInRoleAsync(user, "admin"))
                 {
                     await _userManager.AddToRoleAsync(user, "admin");
                 }
+            }
+
+            if (await _userManager.FindByEmailAsync("xyz@lolol.com") == null)
+            {
+                var user = new SwmUser()
+                {
+                    UserName = "Kaushal Mania",
+                    Email = "xyz@lolol.com"
+                };
+
+                await _userManager.CreateAsync(user, "Kaushal");
+                if (!await _userManager.IsInRoleAsync(user, "user"))
+                {
+                    await _userManager.AddToRoleAsync(user, "user");
+                }
+            }
+
+            if (_ctx.OtherDatas.Any())
+            {
+                var otherData = new OtherData()
+                {
+                    Name = "SubscriptionCount",
+                    Value = "99"
+                };
+                _ctx.OtherDatas.Add(otherData);
+            }
+
+            if (_ctx.UserToSubscriptions.Any())
+            {
+                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
+                var scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
+                int count = Convert.ToInt16()
             }
 
             await _ctx.SaveChangesAsync();

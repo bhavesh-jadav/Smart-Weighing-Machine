@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace SWM.Migrations
 {
-    public partial class addnewentities : Migration
+    public partial class AddedNewEntites : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -108,6 +108,18 @@ namespace SWM.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OtherDatas",
+                columns: table => new
+                {
+                    Name = table.Column<string>(nullable: false),
+                    Value = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OtherDatas", x => x.Name);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PinNumbers",
                 columns: table => new
                 {
@@ -194,6 +206,9 @@ namespace SWM.Migrations
 
             migrationBuilder.DropTable(
                 name: "MachineToUsers");
+
+            migrationBuilder.DropTable(
+                name: "OtherDatas");
 
             migrationBuilder.DropTable(
                 name: "PinNumbers");

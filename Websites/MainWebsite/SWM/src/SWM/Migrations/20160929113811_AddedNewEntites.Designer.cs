@@ -8,8 +8,8 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    [Migration("20160929103453_addnewentities")]
-    partial class addnewentities
+    [Migration("20160929113811_AddedNewEntites")]
+    partial class AddedNewEntites
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -232,6 +232,18 @@ namespace SWM.Migrations
                     b.HasKey("MachineId", "UserID");
 
                     b.ToTable("MachineToUsers");
+                });
+
+            modelBuilder.Entity("SWM.Models.OtherData", b =>
+                {
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Value")
+                        .IsRequired();
+
+                    b.HasKey("Name");
+
+                    b.ToTable("OtherDatas");
                 });
 
             modelBuilder.Entity("SWM.Models.PinNumber", b =>

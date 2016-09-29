@@ -233,6 +233,18 @@ namespace SWM.Migrations
                     b.ToTable("MachineToUsers");
                 });
 
+            modelBuilder.Entity("SWM.Models.OtherData", b =>
+                {
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Value")
+                        .IsRequired();
+
+                    b.HasKey("Name");
+
+                    b.ToTable("OtherDatas");
+                });
+
             modelBuilder.Entity("SWM.Models.PinNumber", b =>
                 {
                     b.Property<int>("Id")
