@@ -29,7 +29,7 @@ namespace SWM.Migrations
                     CropToUserId = table.Column<int>(nullable: false),
                     DateTime = table.Column<DateTime>(nullable: false),
                     FarmLocationId = table.Column<int>(nullable: false),
-                    TroughId = table.Column<int>(nullable: false),
+                    TroughId = table.Column<int>(),
                     Weight = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

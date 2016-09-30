@@ -15,6 +15,7 @@ namespace SWM.Models
         public DateTime DateTime { get; set; }
         [Required]
         public int Weight { get; set; }
+
         public int TroughId { get; set; }
         [Required]
         public int FarmLocationId { get; set; }
