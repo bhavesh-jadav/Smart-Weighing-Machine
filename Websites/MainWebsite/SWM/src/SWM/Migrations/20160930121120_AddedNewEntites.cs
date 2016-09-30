@@ -158,7 +158,7 @@ namespace SWM.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubscriptionType",
+                name: "SubscriptionTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -167,7 +167,7 @@ namespace SWM.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SubscriptionType", x => x.Id);
+                    table.PrimaryKey("PK_SubscriptionTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -220,7 +220,7 @@ namespace SWM.Migrations
                 name: "SubscriptionCounts");
 
             migrationBuilder.DropTable(
-                name: "SubscriptionType");
+                name: "SubscriptionTypes");
 
             migrationBuilder.DropTable(
                 name: "UserToSubscriptions");

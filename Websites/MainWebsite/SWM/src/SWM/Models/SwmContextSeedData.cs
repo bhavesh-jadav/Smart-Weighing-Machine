@@ -22,7 +22,16 @@ namespace SWM.Models
 
         public async Task EnsureSeedData()
         {
-            if(await _roleManager.FindByNameAsync("admin") == null)
+            if (!_ctx.SubscriptionTypes.Any())
+            {
+                var sub = new SubscriptionType()
+                {
+                    Name = "Farming"
+                };
+                _ctx.SubscriptionTypes.Add(sub);
+                await _ctx.SaveChangesAsync();
+            }
+            if (await _roleManager.FindByNameAsync("admin") == null)
             {
                 var role = new UserRoleManager()
                 {
@@ -45,11 +54,12 @@ namespace SWM.Models
             {
                 var user = new SwmUser()
                 {
-                    UserName = "Bhavesh Jadav",
+                    UserName = "Bhavesh",
                     Email = "abc@lolol.com"
                 };
 
-                await _userManager.CreateAsync(user, "Bhavesh");
+                await _userManager.CreateAsync(user, "bhavesh");
+
                 if (!await _userManager.IsInRoleAsync(user, "admin"))
                 {
                     await _userManager.AddToRoleAsync(user, "admin");
@@ -60,18 +70,19 @@ namespace SWM.Models
             {
                 var user = new SwmUser()
                 {
-                    UserName = "Kaushal Mania",
+                    UserName = "Kaushal",
                     Email = "xyz@lolol.com"
                 };
 
-                await _userManager.CreateAsync(user, "Kaushal");
+                await _userManager.CreateAsync(user, "kaushal");
+
                 if (!await _userManager.IsInRoleAsync(user, "user"))
                 {
                     await _userManager.AddToRoleAsync(user, "user");
                 }
             }
 
-            if (_ctx.OtherDatas.Any())
+            if (!_ctx.OtherDatas.Any())
             {
                 var otherData = new OtherData()
                 {
@@ -79,15 +90,27 @@ namespace SWM.Models
                     Value = "99"
                 };
                 _ctx.OtherDatas.Add(otherData);
+                await _ctx.SaveChangesAsync();
             }
 
-            if (_ctx.UserToSubscriptions.Any())
+            if (!_ctx.UserToSubscriptions.Any())
             {
                 var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
                 var scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
                 int count = Convert.ToInt16(scount.Value);
                 count++;
+                var subtype = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name == "Farming");
 
+                var utos = new UserToSubscription()
+                {
+                    UserID = user.Id,
+                    SubscriptionTypeId = subtype.Id,
+                    SubscriptionId = count
+                };
+
+                _ctx.UserToSubscriptions.Add(utos);
+                scount.Value = count.ToString();
+                await _ctx.SaveChangesAsync();
             }
 
             await _ctx.SaveChangesAsync();

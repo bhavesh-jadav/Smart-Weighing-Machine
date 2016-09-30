@@ -42,8 +42,12 @@ namespace SWM
             services.AddIdentity<SwmUser, UserRoleManager>(config =>
                 {
                     config.User.RequireUniqueEmail = true;
-                    config.Password.RequiredLength = 8;
                     config.Cookies.ApplicationCookie.LoginPath = "/SignIn";
+                    config.Password.RequireDigit = false;
+                    config.Password.RequiredLength = 5;
+                    config.Password.RequireLowercase = false;
+                    config.Password.RequireNonAlphanumeric = false;
+                    config.Password.RequireUppercase = false;
                 }
             ).AddEntityFrameworkStores<SwmContext>();
 

@@ -8,7 +8,7 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    [Migration("20160929113811_AddedNewEntites")]
+    [Migration("20160930121120_AddedNewEntites")]
     partial class AddedNewEntites
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -291,7 +291,7 @@ namespace SWM.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubscriptionType");
+                    b.ToTable("SubscriptionTypes");
                 });
 
             modelBuilder.Entity("SWM.Models.SwmUser", b =>

@@ -290,7 +290,7 @@ namespace SWM.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubscriptionType");
+                    b.ToTable("SubscriptionTypes");
                 });
 
             modelBuilder.Entity("SWM.Models.SwmUser", b =>

@@ -44,7 +44,7 @@ namespace SWM.Models
         public DbSet<MachineToUser> MachineToUsers { get; set; }
         public DbSet<PinNumber> PinNumbers { get; set; }
         public DbSet<State> States { get; set; }
-        public DbSet<SubscriptionType> SubscriptionType { get; set; }
+        public DbSet<SubscriptionType> SubscriptionTypes { get; set; }
         public DbSet<UserToSubscription> UserToSubscriptions { get; set; }
         public DbSet<SubscriptionCount> SubscriptionCounts { get; set; }
         public DbSet<OtherData> OtherDatas { get; set; }
