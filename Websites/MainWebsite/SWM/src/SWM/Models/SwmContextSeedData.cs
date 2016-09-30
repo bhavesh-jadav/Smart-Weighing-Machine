@@ -164,10 +164,52 @@ namespace SWM.Models
                 scount.Value = count.ToString();
                 await _ctx.SaveChangesAsync();
             }
+            if(!_ctx.CropInfos.Any())
+            {
+                CropInfo[] cinfos = {new CropInfo { Name = "Apple"}, new CropInfo { Name = "Mango" }, new CropInfo { Name = "Spinach" },
+                new CropInfo { Name = "Grapes"}};
+                _ctx.CropInfos.AddRange(cinfos);
+                await _ctx.SaveChangesAsync();
+            }
+            if(!_ctx.CropToUsers.Any())
+            {
+                //Used by crop data table and data will be added directly into this table after checking if it exists or not
+                //verify before entering data into this table
+                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
+                CropsToUser[] ctou = {new CropsToUser { CropID = 1, UserId = user.Id}, new CropsToUser { CropID = 2, UserId = user.Id },
+                new CropsToUser { CropID = 3, UserId = user.Id}, new CropsToUser { CropID = 4, UserId = user.Id}};
+                _ctx.AddRange(ctou);
+                await _ctx.SaveChangesAsync();
+            }
+            if(!_ctx.FarmLocationToMachines.Any())
+            {
+                //Used by crop data table and data will be added directly into this table after checking if it exists or not
+                //verify before entering data into this table
+                var ftom = new FarmLocationToMachine() { FarmLocationId = 1, MachineId = 70000 };
+                _ctx.FarmLocationToMachines.Add(ftom);
+                await _ctx.SaveChangesAsync();
+            }
 
-
-
-
+            if(!_ctx.CropDatas.Any())
+            {
+                //before adding data into this table verify data in CropsToUser and FarmlocationToMachine tables
+                DateTime datetime = new DateTime(2016, 9, 30, 21, 20, 20);
+                CropData[] cdatas =
+                {
+                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(1), FarmLocationId = 1, Weight = 55 },
+                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(2), FarmLocationId = 1, Weight = 100 },
+                    new CropData {CropToUserId = 3, DateTime = datetime.AddMinutes(3), FarmLocationId = 1, Weight = 20 },
+                    new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(4), FarmLocationId = 1, Weight = 123 },
+                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(5), FarmLocationId = 1, Weight = 555 },
+                    new CropData {CropToUserId = 3, DateTime = datetime.AddMinutes(6), FarmLocationId = 1, Weight = 525 },
+                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(7), FarmLocationId = 1, Weight = 65 },
+                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(8), FarmLocationId = 1, Weight = 512 },
+                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(9), FarmLocationId = 1, Weight = 201 },
+                    new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(10), FarmLocationId = 1, Weight = 215 }
+                };
+                _ctx.AddRange(cdatas);
+                await _ctx.SaveChangesAsync();
+            }
 
             await _ctx.SaveChangesAsync();
         }

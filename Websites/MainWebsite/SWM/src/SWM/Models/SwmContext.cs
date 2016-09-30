@@ -28,7 +28,6 @@ namespace SWM.Models
         {
             base.OnModelCreating(builder);
             builder.Entity<CropData>().HasKey(k => new { k.CropToUserId, k.DateTime });
-            builder.Entity<FarmLocation>().HasKey(k => new { k.UserId, k.Name });
             builder.Entity<MachineToUser>().HasKey(k => new { k.MachineId, k.UserID });
             builder.Entity<UserToSubscription>().HasKey(k => new { k.UserID, k.SubscriptionId });
         }
@@ -46,7 +45,6 @@ namespace SWM.Models
         public DbSet<State> States { get; set; }
         public DbSet<SubscriptionType> SubscriptionTypes { get; set; }
         public DbSet<UserToSubscription> UserToSubscriptions { get; set; }
-        public DbSet<SubscriptionCount> SubscriptionCounts { get; set; }
         public DbSet<OtherData> OtherDatas { get; set; }
         public DbSet<MachineId> MachineIds { get; set; }
     }

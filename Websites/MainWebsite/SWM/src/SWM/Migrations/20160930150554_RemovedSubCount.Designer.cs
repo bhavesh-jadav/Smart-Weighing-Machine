@@ -8,9 +8,10 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    partial class SwmContextModelSnapshot : ModelSnapshot
+    [Migration("20160930150554_RemovedSubCount")]
+    partial class RemovedSubCount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rc2-20901")

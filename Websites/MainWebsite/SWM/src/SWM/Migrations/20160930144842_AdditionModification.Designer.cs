@@ -8,8 +8,8 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    [Migration("20160930141330_AddedMachineIDEntity")]
-    partial class AddedMachineIDEntity
+    [Migration("20160930144842_AdditionModification")]
+    partial class AdditionModification
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -191,20 +191,25 @@ namespace SWM.Migrations
 
             modelBuilder.Entity("SWM.Models.FarmLocation", b =>
                 {
-                    b.Property<string>("UserId");
-
-                    b.Property<string>("Name");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Address")
                         .IsRequired();
 
                     b.Property<int>("CountryId");
 
+                    b.Property<string>("Name")
+                        .IsRequired();
+
                     b.Property<int>("PinId");
 
                     b.Property<int>("StateId");
 
-                    b.HasKey("UserId", "Name");
+                    b.Property<string>("UserId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
 
                     b.ToTable("FarmLocations");
                 });
