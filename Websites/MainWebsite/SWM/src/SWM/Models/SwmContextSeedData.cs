@@ -24,20 +24,10 @@ namespace SWM.Models
         {
             if(!_ctx.States.Any())
             {
-                //var state = new State()
-                //{
-                //    Name = "Maharashtra"
-                //};
-                //_ctx.States.Add(state);
-
                 State[] states = { new State { Name = "Maharashtra" }, new State { Name = "Gujarat" } };
                 _ctx.States.AddRange(states);
                 await _ctx.SaveChangesAsync();
             }
-
-
-
-
             if(!_ctx.Countries.Any())
             {
                 var con = new Country() { Name = "India" };
@@ -50,29 +40,6 @@ namespace SWM.Models
                 _ctx.PinNumbers.Add(pin);
                 await _ctx.SaveChangesAsync();
             }
-            if(!_ctx.FarmLocations.Any())
-            {
-                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
-                var state = _ctx.States.FirstOrDefault(s => s.Name == "Maharashtra");
-                var con = _ctx.Countries.FirstOrDefault(c => c.Name == "India");
-                var pin = _ctx.PinNumbers.FirstOrDefault(p => p.Pin == 400097);
-
-                var floc = new FarmLocation()
-                {
-                    UserId = user.Id,
-                    Name = "Farm 1",
-                    Address = "Gandhi Nagar, Thane",
-                    PinId = pin.Id,
-                    StateId = state.Id,
-                    CountryId = con.Id
-                };
-                _ctx.FarmLocations.Add(floc);
-                await _ctx.SaveChangesAsync();
-            }
-
-
-
-
             if (!_ctx.SubscriptionTypes.Any())
             {
                 var sub = new SubscriptionType()
@@ -133,6 +100,40 @@ namespace SWM.Models
                 }
             }
 
+            if (!_ctx.FarmLocations.Any())
+            {
+                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
+                var state = _ctx.States.FirstOrDefault(s => s.Name == "Maharashtra");
+                var con = _ctx.Countries.FirstOrDefault(c => c.Name == "India");
+                var pin = _ctx.PinNumbers.FirstOrDefault(p => p.Pin == 400097);
+
+                var floc = new FarmLocation()
+                {
+                    UserId = user.Id,
+                    Name = "Farm 1",
+                    Address = "Gandhi Nagar, Thane",
+                    PinId = pin.Id,
+                    StateId = state.Id,
+                    CountryId = con.Id
+                };
+                _ctx.FarmLocations.Add(floc);
+                await _ctx.SaveChangesAsync();
+            }
+            if (!_ctx.MachineIds.Any())
+            {
+                var mid = new MachineId() { Id = 70000, IsAssigned = true };
+                _ctx.MachineIds.Add(mid);
+                await _ctx.SaveChangesAsync();
+            }
+            if (!_ctx.MachineToUsers.Any())
+            {
+                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
+                var mid = _ctx.MachineIds.FirstOrDefault(m => m.Id == 70000);
+                var mtou = new MachineToUser() { UserID = user.Id, MachineId = mid.Id };
+                _ctx.MachineToUsers.Add(mtou);
+                await _ctx.SaveChangesAsync();
+            }
+
             if (!_ctx.OtherDatas.Any())
             {
                 var otherData = new OtherData()
@@ -163,6 +164,10 @@ namespace SWM.Models
                 scount.Value = count.ToString();
                 await _ctx.SaveChangesAsync();
             }
+
+
+
+
 
             await _ctx.SaveChangesAsync();
         }
