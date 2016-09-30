@@ -85,7 +85,9 @@ namespace SWM.Models
             {
                 var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
                 var scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
-                int count = Convert.ToInt16()
+                int count = Convert.ToInt16(scount.Value);
+                count++;
+
             }
 
             await _ctx.SaveChangesAsync();
