@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SWM.Models;
@@ -7,6 +8,7 @@ using SWM.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,18 +20,30 @@ namespace SWM.Controllers.Web
         private IConfigurationRoot _config;
         private SignInManager<SwmUser> _signInManager;
         private UserManager<SwmUser> _userManager;
+        private IHostingEnvironment _env;
+        private RoleManager<UserRoleManager> _roleManager;
 
-        public HomeController(IMailService mailService, IConfigurationRoot config, SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager)
+        public HomeController(IMailService mailService, IConfigurationRoot config, 
+            SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager,
+            IHostingEnvironment env, RoleManager<UserRoleManager> roleManager)
         {
             _mailServie = mailService;
             _config = config;
             _signInManager = signInManager;
             _userManager = userManager;
+            _env = env;
+            _roleManager = roleManager;
         }
+
         public IActionResult Index()
         {
-            ViewBag.Title = "Sign In";
-            return View();
+            if (!User.Identity.IsAuthenticated)
+            {
+                ViewBag.Title = "Sign In";
+                return View();
+            }
+            else
+                return RedirectToAction("Dashboard", "User", new { username = User.Identity.Name });
         }
 
         [HttpPost]
@@ -41,13 +55,19 @@ namespace SWM.Controllers.Web
                 var suser = await _userManager.FindByEmailAsync(user.UserEmail);
                 if (suser != null)
                 {
+                    await _userManager.AddClaimAsync(suser, new Claim("Email", user.UserEmail));
                     var res = await _signInManager.PasswordSignInAsync(suser.UserName, user.Password, user.Remember, false);
                     if (res.Succeeded)
                     {
-                        if (string.IsNullOrWhiteSpace(returnUrl))
-                            return RedirectToAction("Dashboard", "User");
+                        if (_env.IsEnvironment("Maintenance") && await _userManager.IsInRoleAsync(suser, "user"))
+                            return View("Maintenance");
                         else
-                            return Redirect(returnUrl);
+                        {
+                            if (string.IsNullOrWhiteSpace(returnUrl))
+                                return RedirectToAction("Dashboard", "User", new { username = suser.UserName });
+                            else
+                                return Redirect(returnUrl);
+                        }
                     }
                     else
                         ModelState.AddModelError("", "Email or password incorrect.");
@@ -62,9 +82,7 @@ namespace SWM.Controllers.Web
         public async Task<IActionResult> SignOut()
         {
             if(User.Identity.IsAuthenticated)
-            {
                 await _signInManager.SignOutAsync();
-            }
 
             return RedirectToAction("Index", "Home");
         }
@@ -83,24 +101,30 @@ namespace SWM.Controllers.Web
                 model.Email,
                 model.Message);
 
-            var res = _mailServie.SendMail(_config["MailSettings:MailAddress1:Name"], _config["MailSettings:MailAddress1:Email"], model.Name, model.Email, "Contact From SWM", body);
+            var res = _mailServie.SendMail(model.Name, model.Email,_config["MailSettings:MailAddress-BhaveshJ:Name"], 
+                      _config["MailSettings:MailAddress-BhaveshJ:Email"], "Contact From SWM", body);
+
             if (res == 1)
             {
                 ViewBag.SuccessMessage = "Message Sent!";
                 ModelState.Clear();
             }
             else
-            {
                 ModelState.AddModelError("", "There is a problem while sending this message. Try again after some time.");
-            }
+
             ViewBag.Title = "Contact Us";
             return View();
         }
 
         public IActionResult PasswordReset()
         {
-            ViewBag.Title = "Reset Password";
-            return View();
+            if (!User.Identity.IsAuthenticated)
+            {
+                ViewBag.Title = "Password Reset";
+                return View();
+            }
+            else
+                return Redirect("/");
         }
     }
 }

@@ -14,6 +14,7 @@ namespace SWM.ViewModels
         public string UserEmail { get; set; }
 
         [Required(ErrorMessage = "Enter your password")]
+        [MinLength(8, ErrorMessage = "Password Must be atleast 8 characters long")]
         public string Password { get; set; }
 
         public bool Remember { get; set; }

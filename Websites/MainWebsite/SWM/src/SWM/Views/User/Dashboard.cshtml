@@ -1,16 +1,10 @@
-﻿
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1>
-        Blank page
-        <small>it all starts here</small>
-    </h1>
-    <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li><a href="#">Examples</a></li>
-        <li class="active">Blank page</li>
-    </ol>
-</section>
+﻿@*User Dashboard*@
+
+@{
+    ViewBag.Title = "Dashboard";
+    ViewBag.PageHeader = "Dashboard";
+    ViewBag.PageHeaderSmall = "Overview of your data";
+}
 
 <!-- Main content -->
 <section class="content">
@@ -30,7 +24,8 @@
             </div>
         </div>
         <div class="box-body">
-            Start creating your amazing application!
+            @*@User.Claims.FirstOrDefault(c => c.Type == "role").Value*@
+            @*@User.Claims.ElementAt(1)*@
         </div>
         <!-- /.box-body -->
         <div class="box-footer">

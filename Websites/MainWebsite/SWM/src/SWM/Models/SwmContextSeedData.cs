@@ -76,7 +76,7 @@ namespace SWM.Models
                     Email = "abc@lolol.com"
                 };
 
-                await _userManager.CreateAsync(user, "bhavesh");
+                await _userManager.CreateAsync(user, "bhavesh123");
 
                 if (!await _userManager.IsInRoleAsync(user, "admin"))
                 {
@@ -92,7 +92,7 @@ namespace SWM.Models
                     Email = "xyz@lolol.com"
                 };
 
-                await _userManager.CreateAsync(user, "kaushal");
+                await _userManager.CreateAsync(user, "kaushal123");
 
                 if (!await _userManager.IsInRoleAsync(user, "user"))
                 {
@@ -136,12 +136,12 @@ namespace SWM.Models
 
             if (!_ctx.OtherDatas.Any())
             {
-                var otherData = new OtherData()
+                OtherData[] otherdatas =
                 {
-                    Name = "SubscriptionCount",
-                    Value = "99"
+                    new OtherData(){ Name = "SubscriptionCount", Value = "99" },
+                    new OtherData(){ Name = "WebEnv", Value = "Development" }
                 };
-                _ctx.OtherDatas.Add(otherData);
+                _ctx.OtherDatas.AddRange(otherdatas);
                 await _ctx.SaveChangesAsync();
             }
 
@@ -208,6 +208,20 @@ namespace SWM.Models
                     new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(10), FarmLocationId = 1, Weight = 215 }
                 };
                 _ctx.AddRange(cdatas);
+                await _ctx.SaveChangesAsync();
+            }
+
+            if (!_ctx.WebEnvironments.Any())
+            {
+                WebEnvironment[] webenvs =
+                {
+                    new WebEnvironment { EnvName = "Development" },
+                    new WebEnvironment { EnvName = "Production" },
+                    new WebEnvironment { EnvName = "Testing" },
+                    new WebEnvironment { EnvName = "Maintenance" },
+                    new WebEnvironment { EnvName = "FullMaintenance" }
+                };
+                _ctx.WebEnvironments.AddRange(webenvs);
                 await _ctx.SaveChangesAsync();
             }
 

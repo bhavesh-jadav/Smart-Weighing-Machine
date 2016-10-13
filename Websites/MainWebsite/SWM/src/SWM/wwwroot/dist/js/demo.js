@@ -243,7 +243,7 @@
     });
 
     $("body").addClass(cls);
-    store('skin', cls);
+    //store('skin', cls);
     return false;
   }
 
