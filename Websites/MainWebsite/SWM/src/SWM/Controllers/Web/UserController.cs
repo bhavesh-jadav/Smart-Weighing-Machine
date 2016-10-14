@@ -9,6 +9,7 @@ using SWM.Models;
 using Microsoft.AspNetCore.Identity;
 using SWM.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SWM.Models.Repositories;
 
 namespace SWM.Controllers
 {
@@ -42,30 +43,7 @@ namespace SWM.Controllers
 
         public IActionResult Settings()
         {
-            if (User.IsInRole("admin"))
-            {
-                AdminSettings settings = new AdminSettings();
-
-                var envs = _repo.GetAllEnvironments();
-                List<SelectListItem> webenvs = new List<SelectListItem>();
-                foreach(var env in envs)
-                {
-                    webenvs.Add(new SelectListItem()
-                    {
-                        Value = env.EnvName,
-                        Text = env.EnvName
-                    });
-                }
-                settings.WebEnvironments = webenvs;
-                ViewBag.CurrentEnvironment = settings.CurrentWebEnvironMent = _repo.GetCurrentWebEnvironment();
-
-                return View("~/Views/Admin/Settings.cshtml", settings);
-            }
-            else if (User.IsInRole("user"))
-            {
-                return View("~/Views/User/Settings.cshtml");
-            }
-
+            
             return View();
         }
 
@@ -73,14 +51,9 @@ namespace SWM.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public IActionResult Settings(AdminSettings settings)
+        public IActionResult Settings(AdminSettingsModel settings)
         {
-            if (_repo.SetCurrentWebEnvironment(settings.CurrentWebEnvironMent))
-                ViewBag.Message = "Successfully changed the settings";
-            else
-                ViewBag.Message = "There is an error saving the settings. Try again after some time";
-
-            return View("~/Views/Admin/Settings.cshtml", settings);
+            return View();
         }
 
 
@@ -89,7 +62,7 @@ namespace SWM.Controllers
 
         [HttpPost]
         [Authorize(Roles = "user")]
-        public IActionResult Settings(UserSettings settings)
+        public IActionResult Settings(UserSettingsModel settings)
         {
             return View("~/Views/User/Settings.cshtml", settings);
         }

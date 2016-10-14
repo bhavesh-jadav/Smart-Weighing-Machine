@@ -52,10 +52,10 @@ namespace SWM.Controllers.Web
             if(ModelState.IsValid)
             {
                 ViewBag.Title = "Sign In";
-                var suser = await _userManager.FindByEmailAsync(user.UserEmail);
+                var suser = await _userManager.FindByNameAsync(user.UserName);
                 if (suser != null)
                 {
-                    await _userManager.AddClaimAsync(suser, new Claim("Email", user.UserEmail));
+                    //await _userManager.AddClaimAsync(suser, new Claim("Email", user.UserEmail));
                     var res = await _signInManager.PasswordSignInAsync(suser.UserName, user.Password, user.Remember, false);
                     if (res.Succeeded)
                     {
@@ -70,10 +70,10 @@ namespace SWM.Controllers.Web
                         }
                     }
                     else
-                        ModelState.AddModelError("", "Email or password incorrect.");
+                        ModelState.AddModelError("", "User name or password incorrect.");
                 }
                 else
-                    ModelState.AddModelError("", "Email or password incorrect.");
+                    ModelState.AddModelError("", "User name or password incorrect.");
             }
 
             return View();

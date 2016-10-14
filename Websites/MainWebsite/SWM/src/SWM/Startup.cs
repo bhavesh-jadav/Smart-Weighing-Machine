@@ -6,8 +6,8 @@ using Microsoft.Extensions.Configuration;
 using SWM.Models;
 using Microsoft.AspNetCore.Mvc;
 using SWM.Services;
-using SWM.Filters;
 using Microsoft.AspNetCore.Identity;
+using SWM.Models.Repositories;
 
 namespace SWM
 {
@@ -54,8 +54,7 @@ namespace SWM
             {
                 if (_env.IsEnvironment("Production"))
                     config.Filters.Add(new RequireHttpsAttribute());
-
-                config.Filters.Add(typeof(MaintenanceFilter));
+                
             });
         }
 
@@ -76,7 +75,7 @@ namespace SWM
             {
                 config.MapRoute(
                     name: "Home",
-                    template: "",
+                    template: "SignIn",
                     defaults: new { controller = "Home", action = "Index" }
                 );
 
@@ -100,16 +99,9 @@ namespace SWM
 
                 config.MapRoute(
                     name: "UserRoute",
-                    template: "{username}/{action}",
+                    template: "{action}",
                     defaults: new { controller = "User", action = "Dashboard" }
                 );
-
-
-                //config.MapRoute(
-                //    name: "AdminRoute",
-                //    template: "{action}",
-                //    defaults: new { controller = "Admin", action = "Dashboard" }
-                //);
             });
 
             seeder.EnsureSeedData().Wait();

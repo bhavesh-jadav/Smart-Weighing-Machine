@@ -2,11 +2,11 @@
 <div class="login-box-body">
     <p class="login-box-msg">Sign in to continue</p>
     <form method="post" novalidate>
-        <div asp-validation-summary="ModelOnly"></div>
+        <div style="color:#dd4b39" asp-validation-summary="ModelOnly"></div>
         <div class="form-group has-feedback">
-            <input asp-for="UserEmail" type="email" class="form-control" placeholder="Email">
+            <input asp-for="UserName" type="text" class="form-control" placeholder="User Name">
             <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
-            <span asp-validation-for="UserEmail"></span>
+            <span asp-validation-for="UserName"></span>
         </div>
         <div class="form-group has-feedback">
             <input asp-for="Password" type="password" class="form-control" placeholder="Password">

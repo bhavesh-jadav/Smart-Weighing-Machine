@@ -227,16 +227,23 @@ namespace SWM.Migrations
                     b.ToTable("FarmLocationToMachines");
                 });
 
-            modelBuilder.Entity("SWM.Models.MachineId", b =>
+            modelBuilder.Entity("SWM.Models.MachineInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("IsAssigned");
 
+                    b.Property<DateTime>("ManufactureDate");
+
+                    b.Property<string>("ManufactureLocation")
+                        .IsRequired();
+
+                    b.Property<DateTime>("SellDate");
+
                     b.HasKey("Id");
 
-                    b.ToTable("MachineIds");
+                    b.ToTable("MachineInfos");
                 });
 
             modelBuilder.Entity("SWM.Models.MachineToUser", b =>
@@ -360,19 +367,6 @@ namespace SWM.Migrations
                     b.HasKey("UserID", "SubscriptionId");
 
                     b.ToTable("UserToSubscriptions");
-                });
-
-            modelBuilder.Entity("SWM.Models.WebEnvironment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("EnvName")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WebEnvironments");
                 });
 
             modelBuilder.Entity("SWM.Models.UserRoleManager", b =>
