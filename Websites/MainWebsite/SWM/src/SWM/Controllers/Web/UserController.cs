@@ -51,17 +51,23 @@ namespace SWM.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin")]
+        [ActionName("AdminSettings")]
         public IActionResult Settings(AdminSettingsModel settings)
         {
             return View();
         }
 
+        public IActionResult AddNewMachine()
+        {
 
+            return View();
+        }
 
         /*--------------------------------User actions--------------------------------------*/
 
         [HttpPost]
         [Authorize(Roles = "user")]
+        [ActionName("UserSettings")]
         public IActionResult Settings(UserSettingsModel settings)
         {
             return View("~/Views/User/Settings.cshtml", settings);

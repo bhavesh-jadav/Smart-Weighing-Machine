@@ -4,5 +4,11 @@
     "inputFiles": [
       "wwwroot/dist/css/AdminLTE.css"
     ]
+  },
+  {
+    "outputFileName": "MailBodies/Contact.min.html",
+    "inputFiles": [
+      "MailBodies/Contact.html"
+    ]
   }
 ]
