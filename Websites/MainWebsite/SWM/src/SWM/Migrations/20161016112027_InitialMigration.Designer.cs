@@ -8,7 +8,7 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    [Migration("20161015120605_InitialMigration")]
+    [Migration("20161016112027_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -282,6 +282,10 @@ namespace SWM.Migrations
                         .HasAnnotation("MaxLength", 256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 200);
 
                     b.Property<bool>("LockoutEnabled");
 

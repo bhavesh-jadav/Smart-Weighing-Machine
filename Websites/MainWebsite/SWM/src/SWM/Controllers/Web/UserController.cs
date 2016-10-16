@@ -24,7 +24,6 @@ namespace SWM.Controllers
             _signInManager = signInManager;
             _repo = repo;
         }
-        
 
         /*---------------------Commen actions between all type of users------------------------------*/
 
@@ -33,6 +32,8 @@ namespace SWM.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        [Route("/SignOut")]
         public async Task<IActionResult> SignOut()
         {
             if (User.Identity.IsAuthenticated)
@@ -57,6 +58,7 @@ namespace SWM.Controllers
             return View();
         }
 
+        [Authorize(Roles = "admin")]
         public IActionResult AddNewMachine()
         {
 

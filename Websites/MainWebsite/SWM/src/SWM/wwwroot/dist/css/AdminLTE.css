@@ -3262,7 +3262,7 @@ table.text-center th {
  * ------------------------------
  */
 .error-page {
-  width: 600px;
+  width: 400px;
   margin: 20px auto 0 auto;
 }
 @media (max-width: 991px) {
@@ -3282,7 +3282,7 @@ table.text-center th {
   }
 }
 .error-page > .error-content {
-  margin-left: 190px;
+  margin-left: 170px;
   display: block;
 }
 @media (max-width: 991px) {

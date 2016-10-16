@@ -282,6 +282,10 @@ namespace SWM.Migrations
 
                     b.Property<bool>("EmailConfirmed");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 200);
+
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");

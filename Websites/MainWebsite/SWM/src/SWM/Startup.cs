@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using SWM.Services;
 using Microsoft.AspNetCore.Identity;
 using SWM.Models.Repositories;
+using System;
 
 namespace SWM
 {
@@ -34,17 +35,25 @@ namespace SWM
         {
             services.AddScoped<IMailService, MailService>();
             services.AddSingleton(_config);
+            services.AddSession(option =>
+            {
+                option.IdleTimeout = TimeSpan.FromMinutes(1);
+                option.CookieName = ".SWM";
+            });
             services.AddIdentity<SwmUser, UserRoleManager>(config =>
             {
                 config.User.RequireUniqueEmail = true;
                 config.Cookies.ApplicationCookie.LoginPath = "/SignIn";
+                config.Cookies.ApplicationCookie.AccessDeniedPath = "/AccessDenied";
+                config.Cookies.ApplicationCookie.ExpireTimeSpan = TimeSpan.FromDays(1);
+                config.Cookies.ApplicationCookie.CookieName = ".SWM";
+                config.Cookies.ApplicationCookie.SlidingExpiration = false;
                 config.Password.RequireDigit = false;
                 config.Password.RequiredLength = 8;
                 config.Password.RequireLowercase = false;
                 config.Password.RequireNonAlphanumeric = false;
                 config.Password.RequireUppercase = false;
-            }
-            ).AddEntityFrameworkStores<SwmContext>();
+            }).AddEntityFrameworkStores<SwmContext>();
 
             services.AddDbContext<SwmContext>();
             services.AddTransient<SwmContextSeedData>();
@@ -71,39 +80,15 @@ namespace SWM
 
             app.UseStaticFiles();
             app.UseIdentity();
+            app.UseStatusCodePagesWithRedirects("~/Error/{0}");
             app.UseMvc(config =>
             {
-                config.MapRoute(
-                    name: "Home",
-                    template: "SignIn",
-                    defaults: new { controller = "Home", action = "Index" }
-                );
-
-                config.MapRoute(
-                    name: "ContactRoute",
-                    template: "Contact",
-                    defaults: new { controller = "Home", action = "Contact" }
-                );
-
-                config.MapRoute(
-                    name: "PasswordResetRoute",
-                    template: "PasswordReset",
-                    defaults: new { controller = "Home", action = "PasswordReset" }
-                );
-
-                config.MapRoute(
-                    name: "SignOut",
-                    template: "SignOut",
-                    defaults: new { controller = "User", action = "SignOut" }
-                );
-
                 config.MapRoute(
                     name: "UserRoute",
                     template: "{action}",
                     defaults: new { controller = "User", action = "Dashboard" }
                 );
             });
-
             seeder.EnsureSeedData().Wait();
         }
     }

@@ -35,6 +35,7 @@ namespace SWM.Controllers.Web
             _roleManager = roleManager;
         }
 
+        [Route("/SignIn")]
         public IActionResult Index()
         {
             if (!User.Identity.IsAuthenticated)
@@ -43,10 +44,11 @@ namespace SWM.Controllers.Web
                 return View();
             }
             else
-                return RedirectToAction("Dashboard", "User", new { username = User.Identity.Name });
+                return RedirectToAction("Dashboard", "User");
         }
 
         [HttpPost]
+        [Route("/SignIn")]
         public async Task<IActionResult> Index(LoginViewModel user, string returnUrl)
         {
             if(ModelState.IsValid)
@@ -55,19 +57,15 @@ namespace SWM.Controllers.Web
                 var suser = await _userManager.FindByNameAsync(user.UserName);
                 if (suser != null)
                 {
-                    //await _userManager.AddClaimAsync(suser, new Claim("Email", user.UserEmail));
+                    //await _userManager.AddClaimAsync(suser, new Claim("fullName", suser.FullName));
                     var res = await _signInManager.PasswordSignInAsync(suser.UserName, user.Password, user.Remember, false);
                     if (res.Succeeded)
                     {
-                        if (_env.IsEnvironment("Maintenance") && await _userManager.IsInRoleAsync(suser, "user"))
-                            return View("Maintenance");
+                        Response.Cookies.Append("fullName", suser.FullName);
+                        if (string.IsNullOrWhiteSpace(returnUrl))
+                            return RedirectToAction("Dashboard", "User");
                         else
-                        {
-                            if (string.IsNullOrWhiteSpace(returnUrl))
-                                return RedirectToAction("Dashboard", "User", new { username = suser.UserName });
-                            else
-                                return Redirect(returnUrl);
-                        }
+                            return Redirect(returnUrl);
                     }
                     else
                         ModelState.AddModelError("", "User name or password incorrect.");
@@ -79,14 +77,7 @@ namespace SWM.Controllers.Web
             return View();
         }
 
-        public async Task<IActionResult> SignOut()
-        {
-            if(User.Identity.IsAuthenticated)
-                await _signInManager.SignOutAsync();
-
-            return RedirectToAction("Index", "Home");
-        }
-
+        [Route("/Contact")]
         public IActionResult Contact()
         {
             ViewBag.Title = "Contact Us";
@@ -116,6 +107,7 @@ namespace SWM.Controllers.Web
             return View();
         }
 
+        [Route("/PasswordReset")]
         public IActionResult PasswordReset()
         {
             if (!User.Identity.IsAuthenticated)
@@ -125,6 +117,18 @@ namespace SWM.Controllers.Web
             }
             else
                 return Redirect("/");
+        }
+
+        [Route("/AccessDenied")]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [Route("/Error/{statusCode}")]
+        public IActionResult StatusCodePage(string statusCode)
+        {
+            return View("~/Views/Home/StatusCodePages/" + statusCode + ".cshtml");
         }
     }
 }
