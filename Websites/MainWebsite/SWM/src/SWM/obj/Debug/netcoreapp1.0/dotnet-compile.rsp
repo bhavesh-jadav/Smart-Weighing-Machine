@@ -214,6 +214,7 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Startup.
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Controllers\Api\UserController.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Controllers\Web\HomeController.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Controllers\Web\UserController.cs
+F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\AddNewSubscription.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\LocationInfo.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\ProductInfo.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\UserInfo.cs
@@ -242,7 +243,6 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\R
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\Repositories\SwmRepository.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Services\IMailService.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Services\MailService.cs
-F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AddNewMachineModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AdminSettingsModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\ContactViewModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\LoginViewModel.cs

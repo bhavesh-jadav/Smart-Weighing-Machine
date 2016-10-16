@@ -85,6 +85,7 @@ namespace SWM.Controllers.Web
         }
 
         [HttpPost]
+        [Route("/Contact")]
         public IActionResult Contact(ContactViewModel model)
         {
             string body = String.Format(System.IO.File.ReadAllText("MailBodies/Contact.min.html"),

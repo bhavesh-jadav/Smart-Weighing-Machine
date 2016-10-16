@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SWM.JsonModels;
 using SWM.Models.Repositories;
 using System;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 namespace SWM.Controllers.Api
 {
     [Route("api")]
+    [Authorize]
     public class UserController : Controller
     {
         private ISwmRepository _repo;
@@ -65,6 +67,17 @@ namespace SWM.Controllers.Api
                 return Ok(productInfos);
             else
                 return BadRequest("Unable to process requrest");
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost("add_subscirption")]
+        public IActionResult AddNewSubscription([FromBody]AddNewSubscription addNewSubscription)
+        {
+            if (ModelState.IsValid)
+            {
+                return Created($"api/{addNewSubscription.UserName}", addNewSubscription);
+            }
+            return BadRequest("Error adding subscription");
         }
     }
 }

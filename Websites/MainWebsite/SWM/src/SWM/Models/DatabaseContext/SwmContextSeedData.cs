@@ -74,7 +74,8 @@ namespace SWM.Models
                 {
                     UserName = "Bhavesh",
                     Email = "abc@lolol.com",
-                    FullName = "Bhavesh Jadav"
+                    FullName = "Bhavesh Jadav",
+                    PhoneNumber = "+918888888888"
                 };
 
                 await _userManager.CreateAsync(user, "bhavesh123");
@@ -91,7 +92,8 @@ namespace SWM.Models
                 {
                     UserName = "Kaushal",
                     Email = "xyz@lolol.com",
-                    FullName = "Kaushal Mania"
+                    FullName = "Kaushal Mania",
+                    PhoneNumber = "+918888888888"
                 };
 
                 await _userManager.CreateAsync(user, "kaushal123");
