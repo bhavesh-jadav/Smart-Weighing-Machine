@@ -35,11 +35,6 @@ namespace SWM
         {
             services.AddScoped<IMailService, MailService>();
             services.AddSingleton(_config);
-            services.AddSession(option =>
-            {
-                option.IdleTimeout = TimeSpan.FromMinutes(1);
-                option.CookieName = ".SWM";
-            });
             services.AddIdentity<SwmUser, UserRoleManager>(config =>
             {
                 config.User.RequireUniqueEmail = true;
@@ -54,7 +49,6 @@ namespace SWM
                 config.Password.RequireNonAlphanumeric = false;
                 config.Password.RequireUppercase = false;
             }).AddEntityFrameworkStores<SwmContext>();
-
             services.AddDbContext<SwmContext>();
             services.AddTransient<SwmContextSeedData>();
             services.AddScoped<ISwmRepository, SwmRepository>();
