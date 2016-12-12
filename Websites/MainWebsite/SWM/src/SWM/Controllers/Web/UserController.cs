@@ -62,7 +62,15 @@ namespace SWM.Controllers
         public IActionResult AddNewMachine()
         {
 
-            return View();
+            return View("~/Views/Admin/AddNewMachine.cshtml");
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public IActionResult AddNewMachine(AddNewMachineModel newMachine)
+        {
+
+            return View("~/Views/Admin/AddNewMachine.cshtml");
         }
 
         /*--------------------------------User actions--------------------------------------*/
