@@ -15,8 +15,8 @@ import math
 #to use physical pin numbers on board
 GPIO.setmode(GPIO.BOARD)
 
-SCK = 32   #define pin for serial clock input of HX711
-DOUT = 22  #define pin for serial data output of HX711
+SCK = 11  #define pin for serial clock input of HX711
+DOUT = 13  #define pin for serial data output of HX711
 
 GPIO.setup(SCK, GPIO.OUT)	#set output for sck pin for sending clock pulses
 GPIO.setup(DOUT, GPIO.IN)	#set input for dout pin to receive data
@@ -108,3 +108,11 @@ def read_average_value(sample ) :
 				i -= 1
 	sval /= sample	#divide the addition by number of samples to get average
 	return sval
+	
+try:
+	while 1:
+		if GPIO.input(DOUT) == 0 : 
+			val = read_cell_value()
+			print val
+except KeyboardInterrupt:
+	GPIO.cleanup()
