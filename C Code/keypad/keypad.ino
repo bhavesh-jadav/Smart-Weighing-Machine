@@ -45,6 +45,7 @@ static byte kpadState;
 char keyToSend;
 char *cmdToSend;
 char *textMode;
+byte keyState = 0;  //0 = released, 1 = hold
 
 unsigned long TimeInMillis;
 
@@ -67,7 +68,7 @@ void loop() {
 
 int TimeDiffBtwnKeyPress = 1500;
 
-char getKeyFromKeyPress(int keyVal){
+void getKeyFromKeyPress(int keyVal){
   if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strchr(KeyStringArray[keyVal], keyToSend) != NULL)
       KeyCounterArray[keyVal]++;
   else{
@@ -79,7 +80,7 @@ char getKeyFromKeyPress(int keyVal){
   keyToSend = KeyStringArray[keyVal][KeyCounterArray[keyVal]];
 }
 
-char *getCommandFromKeyPress(int keyVal){
+void getCommandFromKeyPress(int keyVal){
   int counterLimit = 0;
   int i = 0, j = 0, k = 0;
   while(KeyStringArray[keyVal][i] != '\0'){
@@ -108,6 +109,25 @@ char *getCommandFromKeyPress(int keyVal){
   cmdToSend = cmds[KeyCounterArray[keyVal]];
 }
 
+//state 0 = released, 1 = hold
+void getCommandFormLongKeyPress(int keyVal, int state){
+  int i = 0, j = 0, k = 0;
+  char cmds[10][10] = {0};
+  while(KeyStringArray[keyVal][k] != '\0'){
+    while(KeyStringArray[keyVal][k] != '-'){
+      cmds[i][j] = KeyStringArray[keyVal][k];
+      k++; j++;
+    }
+    i++; k++; j = 0;
+  }
+  if(state == 0 && cmds[0] != NULL)
+    cmdToSend = cmds[0];
+  else if(state == 1 && cmds[1] != NULL)
+    cmdToSend = cmds[0];
+  else
+    cmdToSend = NULL;
+}
+
 void keypadEvent(KeypadEvent key){
   kpadState = key_pad.getState();
   int keyVal = key;
@@ -124,7 +144,16 @@ void keypadEvent(KeypadEvent key){
     break;
 
     case HOLD:
-      Serial.println("HOLD");
+      keyState = 1;
+      if(isValueInArray(keyVal, longPressCmdButtons))
+        getCommandFormLongKeyPress(keyVal, keyState);
+      break;
+
+    case RELEASED:
+      if(keyState == 1)
+        keyState = 0;
+      else if(isValueInArray(keyVal, longPressCmdButtons))
+        getCommandFormLongKeyPress(keyVal, keyState);
       break;
   }
 }
