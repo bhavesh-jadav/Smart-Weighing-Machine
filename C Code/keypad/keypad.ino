@@ -15,7 +15,7 @@
  * 1) assign multiple characters to single button(which I referred to as key in this program) and cycle through them one by one by pressing same button in some time interval.
  * 2) assign multiple strings to single button(which I referred to as cmd in this program) and cycle through them one by one by pressing same button in some time interval.
  *    note that this strings can be made of single characters to multiple characters. 
- * 3) assign long press i.e. hold button functionality any of the above case
+ * 3) assign long press i.e. hold button functionality to any of the above case
  */
 
 #include <Keypad.h>
