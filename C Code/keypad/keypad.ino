@@ -1,6 +1,6 @@
 
 /**************************************************************************************************
- * Auther: Bhavesh Jadav
+ * Author: Bhavesh Jadav
  * File name: keypad.ino
  * *************************************************************************************************
  * keys numbering are as follows 
@@ -12,8 +12,8 @@
  *      
  * this arduino code is used to assign multiple characters or strings to single button in keypad matrix.
  * there are 3 different scenarios
- * 1) assign multiple characters to single button(which I refered to as key in this program) and cycle through them one by one by pressing same button in some time interval.
- * 2) assign multiple strings to single button(which I refered to as cmd in this program) and cycle through them one by one by pressing same button in some time interval.
+ * 1) assign multiple characters to single button(which I referred to as key in this program) and cycle through them one by one by pressing same button in some time interval.
+ * 2) assign multiple strings to single button(which I referred to as cmd in this program) and cycle through them one by one by pressing same button in some time interval.
  *    note that this strings can be made of single characters to multiple characters. 
  * 3) assign long press i.e. hold button functionality any of the above case
  */
@@ -43,10 +43,10 @@ char keys[ROWS][COLS] = {
  * 3) If you want to assign both character and string then you can do it like 'A-a-hello-*-ok'. by adding '-' between characters and strings.
  */
 char* keyStringArray[20] = {
-  "1.", "2abcABC", "3defDEF", "caps-small-no-",
+  "1.*#", "2abcABC", "3defDEF", "caps-small-no-",
   "4ghiGHI", "5jklJKL", "6mnoMNO", "up-",
   "7pqrsPQRS", "8tuvTUV", "9wxyzWXYZ", "down-",
-  "left-", "0", "right-", "tare-"
+  "left-", "0 ", "right-", "tare-"
 };
 
 /*
@@ -64,10 +64,10 @@ char* longPressKeyStringArray[20] = {
 int alphaKeys[] = {1, 2, 4, 5, 6, 8, 9, 10, 999};  //add numbers of keys which are going to represent alphabet.
 int singlePressKeyButtons[] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 13, 999};  //add numbers of keys which are going to cycle through characters
 int singlePressCmdButtons[] = {3, 7, 11, 12, 14, 15, 999}; //add numbers of keys which are going to cycle through strings
-int longPressCmdButtons[] = {12, 14, 15, 999};  //add nubers of characters which are going to have long press button functionality
+int longPressCmdButtons[] = {12, 14, 15, 999};  //add numbers of characters which are going to have long press button functionality
 
 static byte kpadState;  //to store key state i.e. PRESSED, HOLD or RELEASED
-char textMode[10] = "no";  //initial text mode, no = number, caps = capital alphabet, small = small alphabet
+char textMode[10] = "no";  //initial text mode, no = numbers, caps = capital alphabet, small = small alphabet
 byte keyState = 0;  //0 = released, 1 = hold
 int textModeKey = 3; //assign textmode key number to this variable.
 char valueToSend[50] = {}; //it will store final value to send to the serial monitor.
@@ -96,7 +96,7 @@ void loop() {
 //minimum time in milliseconds required between two key press to cycle through values
 int TimeDiffBtwnKeyPress = 1500;
 
-//following function is used to cycle through charactes
+//following function is used to cycle through characters
 //startIndex and endIndex are used to cycle through particular part of character array. this is important because
 //in 'caps' text mode we only want to cycle through capital letters, in 'small' text mode we only want to cycle through small letters etc.
 void getKeyFromKeyPress(int keyVal, int beginIndex, int endIndex){  
