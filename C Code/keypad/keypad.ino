@@ -30,7 +30,7 @@ Keypad key_pad(makeKeymap(keys), rowPins, colPins, sizeof(rowPins), sizeof(colPi
 int keyCounterArray[16] = {0};
 //here '-' will indicate end of command and null character will indicate end of string.
 char* keyStringArray[16] = {
-  "1.", "2abcABC", "3defDEF", "caps-no-small-",
+  "1.", "2abcABC", "3defDEF", "caps-small-no-",
   "4ghiGHI", "5jklJKL", "6mnoMNO", "up-",
   "7pqrsPQRS", "8tuvTUV", "9wxyzWXYZ", "down-",
   "left-cancel-", "0", "right-menu-", "tare-zero-"
@@ -85,7 +85,7 @@ void getKeyFromKeyPress(int keyVal, int beginIndex, int endIndex){
     keyCounterArray[keyVal] = 0;
   keyToSend = subString[keyCounterArray[keyVal]];
   Serial.println(keyToSend);
-  cmdToSend = 1; //reset the cmd value variable to avoid unnecessaray results
+  cmdToSend = ""; //reset the cmd value variable to avoid unnecessaray results
 }
 
 void getCommandFromKeyPress(int keyVal){
@@ -96,7 +96,7 @@ void getCommandFromKeyPress(int keyVal){
       counterLimit++;
     i++;
   }
-  if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strstr(keyStringArray[keyVal], cmdToSend) != NULL)
+  if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strstr(keyStringArray[keyVal], cmdToSend) != NULL && cmdToSend != "")
       keyCounterArray[keyVal]++;
   else{
     keyCounterArray[keyVal] = 0;
