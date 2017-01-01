@@ -1,17 +1,25 @@
 
-/*
+/**************************************************************************************************
+ * Auther: Bhavesh Jadav
+ * File name: keypad.ino
+ * *************************************************************************************************
  * keys numbering are as follows 
  * 
- *      0    1   2   3   
+ *      0    1   2   3
  *      4    5   6   7
  *      8    9   10  11
  *      12   13  14  15
+ *      
+ * this arduino code is used to assign multiple characters or strings to single button in keypad matrix.
+ * there are 3 different scenarios
+ * 1) assign multiple characters to single button(which I refered to as key in this program) and cycle through them one by one by pressing same button in some time interval.
+ * 2) assign multiple strings to single button(which I refered to as cmd in this program) and cycle through them one by one by pressing same button in some time interval.
+ *    note that this strings can be made of single characters to multiple characters. 
+ * 3) assign long press functionality to the button whcich can only have 
  */
 
 #include <Keypad.h>
 #include <String.h>
-#include <assert.h>
-#include <stdlib.h>
 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //three columns
@@ -29,25 +37,31 @@ char keys[ROWS][COLS] = {
 Keypad key_pad(makeKeymap(keys), rowPins, colPins, sizeof(rowPins), sizeof(colPins));
 int keyCounterArray[16] = {0};
 //here '-' will indicate end of command and null character will indicate end of string.
-char* keyStringArray[16] = {
+char* keyStringArray[20] = {
   "1.", "2abcABC", "3defDEF", "caps-small-no-",
   "4ghiGHI", "5jklJKL", "6mnoMNO", "up-",
   "7pqrsPQRS", "8tuvTUV", "9wxyzWXYZ", "down-",
-  "left-cancel-", "0", "right-menu-", "tare-zero-"
+  "left-", "0", "right-", "tare-"
+};
+
+char* longPressKeyStringArray[20] = {
+  "", "", "", "",
+  "", "", "", "",
+  "", "", "", "",
+  "cancel", "", "menu", "zero"
 };
 
 //999 to indicate end of array
 int alphaKeys[] = {1, 2, 4, 5, 6, 8, 9, 10, 999};
 int singlePressKeyButtons[] = {0, 13, 999};
-int singlePressCmdButtons[] = {3, 7, 11, 12, 999};
-int longPressCmdButtons[] = {14, 15, 999};
+int singlePressCmdButtons[] = {3, 7, 11, 12, 14, 15, 999};
+int longPressCmdButtons[] = {12, 14, 15, 999};
 
 static byte kpadState;
-char keyToSend;
-char *cmdToSend;
 char textMode[10] = "no";
 byte keyState = 0;  //0 = released, 1 = hold
 int textModeKey = 3;
+char valueToSend[50] = {};
 
 unsigned long TimeInMillis;
 
@@ -62,20 +76,16 @@ void setup() {
 
 void loop() {
   int val = key_pad.getKey();
-  if (val){
-    //Serial.println(val);
-    //Serial.println(keyToSend);
-  }
 }
 
 int TimeDiffBtwnKeyPress = 1500;
 
 void getKeyFromKeyPress(int keyVal, int beginIndex, int endIndex){
   
-  char subString[20] = {};
+  char subString[50] = {};
   strncpy(subString, keyStringArray[keyVal] + beginIndex, endIndex - beginIndex);
 
-  if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strchr(subString, keyToSend) != NULL)
+  if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strstr(subString, valueToSend) != NULL)
       keyCounterArray[keyVal]++;
   else{
     keyCounterArray[keyVal] = 0;
@@ -83,9 +93,9 @@ void getKeyFromKeyPress(int keyVal, int beginIndex, int endIndex){
   }
   if(keyCounterArray[keyVal] == strlen(subString))
     keyCounterArray[keyVal] = 0;
-  keyToSend = subString[keyCounterArray[keyVal]];
-  Serial.println(keyToSend);
-  cmdToSend = ""; //reset the cmd value variable to avoid unnecessaray results
+  valueToSend[0] = subString[keyCounterArray[keyVal]];
+  valueToSend[1] = '\0';
+  Serial.println(valueToSend);
 }
 
 void getCommandFromKeyPress(int keyVal){
@@ -96,7 +106,7 @@ void getCommandFromKeyPress(int keyVal){
       counterLimit++;
     i++;
   }
-  if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strstr(keyStringArray[keyVal], cmdToSend) != NULL && cmdToSend != "")
+  if((millis() - TimeInMillis) < TimeDiffBtwnKeyPress && strstr(keyStringArray[keyVal], valueToSend) != NULL && valueToSend != "")
       keyCounterArray[keyVal]++;
   else{
     keyCounterArray[keyVal] = 0;
@@ -114,30 +124,16 @@ void getCommandFromKeyPress(int keyVal){
     }
     i++; k++; j = 0;
   }
-  cmdToSend = cmds[keyCounterArray[keyVal]];
-  Serial.println(cmdToSend);
-  keyToSend = 1; //reset the key value variable to avoid unnecessaray results
+  strcpy(valueToSend, cmds[keyCounterArray[keyVal]]);
+  Serial.println(valueToSend);
 }
 
 //state 0 = released, 1 = hold
-void getCommandFormLongKeyPress(int keyVal, int state){
-  int i = 0, j = 0, k = 0;
-  char cmds[10][10] = {0};
-  while(keyStringArray[keyVal][k] != '\0'){
-    while(keyStringArray[keyVal][k] != '-'){
-      cmds[i][j] = keyStringArray[keyVal][k];
-      k++; j++;
-    }
-    i++; k++; j = 0;
+void getCommandFormLongKeyPress(int keyVal){
+  if(longPressKeyStringArray[keyVal] != ""){
+    strcpy(valueToSend, longPressKeyStringArray[keyVal]);
+    Serial.println(valueToSend);
   }
-  if(state == 0 && cmds[0] != NULL)
-    cmdToSend = cmds[0];
-  else if(state == 1 && cmds[1] != NULL)
-    cmdToSend = cmds[1];
-  else
-    cmdToSend = NULL;
-  Serial.println(cmdToSend);
-   keyToSend = 1; //reset the key value variable to avoid unnecessaray results
 }
 
 void keypadEvent(KeypadEvent key){
@@ -150,7 +146,7 @@ void keypadEvent(KeypadEvent key){
     case HOLD:
       if(isValueInArray(keyVal, longPressCmdButtons)){
         keyState = 1;
-        getCommandFormLongKeyPress(keyVal, keyState);
+        getCommandFormLongKeyPress(keyVal);
       }
       break;
 
@@ -158,15 +154,15 @@ void keypadEvent(KeypadEvent key){
       if(keyState == 1)
         keyState = 0;
         
-      else if(isValueInArray(keyVal, longPressCmdButtons))
-        getCommandFormLongKeyPress(keyVal, keyState);
+      /*else if(isValueInArray(keyVal, longPressCmdButtons))
+        getCommandFormLongKeyPress(keyVal, keyState);*/
       else if(isValueInArray(keyVal, singlePressCmdButtons))
         getCommandFromKeyPress(keyVal);
         
       else if(isValueInArray(keyVal, alphaKeys) && strcmp(textMode, "caps") == 0)
         getKeyFromKeyPress(keyVal, (strlen(keyStringArray[keyVal])/2) + 1, strlen(keyStringArray[keyVal]));
       else if(isValueInArray(keyVal, alphaKeys) && strcmp(textMode, "small") == 0)
-        getKeyFromKeyPress(keyVal, 1, strlen(keyStringArray[keyVal])/2);
+        getKeyFromKeyPress(keyVal, 1, strlen(keyStringArray[keyVal])/2 + 1);
       else if((isValueInArray(keyVal, singlePressKeyButtons) || isValueInArray(keyVal, alphaKeys)) && strcmp(textMode, "no") == 0)
         getKeyFromKeyPress(keyVal, 0, 1);
         
@@ -174,7 +170,7 @@ void keypadEvent(KeypadEvent key){
         getKeyFromKeyPress(keyVal, 0, strlen(keyStringArray[keyVal]));
 
       if(keyVal == textModeKey)
-        strcpy(textMode, cmdToSend);
+        strcpy(textMode, valueToSend);
       break;
   }
 }
