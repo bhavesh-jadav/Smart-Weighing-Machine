@@ -3,8 +3,6 @@
 * Project: 	   	Farm Produce: Logging and Monitoring
 * Author: 		Bhavesh Jadav
 * Filename:    		loadcell.py
-* Functions: 		read_cell_value(), base_vaue(), read_average_value(sample)
-* Global Variables:	SCK, DOUT, bits
 *
 '''
 
