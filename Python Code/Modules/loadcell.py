@@ -122,14 +122,13 @@ def is_ready():
 	else:
 		return False
 		
-def weight_in_gram():
-	while is_ready() != True:
-		continue
-	weight = abs(((base_value - read_cell_value()) / known_weight_diff) * known_weight_in_gram)
+def weight_in_gram(sample = 1):
+	weight = abs(((base_value - read_average_value(sample)) / known_weight_diff) * known_weight_in_gram)
+	print weight
 	return weight
 
-def weight_in_kg():
-	return weight_in_gram() / 1000.0
+def weight_in_kg(sample = 1):
+	return weight_in_gram(sample) / 1000.0
 	
 def init():
 	with open('loadcell_data.json', 'r') as f:
@@ -139,6 +138,8 @@ def init():
 	known_weight_diff = data['known_weight_diff']
 	base_value = data['base_value']
 	
+	print abs(((base_value - read_average_value(1)) / known_weight_diff) * known_weight_in_gram)
+	
 def calibrate():
 	key = ""
 	global known_weight_diff, known_weight_in_gram, base_value
@@ -147,44 +148,77 @@ def calibrate():
 	known_weight_in_gram = ""
 	base_value = ""
 	
-	#calculate base value
-	lcd.display.clear()
-	lcd.draw.text("REMOVE ANY OBJECT", 15, 23)
-	lcd.draw.text("FORM WEIGHING MACHINE", 3, 32)
-	lcd.display.commit()
-	
-	'''
-	#accept known weight in grams
-	lcd.display.clear()
-	lcd.draw.text("ENTER KNOWN WEIGHT IN", 0, 0)
-	lcd.draw.text("GRAMS", 0, 9)
-	lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
-	lcd.display.commit()
-	while key != "right" or len(known_weight_in_gram) <= 0:
-		key = keypad.get_value()
-		if key.isdigit():
-			known_weight_in_gram += key
-		elif key == "left" and len(known_weight_in_gram) > 0:
-			known_weight_in_gram = known_weight_in_gram[:-1]
-		elif key == "number" or key == "small" or key == "caps":
-			lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
-			global_variables.textmode = key
-			lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
-		if len(known_weight_in_gram) >= 0:
-			lcd.draw.clear(0, 19, 127, 26)
-			if len(known_weight_in_gram) != 0:
-				lcd.draw.text(known_weight_in_gram, 0, 19)
-			else:
-				lcd.draw.text(" ", 0, 19)
+	try:
+		#calculate base value
+		lcd.display.clear()
+		lcd.draw.text("REMOVE ANY OBJECT", 15, 23)
+		lcd.draw.text("FROM WEIGHING MACHINE", 3, 32)
 		lcd.display.commit()
-		'''
-	
-	
-	'''
-	data = {'known_weight_in_gram':known_weight_in_gram, 'known_weight_diff':known_weight_diff, 'base_value':base_value}
-	with open('loadcell_data.json', 'w') as f:
-		json.dump(data,f)
-		'''
+		time.sleep(5)
+		lcd.display.clear()
+		lcd.draw.text("PLEASE WAIT...", 25, 25)
+		lcd.display.commit()
+		base_value = calculate_base_value()
+		time.sleep(0.1)
+		
+		#accept known weight in grams
+		lcd.display.clear()
+		lcd.draw.text("ENTER KNOWN WEIGHT IN", 0, 0)
+		lcd.draw.text("GRAMS", 0, 9)
+		lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+		lcd.display.commit()
+		while key != "right" or len(known_weight_in_gram) <= 0:
+			key = keypad.get_value()
+			if key.isdigit():
+				known_weight_in_gram += key
+			elif key == "left" and len(known_weight_in_gram) > 0:
+				known_weight_in_gram = known_weight_in_gram[:-1]
+			elif key == "number" or key == "small" or key == "caps":
+				lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
+				global_variables.textmode = key
+				lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+			if len(known_weight_in_gram) >= 0:
+				lcd.draw.clear(0, 19, 127, 26)
+				if len(known_weight_in_gram) != 0:
+					lcd.draw.text(known_weight_in_gram, 0, 19)
+				else:
+					lcd.draw.text(" ", 0, 19)
+			lcd.display.commit()
+		known_weight_in_gram = float(known_weight_in_gram)
+		time.sleep(0.1)
+
+		#calculate diff between base load cell value and known weight load cell value
+		lcd.display.clear()
+		lcd.draw.text("PUT KNOWN WEIGHT ON", 0, 0)
+		lcd.draw.text("WEIGHING MACHINE THEN", 0, 9)
+		lcd.draw.text("PRESS 'OK' TO CONTINUE", 0, 18)
+		lcd.display.commit()
+		key = ""
+		while key != "right":
+			key = keypad.get_value()
+		lcd.display.clear()
+		lcd.draw.text("PLEASE WAIT...", 25, 25)
+		lcd.display.commit()
+		val = read_average_value(15)
+		known_weight_diff = float(abs(base_value - val))
+		
+		#store calculated values in json file
+		data = {'known_weight_in_gram':known_weight_in_gram, 'known_weight_diff':known_weight_diff, 'base_value':base_value}
+		with open('loadcell_data.json', 'w') as f:
+			json.dump(data,f)
+			
+		
+		lcd.display.clear()
+		lcd.draw.text("DONE CALIBRATING", 15, 25)
+		lcd.display.commit()
+		time.sleep(3)
+		
+	except:
+		lcd.display.clear()
+		lcd.draw.text("THERE IS A PROBLEM", 0, 0)
+		lcd.draw.text("IN CALIBRATING", 0, 9)
+		lcd.display.commit()
+		time.sleep(5)
 		
 #def zero():
 	
