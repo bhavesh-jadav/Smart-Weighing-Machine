@@ -6,9 +6,15 @@
 *
 '''
 
+from Modules import lcd_init as lcd
 import RPi.GPIO as GPIO
 import time
 import math
+import json
+
+known_weight_in_gram = 100.0
+known_weight_diff = 1000.0
+base_value = 3500.0
 
 #to use physical pin numbers on board
 GPIO.setmode(GPIO.BOARD)
@@ -21,6 +27,7 @@ GPIO.setup(DOUT, GPIO.IN)	#set input for dout pin to receive data
 
 #define array of size 24 for storing 24 bit data sent by HX711
 bits = [0 for i in range(24)]
+
 
 '''
 *
@@ -68,7 +75,7 @@ def read_cell_value() :
 * Example Call:		base_value()
 *
 '''
-def base_value():
+def calculate_base_value():
 	"to calculate initial base value with moving average method"
 	sample = 50	#define number of samples to take
 	count = 0
@@ -77,7 +84,7 @@ def base_value():
 	#loop till certain amount of sample are used
 	while sample :
 		#if hx711 is ready to send the data
-		if GPIO.input(DOUT) == 0 :
+		if is_ready():
 			val = read_cell_value()	#then read the value from the load cell
 			count += 1.0	#increment the counter
 			tval = ((count - 1) / count) * tval + (1 / count) * val #claculate moving average
@@ -100,17 +107,47 @@ def read_average_value(sample ) :
 	i = sample
 	#loop through all the readings and add them
 	while i :
-			if GPIO.input(DOUT) == 0 :
+			if is_ready():
 				val = read_cell_value()
 				sval += val
 				i -= 1
 	sval /= sample	#divide the addition by number of samples to get average
 	return sval
+
+def is_ready():
+	if GPIO.input(DOUT) == 0:
+		return True
+	else:
+		return False
+		
+def weight_in_gram():
+	while is_ready() != True:
+		continue
+	weight = abs(((base_value - read_cell_value()) / known_weight_diff) * known_weight_in_gram)
+	return weight
+
+def weight_in_kg():
+	return weight_in_gram() / 1000.0
 	
-try:
-	while 1:
-		if GPIO.input(DOUT) == 0 : 
-			val = read_cell_value()
-			print val
-except KeyboardInterrupt:
-	GPIO.cleanup()
+def init():
+	with open('loadcell_data.json', 'r') as f:
+		data = json.load(f)
+		
+	known_weight_in_gram = data['known_weight_in_gram']
+	known_weight_diff = data['known_weight_diff']
+	base_value = data['base_value']
+	
+def calibrate():
+	
+	lcd.draw.text("Enter known weight value", 0, 0, size = 12)
+	lcd.display.commit()
+	
+	'''
+	data = {'known_weight_in_gram':known_weight_in_gram, 'known_weight_diff':known_weight_diff, 'base_value':base_value}
+	with open('loadcell_data.json', 'w') as f:
+		json.dump(data,f)
+		'''
+		
+#def zero():
+	
+#def tare():
