@@ -19,7 +19,7 @@
  */
 
 #include <Keypad.h>
-#include <String.h>
+#include <WString.h>
 
 //change following according to the keypad
 const byte ROWS = 4; //four rows

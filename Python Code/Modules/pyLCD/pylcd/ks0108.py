@@ -367,7 +367,7 @@ class DisplayDraw:
 		if self.auto_commit:
 			self.display.commit()
 	
-	def text(self, text, x, y, size = 10, font = "/usr/share/fonts/truetype/freefont/FreeSans.ttf", angle = 0, clear = False):
+	def text(self, text, x, y, size = 10, font = '/home/pi/Desktop/Smart-Weighing-Machine/Python Code/Modules/pyLCD/fonts/5x7.fnt', angle = 0, clear = False):
 		truetype = font.lower().endswith(".ttf")
 		if truetype:
 			if not IMAGE:

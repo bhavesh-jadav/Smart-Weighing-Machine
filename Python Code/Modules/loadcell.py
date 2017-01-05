@@ -139,7 +139,7 @@ def init():
 	
 def calibrate():
 	
-	lcd.draw.text("Enter known weight value", 0, 0, size = 12)
+	lcd.draw.text("ENTER KNOWN WEIGHT", 0, 0, size = 20)
 	lcd.display.commit()
 	
 	'''
