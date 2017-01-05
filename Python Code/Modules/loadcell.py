@@ -14,9 +14,9 @@ import json
 import Modules.keypad as keypad
 from Modules.global_variables import global_variables
 
-known_weight_in_gram = 100.0
-known_weight_diff = 1000.0
-base_value = 3500.0
+known_weight_in_gram = 0.0
+known_weight_diff = 0.0
+base_value = 0.0
 
 #to use physical pin numbers on board
 GPIO.setmode(GPIO.BOARD)
@@ -124,21 +124,23 @@ def is_ready():
 		
 def weight_in_gram(sample = 1):
 	weight = abs(((base_value - read_average_value(sample)) / known_weight_diff) * known_weight_in_gram)
-	print weight
 	return weight
 
 def weight_in_kg(sample = 1):
 	return weight_in_gram(sample) / 1000.0
 	
 def init():
+	
+	global known_weight_in_gram
+	global known_weight_diff
+	global base_value
+	
 	with open('loadcell_data.json', 'r') as f:
 		data = json.load(f)
 		
 	known_weight_in_gram = data['known_weight_in_gram']
 	known_weight_diff = data['known_weight_diff']
 	base_value = data['base_value']
-	
-	print abs(((base_value - read_average_value(1)) / known_weight_diff) * known_weight_in_gram)
 	
 def calibrate():
 	key = ""
