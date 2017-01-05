@@ -8,10 +8,10 @@ try:
 	lcd.display.commit()
 	while 1:
 		key = keypad.get_value()
-		print key
 		if key != "" :
 			val += key
-			lcd.draw.text(val, 0, 7)
+			lcd.draw.rectangle(0,7,127,14,fill=True)
+			lcd.draw.text(val, 0, 7, clear=True)
 			lcd.display.commit()
 except KeyboardInterrupt:
 	lcd.display.clear()
