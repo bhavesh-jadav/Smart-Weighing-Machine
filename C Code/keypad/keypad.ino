@@ -43,7 +43,7 @@ char keys[ROWS][COLS] = {
  * 3) If you want to assign both character and string then you can do it like 'A-a-hello-*-ok'. by adding '-' between characters and strings.
  */
 char* keyStringArray[20] = {
-  "1.*#", "2abcABC", "3defDEF", "caps-small-no-",
+  "1.*#", "2abcABC", "3defDEF", "caps-small-number-",
   "4ghiGHI", "5jklJKL", "6mnoMNO", "up-",
   "7pqrsPQRS", "8tuvTUV", "9wxyzWXYZ", "down-",
   "left-", "0 ", "right-", "tare-"
@@ -67,7 +67,7 @@ int singlePressCmdButtons[] = {3, 7, 11, 12, 14, 15, 999}; //add numbers of keys
 int longPressCmdButtons[] = {12, 14, 15, 999};  //add numbers of characters which are going to have long press button functionality
 
 static byte kpadState;  //to store key state i.e. PRESSED, HOLD or RELEASED
-char textMode[10] = "no";  //initial text mode, no = numbers, caps = capital alphabet, small = small alphabet
+char textMode[10] = "number";  //initial text mode, no = numbers, caps = capital alphabet, small = small alphabet
 byte keyState = 0;  //0 = released, 1 = hold
 int textModeKey = 3; //assign textmode key number to this variable.
 char valueToSend[50] = {}; //it will store final value to send to the serial monitor.
@@ -181,7 +181,7 @@ void keypadEvent(KeypadEvent key){
         getKeyFromKeyPress(keyVal, (strlen(keyStringArray[keyVal])/2) + 1, strlen(keyStringArray[keyVal]));
       else if(isValueInArray(keyVal, alphaKeys) && strcmp(textMode, "small") == 0)
         getKeyFromKeyPress(keyVal, 1, strlen(keyStringArray[keyVal])/2 + 1);
-      else if(isValueInArray(keyVal, singlePressKeyButtons) && strcmp(textMode, "no") == 0)
+      else if(isValueInArray(keyVal, singlePressKeyButtons) && strcmp(textMode, "number") == 0)
         getKeyFromKeyPress(keyVal, 0, 1);
         
       else if(isValueInArray(keyVal, singlePressKeyButtons))

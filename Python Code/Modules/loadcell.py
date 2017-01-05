@@ -11,6 +11,8 @@ import RPi.GPIO as GPIO
 import time
 import math
 import json
+import Modules.keypad as keypad
+from Modules.global_variables import global_variables
 
 known_weight_in_gram = 100.0
 known_weight_diff = 1000.0
@@ -138,9 +140,45 @@ def init():
 	base_value = data['base_value']
 	
 def calibrate():
+	key = ""
+	global known_weight_diff, known_weight_in_gram, base_value
 	
-	lcd.draw.text("ENTER KNOWN WEIGHT", 0, 0, size = 20)
+	known_weight_diff = ""
+	known_weight_in_gram = ""
+	base_value = ""
+	
+	#calculate base value
+	lcd.display.clear()
+	lcd.draw.text("REMOVE ANY OBJECT", 15, 23)
+	lcd.draw.text("FORM WEIGHING MACHINE", 3, 32)
 	lcd.display.commit()
+	
+	'''
+	#accept known weight in grams
+	lcd.display.clear()
+	lcd.draw.text("ENTER KNOWN WEIGHT IN", 0, 0)
+	lcd.draw.text("GRAMS", 0, 9)
+	lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+	lcd.display.commit()
+	while key != "right" or len(known_weight_in_gram) <= 0:
+		key = keypad.get_value()
+		if key.isdigit():
+			known_weight_in_gram += key
+		elif key == "left" and len(known_weight_in_gram) > 0:
+			known_weight_in_gram = known_weight_in_gram[:-1]
+		elif key == "number" or key == "small" or key == "caps":
+			lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
+			global_variables.textmode = key
+			lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+		if len(known_weight_in_gram) >= 0:
+			lcd.draw.clear(0, 19, 127, 26)
+			if len(known_weight_in_gram) != 0:
+				lcd.draw.text(known_weight_in_gram, 0, 19)
+			else:
+				lcd.draw.text(" ", 0, 19)
+		lcd.display.commit()
+		'''
+	
 	
 	'''
 	data = {'known_weight_in_gram':known_weight_in_gram, 'known_weight_diff':known_weight_diff, 'base_value':base_value}
