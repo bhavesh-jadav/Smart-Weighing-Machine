@@ -13,6 +13,8 @@ import math
 import json
 import Modules.keypad as keypad
 from Modules.global_variables import global_variables
+import os
+import sys
 
 known_weight_in_gram = 0.0
 known_weight_diff = 0.0
@@ -186,6 +188,10 @@ def calibrate():
 				else:
 					lcd.draw.text(" ", 0, 19)
 			lcd.display.commit()
+			if key == "cancel":
+				sys.stdout.flush()
+				GPIO.cleanup()
+				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
 		known_weight_in_gram = float(known_weight_in_gram)
 		time.sleep(0.1)
 
@@ -198,6 +204,10 @@ def calibrate():
 		key = ""
 		while key != "right":
 			key = keypad.get_value()
+			if key == "cancel":
+				sys.stdout.flush()
+				GPIO.cleanup()
+				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
 		lcd.display.clear()
 		lcd.draw.text("PLEASE WAIT...", 25, 25)
 		lcd.display.commit()
