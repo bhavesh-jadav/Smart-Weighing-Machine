@@ -12,9 +12,8 @@ import sys
 date_and_time = ""
 old_date_and_time = ""
 menu = ["CHECK INTERNET", "RESTART SCRIPT", "SHUTDOWN MACHINE", "RESTART MACHINE", "CALIBRATE MACHINE", "SIGN IN", "SIGN OUT"]
-
+lcd.display.clear()	
 loadcell.init()
-
 
 def display_date_and_time():
 	global date_and_time, old_date_and_time
@@ -69,10 +68,12 @@ def restart_script():
 	
 def shutdown_machine():
 	lcd.display.clear()
+	lcd.display.commit()
 	os.system("sudo poweroff")
 	
 def restart_machine():
 	lcd.display.clear()
+	lcd.display.commit()
 	os.system("sudo reboot")
 	
 def calibrate_machine():

@@ -91,6 +91,15 @@ void setup() {
 
 void loop() {
   int val = key_pad.getKey();
+  if (Serial.available() > 0){
+    char value = Serial.read();
+    if (value == 's')
+      strcpy(textMode, "small");
+    else if (value == 'c')
+      strcpy(textMode, "caps");
+    else if(value == 'n')
+      strcpy(textMode, "number");
+  }
 }
 
 //minimum time in milliseconds required between two key press to cycle through values

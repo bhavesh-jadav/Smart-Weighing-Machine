@@ -14,3 +14,6 @@ def get_value():
 		return val_to_send
 	else:
 		return ""
+		
+def send_value(value):
+	ser.write(value)
