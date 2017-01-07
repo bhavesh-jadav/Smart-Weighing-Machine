@@ -81,6 +81,7 @@ Keypad key_pad(makeKeymap(keys), rowPins, colPins, sizeof(rowPins), sizeof(colPi
 int keyCounterArray[16] = {0};
 
 void setup() {
+  delay(1000);
   Serial.begin(9600);
   key_pad.begin(makeKeymap(keys));
   key_pad.addEventListener(keypadEvent);

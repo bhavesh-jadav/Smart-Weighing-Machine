@@ -11,7 +11,11 @@ import sys
 
 date_and_time = ""
 old_date_and_time = ""
-menu = ["CHECK INTERNET", "RESTART SCRIPT", "SHUTDOWN MACHINE", "RESTART MACHINE", "CALIBRATE MACHINE", "SIGN IN", "SIGN OUT"]
+#One menu function should only take one line and there only will be 7 menu function per one menu page
+menu_pages = [["1.CHECK INTERNET", "2.RESTART SCRIPT", "3.SHUTDOWN MACHINE", "4.RESTART MACHINE", "5.CALIBRATE MACHINE", "6.SIGN IN", "7.SIGN OUT"],
+			  ["8.CONNECT TO WIFI", "9.ENTER IP ADDRESS"]]
+menu_page_number = 0
+menu_selected_function = 0
 lcd.display.clear()	
 loadcell.init()
 
@@ -45,8 +49,9 @@ def check_internet():
 	try:
 		urllib2.urlopen("http://www.google.com", timeout = 3)
 		lcd.display.clear()
-		lcd.draw.text("CONNECTED TO THE INTERNET", 0, 0)
-		lcd.draw.text("PRESS 'OK' TO CONTINUE", 0, 9)
+		lcd.draw.text("CONNECTED TO THE", 0, 0)
+		lcd.draw.text("INTERNET", 0, 9)
+		lcd.draw.text("PRESS 'OK' TO CONTINUE", 0, 18)
 		lcd.display.commit()
 		key = keypad.get_value()
 		while key != "right":
@@ -79,24 +84,41 @@ def restart_machine():
 def calibrate_machine():
 	loadcell.calibrate()
 	
-def show_menu():
+def call_menu_functions(function):
+	if function == menu_pages[0][0]:
+		check_internet()
+	elif function == menu_pages[0][1]:
+		restart_script()
+	elif function == menu_pages[0][2]:
+		shutdown_machine()
+	elif function == menu_pages[0][3]:
+		restart_machine()
+	elif function == menu_pages[0][4]:
+		calibrate_machine()
+	
+def show_menu_page(menu):
+	global menu_selected_function
 	lcd.display.clear()
 	counter = 1
+	yaxis = (menu_selected_function*9) + 1
 	for i in range(len(menu)):
-		if i == 0:
-			lcd.draw.rectangle(0,0,127,8,fill=True)
-			lcd.draw.text(menu[0],1,counter,clear=True)
-		else:
+		if i == menu_selected_function:
+			lcd.draw.rectangle(0,menu_selected_function*9,127,(menu_selected_function*9+9)-1,fill=True)
+			lcd.draw.text(menu[menu_selected_function],1,yaxis,clear=True)
 			counter = counter + 9
+			continue
+		else:
 			lcd.draw.text(menu[i], 1, counter)
+			counter = counter + 9
+			
 	lcd.display.commit()
-	counter = 0
-	yaxis = 1
+	counter = menu_selected_function
 	while 1:
 		key = keypad.get_value()
 		if key == "left" or key == "cancel":
-			lcd.display.clear()
-			break
+			return "cancel"
+		elif key.isdigit():
+			return key
 		elif key == "up":
 			if counter > 0:
 				lcd.draw.clear(0, counter*9, 127, counter*9+8)
@@ -107,6 +129,9 @@ def show_menu():
 				yaxis -= 9
 				lcd.draw.text(menu[counter],1, yaxis, clear = True)
 				lcd.display.commit()
+			else:
+				return "prev"
+				
 		elif key == "down":
 			if counter < len(menu) - 1:
 				lcd.draw.clear(0, counter*9, 127, counter*9+8)
@@ -117,20 +142,56 @@ def show_menu():
 				yaxis += 9
 				lcd.draw.text(menu[counter],1, yaxis, clear = True)
 				lcd.display.commit()
+			else:
+				return "next"
+				
 		elif key ==  "right":
-			if counter == 0:
-				check_internet()
-				break
-			elif counter == 1:
-				restart_script()
-			elif counter == 2:
-				shutdown_machine()
-			elif counter == 3:
-				restart_machine()
-			elif counter == 4:
-				calibrate_machine()
+			call_menu_functions(menu[counter])
+			break
 			
 	lcd.display.clear()	
+
+def show_menu():
+	global menu_page_number, menu_selected_function
+	number = ""
+	menu_fn = ""
+	menu_page_number = 0
+	menu_selected_function = 0
+	found = 0
+	while 1:
+		val = show_menu_page(menu_pages[menu_page_number])
+		if val == "cancel":
+			lcd.display.clear()
+			break	
+		elif val.isdigit():
+			while 1:
+				lcd.display.clear()
+				number += val
+				lcd.draw.text(number,1,54)
+				for menu_page in menu_pages:
+					for menu_function in menu_page:
+						if number in menu_function:
+							found = 1
+							menu_fn = menu_function
+							break
+					if found == 1:
+						break
+				
+		elif val == "next":
+			if menu_page_number < len(menu_pages)-1:
+				menu_page_number += 1
+				menu_selected_function = 0
+			else:
+				menu_page_number = 0
+				menu_selected_function = 0
+		elif val == "prev":
+			if menu_page_number > 0:
+				menu_page_number -= 1
+				menu_selected_function = len(menu_pages[menu_page_number])-1
+			else:
+				menu_page_number = len(menu_pages) - 1
+				menu_selected_function = len(menu_pages[menu_page_number])-1
+			
 
 try:
 	while 1:
