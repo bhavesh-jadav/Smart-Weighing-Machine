@@ -147,6 +147,7 @@ def show_menu_page(menu):
 				
 		elif key ==  "right":
 			call_menu_functions(menu[counter])
+			return "cancel"
 			break
 			
 	lcd.display.clear()	
@@ -213,7 +214,6 @@ def show_menu():
 				menu_page_number = len(menu_pages) - 1
 				menu_selected_function = len(menu_pages[menu_page_number])-1
 			
-
 try:
 	while 1:
 		
@@ -224,6 +224,8 @@ try:
 		key = keypad.get_value()
 		if key == "menu":
 			show_menu()
+		elif key == "tare":
+			loadcell.tare()
 		
 except:
 	GPIO.cleanup()

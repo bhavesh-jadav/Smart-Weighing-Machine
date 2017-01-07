@@ -19,6 +19,7 @@ import sys
 known_weight_in_gram = 0.0
 known_weight_diff = 0.0
 base_value = 0.0
+tared_weight = 0.0
 
 #to use physical pin numbers on board
 GPIO.setmode(GPIO.BOARD)
@@ -81,7 +82,7 @@ def read_cell_value() :
 '''
 def calculate_base_value():
 	"to calculate initial base value with moving average method"
-	sample = 50	#define number of samples to take
+	sample = 200	#define number of samples to take
 	count = 0
 	tval = 0	#variable to sotre the final moving average value
 
@@ -126,7 +127,7 @@ def is_ready():
 		
 def weight_in_gram(sample = 1):
 	weight = abs(((base_value - read_average_value(sample)) / known_weight_diff) * known_weight_in_gram)
-	return weight
+	return (weight-tared_weight)
 
 def weight_in_kg(sample = 1):
 	return weight_in_gram(sample) / 1000.0
@@ -213,7 +214,7 @@ def calibrate():
 		lcd.display.clear()
 		lcd.draw.text("PLEASE WAIT...", 25, 25)
 		lcd.display.commit()
-		val = read_average_value(15)
+		val = calculate_base_value()
 		known_weight_diff = float(abs(base_value - val))
 		
 		#store calculated values in json file
@@ -236,4 +237,8 @@ def calibrate():
 		
 #def zero():
 	
-#def tare():
+def tare():
+	global tared_weight, base_value
+	val = read_average_value(10)
+	diff = abs(base_value - val)
+	tared_weight = (diff / known_weight_diff) * known_weight_in_gram
