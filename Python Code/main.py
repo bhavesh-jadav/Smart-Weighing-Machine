@@ -165,8 +165,11 @@ def show_menu():
 			break	
 		elif val.isdigit():
 			while 1:
+				found = 0
 				lcd.display.clear()
-				number += val
+				if val.isdigit():
+					number += val
+				val = ""
 				lcd.draw.text(number,1,54)
 				for menu_page in menu_pages:
 					for menu_function in menu_page:
@@ -176,7 +179,25 @@ def show_menu():
 							break
 					if found == 1:
 						break
-				
+				if found == 0:
+					lcd.draw.text("NO FUNCTION FOUND",1,1)
+				else:
+					lcd.draw.text(menu_fn,1,1)
+				lcd.display.commit()
+				key = keypad.get_value()
+				if key.isdigit():
+					val = key
+				elif key == "left":
+					number = ""
+					break
+				elif key == "cancel":
+					sys.stdout.flush()
+					GPIO.cleanup()
+					os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
+				elif key == "right":
+					call_menu_functions(menu_fn)
+					break
+					
 		elif val == "next":
 			if menu_page_number < len(menu_pages)-1:
 				menu_page_number += 1
