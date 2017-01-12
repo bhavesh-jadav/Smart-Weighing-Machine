@@ -18,6 +18,6 @@ namespace SWM.Models
 
         public int TroughId { get; set; }
         [Required]
-        public int FarmLocationId { get; set; }
+        public int UserLocationToMachineId { get; set; }
     }
 }

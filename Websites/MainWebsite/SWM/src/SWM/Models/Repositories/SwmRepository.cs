@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SWM.JsonModels;
 using Microsoft.AspNetCore.Identity;
+using SWM.Models.ApiModels;
 
 namespace SWM.Models.Repositories
 {
@@ -98,7 +99,8 @@ namespace SWM.Models.Repositories
             {
                 List<ProductInfo> productInfos = new List<ProductInfo>();
                 var user = GetUserByUserName(userName).Result;
-                if (user != null)
+                var location = _ctx.UserLocations.FirstOrDefault(l => l.Name == locationName);
+                if (user != null && location != null)
                 {
                     ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
                     foreach (var cu in ctou)
@@ -106,7 +108,8 @@ namespace SWM.Models.Repositories
                         productInfos.Add(new ProductInfo()
                         {
                             ProductName = GetProductInformation(cu.ProductID).Name,
-                            TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id && cd.FarmLocationId == _ctx.UserLocations.FirstOrDefault(ul => ul.Name == locationName && ul.UserId == user.Id).Id).Select(cd => cd.Weight).Sum()
+                            TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id && 
+                            cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(ul => ul.UserLocationId == location.Id).Id).Select(cd => cd.Weight).Sum()
                         });
                     }
                     return productInfos;
@@ -147,6 +150,54 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return new UserInformation();
+            }
+        }
+
+        public async Task<bool> CheckUserPassword(SwmUser user, string password)
+        {
+            return await _userManager.CheckPasswordAsync(user, password);
+        }
+
+        public bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId)
+        {
+            try
+            {
+                var user = _userManager.FindByIdAsync(userId).Result;
+                var machine = _ctx.MachineInformations.FirstOrDefault(m => m.Id == machineId);
+                var product = _ctx.ProductInformations.FirstOrDefault(p => p.Id == data.ProductId);
+                var location = _ctx.UserLocations.FirstOrDefault(l => (l.Id == data.LocationId) && (l.UserId == userId));
+                var ptou = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.ProductID == data.ProductId && pu.UserId == userId);
+
+                if (user != null && machine != null && product != null && location != null && ptou != null)
+                {
+                    var utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == machineId) && (um.UserLocationId == location.Id));
+                    if (utom == null)
+                    {
+                        _ctx.UserLocationToMachines.Add(new UserLocationToMachine()
+                        {
+                            MachineId = machineId,
+                            UserLocationId = location.Id
+                        });
+                        _ctx.SaveChanges();
+                        utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == machineId) && (um.UserLocationId == location.Id));
+                    }
+
+                    _ctx.CropDatas.Add(new CropData
+                    {
+                        CropToUserId = ptou.Id,
+                        UserLocationToMachineId = utom.Id,
+                        DateTime = data.DateAndTime,
+                        Weight = data.weight
+                    });
+                    _ctx.SaveChanges();
+                    return true;
+                }
+                else
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
     }

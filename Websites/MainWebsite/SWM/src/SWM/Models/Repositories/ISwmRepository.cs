@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SWM.JsonModels;
+using SWM.Models.ApiModels;
 
 namespace SWM.Models.Repositories
 {
@@ -18,5 +19,7 @@ namespace SWM.Models.Repositories
         List<ProductInfo> GetProductInfoByUserNameAndLocation(string locationName, string userName);
         ProductInformation GetProductInformation(int productId);
         UserInformation GetUserInformationForAPI(string userName);
+        Task<bool> CheckUserPassword(SwmUser user, string password);
+        bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId);
     }
 }

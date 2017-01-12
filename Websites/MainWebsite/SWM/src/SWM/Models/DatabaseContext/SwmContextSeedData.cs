@@ -199,16 +199,16 @@ namespace SWM.Models
                 DateTime datetime = new DateTime(2016, 9, 30, 21, 20, 20);
                 CropData[] cdatas =
                 {
-                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(1), FarmLocationId = 1, Weight = 55 },
-                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(2), FarmLocationId = 1, Weight = 100 },
-                    new CropData {CropToUserId = 3, DateTime = datetime.AddMinutes(3), FarmLocationId = 1, Weight = 20 },
-                    new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(4), FarmLocationId = 1, Weight = 123 },
-                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(5), FarmLocationId = 1, Weight = 555 },
-                    new CropData {CropToUserId = 3, DateTime = datetime.AddMinutes(6), FarmLocationId = 1, Weight = 525 },
-                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(7), FarmLocationId = 1, Weight = 65 },
-                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(8), FarmLocationId = 1, Weight = 512 },
-                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(9), FarmLocationId = 1, Weight = 201 },
-                    new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(10), FarmLocationId = 1, Weight = 215 }
+                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(1), UserLocationToMachineId = 1, Weight = 55 },
+                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(2), UserLocationToMachineId = 1, Weight = 100 },
+                    new CropData {CropToUserId = 3, DateTime = datetime.AddMinutes(3), UserLocationToMachineId = 1, Weight = 20 },
+                    new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(4), UserLocationToMachineId = 1, Weight = 123 },
+                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(5), UserLocationToMachineId = 1, Weight = 555 },
+                    new CropData {CropToUserId = 3, DateTime = datetime.AddMinutes(6), UserLocationToMachineId = 1, Weight = 525 },
+                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(7), UserLocationToMachineId = 1, Weight = 65 },
+                    new CropData {CropToUserId = 1, DateTime = datetime.AddMinutes(8), UserLocationToMachineId = 1, Weight = 512 },
+                    new CropData {CropToUserId = 2, DateTime = datetime.AddMinutes(9), UserLocationToMachineId = 1, Weight = 201 },
+                    new CropData {CropToUserId = 4, DateTime = datetime.AddMinutes(10), UserLocationToMachineId = 1, Weight = 215 }
                 };
                 _ctx.AddRange(cdatas);
                 await _ctx.SaveChangesAsync();
