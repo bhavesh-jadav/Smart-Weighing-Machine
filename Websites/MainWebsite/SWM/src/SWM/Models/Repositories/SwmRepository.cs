@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using SWM.JsonModels;
 using Microsoft.AspNetCore.Identity;
 using SWM.Models.ApiModels;
+using SWM.ViewModels;
 
 namespace SWM.Models.Repositories
 {
@@ -199,6 +200,41 @@ namespace SWM.Models.Repositories
             {
                 return false;
             }
+        }
+
+        public List<TableDataModel> GetDataForDataTable(SwmUser user)
+        {
+            try
+            {
+                int counter = 1;
+                List<TableDataModel> tableData = new List<TableDataModel>();
+                List<ProductsToUser> produtToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => produtToUsers.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+
+                foreach (var cropData in cropDatas)
+                {
+                    tableData.Add(new TableDataModel()
+                    {
+                        No = counter++,
+                        Name = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == produtToUsers.FirstOrDefault(pu => pu.Id == cropData.CropToUserId).ProductID).Name,
+                        Weight = cropData.Weight,
+                        DateAndTime = cropData.DateTime,
+                        Location = _ctx.UserLocations.FirstOrDefault(ul => ul.Id == _ctx.UserLocationToMachines.FirstOrDefault(um => um.Id == cropData.UserLocationToMachineId).UserLocationId).Address,
+                        MachineId = _ctx.UserLocationToMachines.FirstOrDefault(um => um.Id == cropData.UserLocationToMachineId).MachineId
+                    });
+                }
+
+                return tableData;
+            }
+            catch (Exception ex)
+            {
+                return new List<TableDataModel>();
+            }
+        }
+
+        public async Task<SwmUser> GetUserByUserId(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
         }
     }
 }

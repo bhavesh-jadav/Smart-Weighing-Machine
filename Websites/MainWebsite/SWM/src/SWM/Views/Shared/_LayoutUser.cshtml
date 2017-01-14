@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="~/plugins/datepicker/datepicker3.css">
     <link rel="stylesheet" href="~/plugins/daterangepicker/daterangepicker.css">
     <link rel="stylesheet" href="~/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    @RenderSection("css", false);
 </head>
 @{
     if (User.IsInRole("admin"))
@@ -73,6 +74,14 @@
                             <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                         </a>
                     </li>
+                    @if (User.IsInRole("user"))
+                    {
+                        <li class="">
+                            <a asp-controller="User" asp-action="ShowData">
+                                <i class="fa fa-server"></i> <span>Show Data</span>
+                            </a>
+                        </li>
+                    }
                     @if (User.IsInRole("admin"))
                     {
                         <li class="">
@@ -108,9 +117,6 @@
     </div>
     <script src="~/plugins/jQuery/jquery-2.2.3.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-    <script>
-        $.widget.bridge('uibutton', $.ui.button);
-    </script>
     <script src="~/lib/angular/angular.min.js"></script>
     <script src="~/bootstrap/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
@@ -126,8 +132,6 @@
     <script src="~/plugins/slimScroll/jquery.slimscroll.min.js"></script>
     <script src="~/plugins/fastclick/fastclick.js"></script>
     <script src="~/dist/js/app.min.js"></script>
-    <script src="~/dist/js/pages/dashboard.js"></script>
-    <script src="~/dist/js/demo.js"></script>
-    @RenderSection("script", false)
+    @RenderSection("scripts", false)
 </body>
 </html>

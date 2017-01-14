@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SWM.JsonModels;
 using SWM.Models.ApiModels;
+using SWM.ViewModels;
 
 namespace SWM.Models.Repositories
 {
@@ -13,6 +14,7 @@ namespace SWM.Models.Repositories
         List<ProductInfo> GetProductInfoByUserName(string userName);
         List<LocationInfo> GetLocationInfoByUserName(string userName);
         Task<SwmUser> GetUserByUserName(string userName);
+        Task<SwmUser> GetUserByUserId(string id);
         string GetStateName(int stateId);
         string GetCountryName(int countryId);
         int GetPinNumber(int pinId);
@@ -21,5 +23,6 @@ namespace SWM.Models.Repositories
         UserInformation GetUserInformationForAPI(string userName);
         Task<bool> CheckUserPassword(SwmUser user, string password);
         bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId);
+        List<TableDataModel> GetDataForDataTable(SwmUser user);
     }
 }

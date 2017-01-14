@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using SWM.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SWM.Models.Repositories;
+using System.Security.Claims;
 
 namespace SWM.Controllers
 {
@@ -81,6 +82,13 @@ namespace SWM.Controllers
         public IActionResult Settings(UserSettingsModel settings)
         {
             return View("~/Views/User/Settings.cshtml", settings);
+        }
+
+        [Authorize(Roles = "user")]
+        public IActionResult ShowData()
+        {
+            List<TableDataModel> tableData = _repo.GetDataForDataTable(_repo.GetUserByUserId(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result);
+            return View(tableData);
         }
     }
 }
