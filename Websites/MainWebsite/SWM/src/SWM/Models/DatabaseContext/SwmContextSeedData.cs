@@ -75,7 +75,11 @@ namespace SWM.Models
                     UserName = "Bhavesh",
                     Email = "abc@lolol.com",
                     FullName = "Bhavesh Jadav",
-                    PhoneNumber = "+918888888888"
+                    PhoneNumber = "+918888888888",
+                    Address = "Malad east, Mumbai",
+                    PinNo = 400097,
+                    StateId = 1,
+                    CountryId = 1
                 };
 
                 await _userManager.CreateAsync(user, "bhavesh123");
@@ -93,7 +97,11 @@ namespace SWM.Models
                     UserName = "Kaushal",
                     Email = "xyz@lolol.com",
                     FullName = "Kaushal Mania",
-                    PhoneNumber = "+918888888888"
+                    PhoneNumber = "+918888888888",
+                    Address = "Borivali, Mumbai",
+                    PinNo = 400097,
+                    StateId = 1,
+                    CountryId = 1
                 };
 
                 await _userManager.CreateAsync(user, "kaushal123");

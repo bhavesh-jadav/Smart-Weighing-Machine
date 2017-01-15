@@ -153,12 +153,10 @@ namespace SWM.Models.Repositories
                 return new UserInformation();
             }
         }
-
         public async Task<bool> CheckUserPassword(SwmUser user, string password)
         {
             return await _userManager.CheckPasswordAsync(user, password);
         }
-
         public bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId)
         {
             try
@@ -201,7 +199,6 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-
         public List<TableDataModel> GetDataForDataTable(SwmUser user)
         {
             try
@@ -231,12 +228,10 @@ namespace SWM.Models.Repositories
                 return new List<TableDataModel>();
             }
         }
-
         public async Task<SwmUser> GetUserByUserId(string id)
         {
             return await _userManager.FindByIdAsync(id);
         }
-
         public string[] GetSubscriptionTypes()
         {
             try
@@ -249,9 +244,49 @@ namespace SWM.Models.Repositories
             }
         }
 
-        public bool AddNewUser(AddNewUserModel userModel)
+        public async Task<bool> AddNewUser(AddNewUserModel userModel)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var userName = userModel.FullName.Replace(" ", String.Empty).ToLower() + userModel.SubscriptionTypes[0].Trim().ToLower();
+                var password = "bhavesh123";
+                var state = _ctx.States.FirstOrDefault(s => s.Name.ToLower().Trim() == userModel.State.ToLower().Trim());
+                if (state == null)
+                {
+                    _ctx.States.Add(new State { Name = userModel.State });
+                    _ctx.SaveChanges();
+                    state = _ctx.States.FirstOrDefault(s => s.Name.ToLower().Trim() == userModel.State.ToLower().Trim());
+                }
+                var country = _ctx.Countries.FirstOrDefault(c => c.Name.ToLower().Trim() == userModel.Country.ToLower().Trim());
+                if (country == null)
+                {
+                    _ctx.Countries.Add(new Country { Name = userModel.Country });
+                    _ctx.SaveChanges();
+                    country = _ctx.Countries.FirstOrDefault(c => c.Name.ToLower().Trim() == userModel.Country.ToLower().Trim());
+                }
+
+                await _userManager.CreateAsync(new SwmUser()
+                {
+                    Email = userModel.Email,
+                    FullName = userModel.FullName,
+                    PhoneNumber = userModel.ContactNo,
+                    UserName = userName,
+                    Address = userModel.Address,
+                    PinNo = Int32.Parse(userModel.PinNo),
+                    StateId = state.Id,
+                    CountryId = country.Id
+                }, password);
+                var user = await _userManager.FindByNameAsync(userName);
+                await _userManager.AddToRoleAsync(user, "user");
+                var subscriptionId = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name.ToLower() == userModel.SubscriptionTypes[0].ToLower()).Id;
+                _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionId = subscriptionId });
+                _ctx.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

@@ -25,6 +25,6 @@ namespace SWM.Models.Repositories
         bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId);
         List<TableDataModel> GetDataForDataTable(SwmUser user);
         string[] GetSubscriptionTypes();
-        bool AddNewUser(AddNewUserModel userModel);
+        Task<bool> AddNewUser(AddNewUserModel userModel);
     }
 }

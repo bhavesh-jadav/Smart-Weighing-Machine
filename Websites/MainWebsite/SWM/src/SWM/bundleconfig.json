@@ -10,5 +10,11 @@
     "inputFiles": [
       "MailBodies/Contact.html"
     ]
+  },
+  {
+    "outputFileName": "MailBodies/Registration.min.html",
+    "inputFiles": [
+      "MailBodies/Registration.html"
+    ]
   }
 ]

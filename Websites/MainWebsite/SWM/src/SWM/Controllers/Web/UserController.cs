@@ -94,6 +94,10 @@ namespace SWM.Controllers
         [HttpPost]
         public IActionResult AddNewUser(AddNewUserModel userModel)
         {
+            if (_repo.AddNewUser(userModel).Result)
+                ViewBag.SuccessMessage = "Successfully Added New User";
+            else
+                ModelState.AddModelError("", "Unable to register new user");
 
             var res = _repo.GetSubscriptionTypes();
             userModel = new AddNewUserModel();
@@ -107,6 +111,13 @@ namespace SWM.Controllers
                 ModelState.AddModelError("", "Unable to get subscription types");
                 return View(userModel);
             }
+        }
+
+        [Authorize(Roles = "admin")]
+        public IActionResult ShowUsers()
+        {
+
+            return View();
         }
 
         /*--------------------------------User actions--------------------------------------*/

@@ -13,5 +13,14 @@ namespace SWM.Models
         [StringLength(200)]
         [Required]
         public string FullName { get; set; }
+        [Required]
+        [StringLength(200)]
+        public string Address { get; set; }
+        [Required]
+        public int PinNo { get; set; }
+        [Required]
+        public int StateId { get; set; }
+        [Required]
+        public int CountryId { get; set; }
     }
 }

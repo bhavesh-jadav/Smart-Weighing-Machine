@@ -8,16 +8,19 @@
     <form method="post">
         <div class="box box-success">
             <div style="color:#dd4b39" asp-validation-summary="ModelOnly"></div>
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <h3 style="color:green;margin-left:10px;">@ViewBag.SuccessMessage</h3>
+            }
             <div class="box-body">
                 <div class="form-group">
                     <label>Full name:</label>
                     <input asp-for="FullName" class="form-control" type="text" value="" placeholder="Enter full name" />
                     <span asp-validation-for="FullName"></span>
                 </div>
-
                 <div class="form-group">
                     <label>Subscription type:</label>
-                    <select class="form-control">
+                    <select name="SubscriptionTypes" class="form-control">
                         @if (Model.SubscriptionTypes.Length > 0)
                         {
                             <option selected>@Model.SubscriptionTypes[0]</option>
@@ -33,7 +36,6 @@
                     </select>
                     <span asp-validation-for="SubscriptionTypes"></span>
                 </div>
-
                 <div class="form-group">
                     <label>Email:</label>
                     <input asp-for="Email" type="email" value="" placeholder="Enter email" class="form-control" />
