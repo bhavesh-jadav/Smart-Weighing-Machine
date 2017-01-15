@@ -26,5 +26,6 @@ namespace SWM.Models.Repositories
         List<TableDataModel> GetDataForDataTable(SwmUser user);
         string[] GetSubscriptionTypes();
         Task<bool> AddNewUser(AddNewUserModel userModel);
+        List<ShowUserModel> GetAllUsers();
     }
 }

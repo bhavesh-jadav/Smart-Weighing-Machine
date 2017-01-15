@@ -243,7 +243,6 @@ namespace SWM.Models.Repositories
                 return new string[] { };
             }
         }
-
         public async Task<bool> AddNewUser(AddNewUserModel userModel)
         {
             try
@@ -278,14 +277,50 @@ namespace SWM.Models.Repositories
                 }, password);
                 var user = await _userManager.FindByNameAsync(userName);
                 await _userManager.AddToRoleAsync(user, "user");
-                var subscriptionId = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name.ToLower() == userModel.SubscriptionTypes[0].ToLower()).Id;
-                _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionId = subscriptionId });
+
+                var subscriptionTypeId = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name.ToLower() == userModel.SubscriptionTypes[0].ToLower()).Id;
+                var subscriptionIdCount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
+                var subscriptionId = Int32.Parse(subscriptionIdCount.Value);
+                subscriptionId++;
+                _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionTypeId = subscriptionTypeId, SubscriptionId = subscriptionId });
+                subscriptionIdCount.Value = subscriptionId.ToString();
                 _ctx.SaveChanges();
                 return true;
             }
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+
+        public List<ShowUserModel> GetAllUsers()
+        {
+            int counter = 1;
+            List<ShowUserModel> allUsers = new List<ShowUserModel>();
+            try
+            {
+                var users = _ctx.SwmUsers.ToList();
+                foreach(var user in users)
+                {
+                    if (_userManager.IsInRoleAsync(user, "user").Result)
+                    {
+                        allUsers.Add(new ShowUserModel()
+                        {
+                            No = counter++,
+                            FullName = user.FullName,
+                            ContactNo = user.PhoneNumber,
+                            LogInUserName = user.UserName,
+                            UserId = user.Id,
+                            SubscriptionType = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionTypeId).Name,
+                            Address = user.Address + ", Pin: " + user.PinNo + ", State: " + _ctx.States.FirstOrDefault(s => s.Id == user.StateId).Name + ", Country: " + _ctx.Countries.FirstOrDefault(c => c.Id == user.CountryId).Name
+                        });
+                    }
+                }
+                return allUsers;
+            }
+            catch (Exception ex)
+            {
+                return allUsers;
             }
         }
     }

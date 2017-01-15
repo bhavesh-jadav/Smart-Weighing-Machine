@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<ShowUserModel>
+@{
     ViewBag.Title = "Show Users";
     ViewBag.PageHeader = "Show Users";
     ViewBag.PageHeaderSmall = "Displays all the subscription user in tabular form";
@@ -25,17 +26,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @*@foreach (var tableData in Model)
+                    @foreach (var user in Model)
                     {
                         <tr>
-                            <td>@tableData.No</td>
-                            <td>@tableData.Name</td>
-                            <td>@tableData.Weight</td>
-                            <td>@tableData.DateAndTime</td>
-                            <td>@tableData.Location</td>
-                            <td>@tableData.MachineId</td>
+                            <td>@user.No</td>
+                            <td>@user.UserId</td>
+                            <td>@user.LogInUserName</td>
+                            <td>@user.FullName</td>
+                            <td>@user.SubscriptionType</td>
+                            <td>@user.Address</td>
+                            <td>@user.ContactNo</td>
                         </tr>
-                    }*@
+                    }
                 <tfoot>
                     <tr>
                         <th>No.</th>

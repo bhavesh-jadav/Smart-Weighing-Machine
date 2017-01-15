@@ -116,8 +116,7 @@ namespace SWM.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult ShowUsers()
         {
-
-            return View();
+            return View(_repo.GetAllUsers());
         }
 
         /*--------------------------------User actions--------------------------------------*/
