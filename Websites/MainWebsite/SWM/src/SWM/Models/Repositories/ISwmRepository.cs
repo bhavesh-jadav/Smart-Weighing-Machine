@@ -24,5 +24,7 @@ namespace SWM.Models.Repositories
         Task<bool> CheckUserPassword(SwmUser user, string password);
         bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId);
         List<TableDataModel> GetDataForDataTable(SwmUser user);
+        string[] GetSubscriptionTypes();
+        bool AddNewUser(AddNewUserModel userModel);
     }
 }

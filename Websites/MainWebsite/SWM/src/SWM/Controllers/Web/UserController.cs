@@ -53,8 +53,7 @@ namespace SWM.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin")]
-        [ActionName("AdminSettings")]
-        public IActionResult Settings(AdminSettingsModel settings)
+        public IActionResult AdminSettings(AdminSettingsModel settings)
         {
             return View();
         }
@@ -74,14 +73,49 @@ namespace SWM.Controllers
             return View("~/Views/Admin/AddNewMachine.cshtml");
         }
 
+        [Authorize(Roles = "admin")]
+        public IActionResult AddNewUser()
+        {
+            var res = _repo.GetSubscriptionTypes();
+            AddNewUserModel userModel = new AddNewUserModel();
+            if (res.Length > 0)
+            {
+                userModel.SubscriptionTypes = res;
+                return View(userModel);
+            }
+            else
+            {
+                ModelState.AddModelError("", "Unable to get subscription types");
+                return View(userModel);
+            }
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public IActionResult AddNewUser(AddNewUserModel userModel)
+        {
+
+            var res = _repo.GetSubscriptionTypes();
+            userModel = new AddNewUserModel();
+            if (res.Length > 0)
+            {
+                userModel.SubscriptionTypes = res;
+                return View(userModel);
+            }
+            else
+            {
+                ModelState.AddModelError("", "Unable to get subscription types");
+                return View(userModel);
+            }
+        }
+
         /*--------------------------------User actions--------------------------------------*/
 
         [HttpPost]
         [Authorize(Roles = "user")]
-        [ActionName("UserSettings")]
-        public IActionResult Settings(UserSettingsModel settings)
+        public IActionResult UserSettings(UserSettingsModel settings)
         {
-            return View("~/Views/User/Settings.cshtml", settings);
+            return View(settings);
         }
 
         [Authorize(Roles = "user")]

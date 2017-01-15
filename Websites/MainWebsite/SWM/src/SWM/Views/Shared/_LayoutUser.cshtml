@@ -85,13 +85,18 @@
                     @if (User.IsInRole("admin"))
                     {
                         <li class="">
-                            <a asp-controller="User" asp-action="Settings">
+                            <a asp-controller="User" asp-action="AdminSettings">
                                 <i class="fa fa-gear"></i> <span>Website Settings</span>
                             </a>
                         </li>
                         <li class="">
                             <a asp-controller="User" asp-action="AddNewMachine">
                                 <i class="fa fa-gear"></i> <span>Add New Machine</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a asp-controller="User" asp-action="AddNewUser">
+                                <i class="fa fa-plus"></i> <span>Add New User</span>
                             </a>
                         </li>
                     }

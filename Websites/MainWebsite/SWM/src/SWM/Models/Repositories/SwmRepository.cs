@@ -236,5 +236,22 @@ namespace SWM.Models.Repositories
         {
             return await _userManager.FindByIdAsync(id);
         }
+
+        public string[] GetSubscriptionTypes()
+        {
+            try
+            {
+                return _ctx.SubscriptionTypes.Select(s => s.Name).ToArray();
+            }
+            catch (Exception ex)
+            {
+                return new string[] { };
+            }
+        }
+
+        public bool AddNewUser(AddNewUserModel userModel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

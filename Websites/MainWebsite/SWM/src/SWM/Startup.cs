@@ -9,6 +9,7 @@ using SWM.Services;
 using Microsoft.AspNetCore.Identity;
 using SWM.Models.Repositories;
 using System;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace SWM
 {
@@ -58,6 +59,9 @@ namespace SWM
                 if (_env.IsEnvironment("Production"))
                     config.Filters.Add(new RequireHttpsAttribute());
                 
+            });
+            services.Configure<RazorViewEngineOptions>(options => {
+                options.ViewLocationExpanders.Add(new ViewLocationExpander());
             });
         }
 

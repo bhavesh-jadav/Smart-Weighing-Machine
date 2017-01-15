@@ -1,0 +1,78 @@
+﻿@model AddNewUserModel
+@{
+    ViewBag.Title = "Add New User";
+    ViewBag.PageHeader = "Add New User";
+    ViewBag.PageHeaderSmall = "Add new subscription user into system";
+}
+<section class="content">
+    <form method="post">
+        <div class="box box-success">
+            <div style="color:#dd4b39" asp-validation-summary="ModelOnly"></div>
+            <div class="box-body">
+                <div class="form-group">
+                    <label>Full name:</label>
+                    <input asp-for="FullName" class="form-control" type="text" value="" placeholder="Enter full name" />
+                    <span asp-validation-for="FullName"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Subscription type:</label>
+                    <select class="form-control">
+                        @if (Model.SubscriptionTypes.Length > 0)
+                        {
+                            <option selected>@Model.SubscriptionTypes[0]</option>
+                            for (int i = 1; i < Model.SubscriptionTypes.Length; i++)
+                            {
+                                <option>@Model.SubscriptionTypes[i]</option>
+                            }
+                        }
+                        else
+                        {
+                            <option selected>Unable to get subscritpion types</option>
+                        }
+                    </select>
+                    <span asp-validation-for="SubscriptionTypes"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input asp-for="Email" type="email" value="" placeholder="Enter email" class="form-control" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <div class="form-group">
+                    <label>Contact number:</label>
+                    <input asp-for="ContactNo" type="tel" placeholder="Enter contact number" class="form-control" value="" />
+                    <span asp-validation-for="ContactNo"></span>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label>
+                    <input asp-for="Address" type="text" placeholder="Enter contact number" class="form-control" value="" />
+                    <span asp-validation-for="Address"></span>
+                </div>
+                <div class="form-group">
+                    <label>Pin number:</label>
+                    <input asp-for="PinNo" type="text" placeholder="Enter pin number" class="form-control" value="" />
+                    <span asp-validation-for="PinNo"></span>
+                </div>
+                <div class="form-group">
+                    <label>State:</label>
+                    <input asp-for="State" type="text" placeholder="Enter state name" class="form-control" value="" />
+                    <span asp-validation-for="State"></span>
+                </div>
+                <div class="form-group">
+                    <label>Country:</label>
+                    <input asp-for="Country" type="text" placeholder="Enter country name" class="form-control" value="" />
+                    <span asp-validation-for="Country"></span>
+                </div>
+            </div>
+            <div class="box-footer">
+                <button type="submit" class="btn btn-success">Add</button>
+            </div>
+        </div>
+    </form>
+</section>
+@section scripts{
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}
+
