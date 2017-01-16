@@ -17,7 +17,7 @@ namespace SWM.Services
         {
             _config = config;
         }
-        public int SendMail(string fromName, string from, string toName, string to, string subject, string body)
+        public bool SendMail(string fromName, string from, string toName, string to, string subject, string body)
         {
             try
             {
@@ -39,12 +39,12 @@ namespace SWM.Services
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
                     client.Send(message);
                     client.Disconnect(true);
-                    return 1;
+                    return true;
                 }
             }
             catch(Exception)
             {
-                return 0;
+                return false;
             }
         }
     }

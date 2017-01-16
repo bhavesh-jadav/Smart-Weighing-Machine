@@ -16,23 +16,19 @@ namespace SWM.Controllers.Web
 {
     public class HomeController : Controller
     {
-        private IMailService _mailServie;
+        private IMailService _mailService;
         private IConfigurationRoot _config;
         private SignInManager<SwmUser> _signInManager;
         private UserManager<SwmUser> _userManager;
         private IHostingEnvironment _env;
         private RoleManager<UserRoleManager> _roleManager;
+        private SwmContext _ctx;
 
-        public HomeController(IMailService mailService, IConfigurationRoot config, 
-            SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager,
-            IHostingEnvironment env, RoleManager<UserRoleManager> roleManager)
+        public HomeController(SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager, SwmContext ctx)
         {
-            _mailServie = mailService;
-            _config = config;
             _signInManager = signInManager;
             _userManager = userManager;
-            _env = env;
-            _roleManager = roleManager;
+            _ctx = ctx;
         }
 
         [Route("/SignIn")]
@@ -57,11 +53,18 @@ namespace SWM.Controllers.Web
                 var suser = await _userManager.FindByNameAsync(user.UserName);
                 if (suser != null)
                 {
-                    //await _userManager.AddClaimAsync(suser, new Claim("fullName", suser.FullName));
                     var res = await _signInManager.PasswordSignInAsync(suser.UserName, user.Password, user.Remember, false);
                     if (res.Succeeded)
                     {
                         Response.Cookies.Append("fullName", suser.FullName);
+                        if (_ctx.UserLocations.FirstOrDefault(ul => ul.UserId == suser.Id) == null)
+                        {
+                            return RedirectToAction("AddNewLocation", "User");
+                        }
+                        if(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == suser.Id) == null)
+                        {
+                            //ADD PRODUCT ADDRESS
+                        }
                         if (string.IsNullOrWhiteSpace(returnUrl))
                             return RedirectToAction("Dashboard", "User");
                         else
@@ -93,10 +96,10 @@ namespace SWM.Controllers.Web
                 model.Email,
                 model.Message);
 
-            var res = _mailServie.SendMail(model.Name, model.Email,_config["MailSettings:MailAddress-BhaveshJ:Name"], 
+            var res = _mailService.SendMail(model.Name, model.Email,_config["MailSettings:MailAddress-BhaveshJ:Name"], 
                       _config["MailSettings:MailAddress-BhaveshJ:Email"], "Contact From SWM", body);
 
-            if (res == 1)
+            if (res)
             {
                 ViewBag.SuccessMessage = "Message Sent!";
                 ModelState.Clear();

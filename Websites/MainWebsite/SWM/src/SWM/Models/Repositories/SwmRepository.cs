@@ -7,6 +7,8 @@ using SWM.JsonModels;
 using Microsoft.AspNetCore.Identity;
 using SWM.Models.ApiModels;
 using SWM.ViewModels;
+using SWM.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace SWM.Models.Repositories
 {
@@ -14,11 +16,15 @@ namespace SWM.Models.Repositories
     {
         private SwmContext _ctx;
         private UserManager<SwmUser> _userManager;
+        private IMailService _mailService;
+        private IConfigurationRoot _config;
 
-        public SwmRepository(SwmContext ctx, UserManager<SwmUser> userManager)
+        public SwmRepository(SwmContext ctx, UserManager<SwmUser> userManager, IMailService mailService, IConfigurationRoot config)
         {
             _ctx = ctx;
             _userManager = userManager;
+            _mailService = mailService;
+            _config = config;
         }
         public string GetCountryName(int countryId)
         {
@@ -177,6 +183,9 @@ namespace SWM.Models.Repositories
                             MachineId = machineId,
                             UserLocationId = location.Id
                         });
+                        var mu = _ctx.MachineToUsers.FirstOrDefault(m => m.UserID == user.Id);
+                        if (mu == null)
+                            _ctx.MachineToUsers.Add(new MachineToUser() { MachineId = machineId, UserID = user.Id });
                         _ctx.SaveChanges();
                         utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == machineId) && (um.UserLocationId == location.Id));
                     }
@@ -285,7 +294,15 @@ namespace SWM.Models.Repositories
                 _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionTypeId = subscriptionTypeId, SubscriptionId = subscriptionId });
                 subscriptionIdCount.Value = subscriptionId.ToString();
                 _ctx.SaveChanges();
-                return true;
+
+                string body = String.Format(System.IO.File.ReadAllText("MailBodies/Registration.min.html"), userName, password);
+                var res = _mailService.SendMail("SWM", "noreply@swm", userModel.FullName,
+                      userModel.Email, "Welcome to SWM", body);
+
+                if (res)
+                    return true;
+                else
+                    return false;
             }
             catch (Exception ex)
             {
@@ -321,6 +338,48 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return allUsers;
+            }
+        }
+
+        public async Task<bool> RemoveUser(RemoveUserModel userModel)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userModel.UserId);
+                if (user != null && user.UserName == userModel.UserName)
+                {
+                    await _userManager.DeleteAsync(user);
+                    var pus = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                    foreach (var row in pus)
+                    {
+                        var cds = _ctx.CropDatas.Where(cd => cd.CropToUserId == row.Id).ToList();
+                        foreach (var cd in cds)
+                            _ctx.Remove(cd);
+                        _ctx.Remove(row);
+                    }
+                    var uls = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
+                    foreach (var ul in uls)
+                    {
+                        var ulms = _ctx.UserLocationToMachines.Where(ulm => ulm.UserLocationId == ul.Id).ToList();
+                        foreach (var ulm in ulms)
+                            _ctx.Remove(ulm);
+                        _ctx.Remove(ul);
+                    }
+                    var uss = _ctx.UserToSubscriptions.Where(us => us.UserID == user.Id).ToList();
+                    foreach (var us in uss)
+                        _ctx.Remove(us);
+                    var mus = _ctx.MachineToUsers.Where(mu => mu.UserID == user.Id).ToList();
+                    foreach (var mu in mus)
+                        _ctx.Remove(mu);
+                    await _ctx.SaveChangesAsync();
+                    return true;
+                }
+                else
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
     }

@@ -8,6 +8,6 @@ namespace SWM.Services
 {
     public interface IMailService
     {
-        int SendMail(string fromName, string from, string toName, string to, string subject, string body);
+        bool SendMail(string fromName, string from, string toName, string to, string subject, string body);
     }
 }

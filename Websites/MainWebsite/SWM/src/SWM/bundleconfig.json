@@ -16,5 +16,11 @@
     "inputFiles": [
       "MailBodies/Registration.html"
     ]
+  },
+  {
+    "outputFileName": "wwwroot/plugins/datatables/jquery.dataTables.min.css",
+    "inputFiles": [
+      "wwwroot/plugins/datatables/jquery.dataTables.css"
+    ]
   }
 ]

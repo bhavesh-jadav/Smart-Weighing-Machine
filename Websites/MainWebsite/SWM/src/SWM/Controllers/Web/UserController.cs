@@ -119,6 +119,23 @@ namespace SWM.Controllers
             return View(_repo.GetAllUsers());
         }
 
+        [Authorize(Roles = "admin")]
+        public IActionResult RemoveUser()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public IActionResult RemoveUser(RemoveUserModel userModel)
+        {
+            if (_repo.RemoveUser(userModel).Result)
+                ViewBag.SuccessMessage = "Successfully Removed User";
+            else 
+                ModelState.AddModelError("", "Either user name or user id is incorrect");
+            return View();
+        }
+
         /*--------------------------------User actions--------------------------------------*/
 
         [HttpPost]
@@ -133,6 +150,12 @@ namespace SWM.Controllers
         {
             List<TableDataModel> tableData = _repo.GetDataForDataTable(_repo.GetUserByUserId(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result);
             return View(tableData);
+        }
+
+        [Authorize(Roles = "user")]
+        public IActionResult AddNewLocation()
+        {
+            return View();
         }
     }
 }

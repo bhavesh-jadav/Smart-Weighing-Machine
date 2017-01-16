@@ -20,7 +20,7 @@ namespace SWM
         public IEnumerable<string> ExpandViewLocations(ViewLocationExpanderContext context, IEnumerable<string> viewLocations)
         {
             //{2} is area, {1} is controller,{0} is the action
-            string[] locations = new string[] { "/Views/Admin/{0}.cshtml" };
+            string[] locations = new string[] { "/Views/Admin/{0}.cshtml", "/Views/User/{0}.cshtml" };
             return locations.Union(viewLocations);          //Add mvc default locations after ours
         }
 

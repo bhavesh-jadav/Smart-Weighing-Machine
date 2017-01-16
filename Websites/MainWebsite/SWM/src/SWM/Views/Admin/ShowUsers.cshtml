@@ -13,43 +13,45 @@
             <h3 class="box-title">Click on column name to sort by that column. Use search box to search the specific user</h3>
         </div>
         <div class="box-body">
-            <table id="user-table" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>User ID</th>
-                        <th>Login User Name</th>
-                        <th>Full Name</th>
-                        <th>Subscription Type</th>
-                        <th>Address</th>
-                        <th>Contact No.</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model)
-                    {
+            <div class="table-responsive">
+                <table id="user-table" class="table table-bordered table-striped">
+                    <thead>
                         <tr>
-                            <td>@user.No</td>
-                            <td>@user.UserId</td>
-                            <td>@user.LogInUserName</td>
-                            <td>@user.FullName</td>
-                            <td>@user.SubscriptionType</td>
-                            <td>@user.Address</td>
-                            <td>@user.ContactNo</td>
+                            <th>No.</th>
+                            <th>User ID</th>
+                            <th>Login User Name</th>
+                            <th>Full Name</th>
+                            <th>Subscription Type</th>
+                            <th>Address</th>
+                            <th>Contact No.</th>
                         </tr>
-                    }
-                <tfoot>
-                    <tr>
-                        <th>No.</th>
-                        <th>User ID</th>
-                        <th>Login User Name</th>
-                        <th>Full Name</th>
-                        <th>Subscription Type</th>
-                        <th>Address</th>
-                        <th>Contact No.</th>
-                    </tr>
-                </tfoot>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.No</td>
+                                <td>@user.UserId</td>
+                                <td>@user.LogInUserName</td>
+                                <td>@user.FullName</td>
+                                <td>@user.SubscriptionType</td>
+                                <td>@user.Address</td>
+                                <td>@user.ContactNo</td>
+                            </tr>
+                        }
+                    <tfoot>
+                        <tr>
+                            <th>No.</th>
+                            <th>User ID</th>
+                            <th>Login User Name</th>
+                            <th>Full Name</th>
+                            <th>Subscription Type</th>
+                            <th>Address</th>
+                            <th>Contact No.</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 </section>

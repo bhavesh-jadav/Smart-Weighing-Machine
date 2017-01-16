@@ -81,6 +81,11 @@
                                 <i class="fa fa-server"></i> <span>Show Data</span>
                             </a>
                         </li>
+                        <li class="">
+                            <a asp-controller="User" asp-action="AddNewLocation">
+                                <i class="fa fa-map"></i> <span>Add New Location</span>
+                            </a>
+                        </li>
                     }
                     @if (User.IsInRole("admin"))
                     {
@@ -95,13 +100,18 @@
                             </a>
                         </li>
                         <li>
+                            <a asp-controller="User" asp-action="ShowUsers">
+                                <i class="fa fa-user"></i> <span>Show Users</span>
+                            </a>
+                        </li>
+                        <li>
                             <a asp-controller="User" asp-action="AddNewUser">
                                 <i class="fa fa-user-plus"></i> <span>Add New User</span>
                             </a>
                         </li>
                         <li>
-                            <a asp-controller="User" asp-action="ShowUsers">
-                                <i class="fa fa-user"></i> <span>Show Users</span>
+                            <a asp-controller="User" asp-action="RemoveUser">
+                                <i class="fa fa-user-times"></i> <span>Remove User</span>
                             </a>
                         </li>
                     }

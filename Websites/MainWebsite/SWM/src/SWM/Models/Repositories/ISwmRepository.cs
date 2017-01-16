@@ -27,5 +27,6 @@ namespace SWM.Models.Repositories
         string[] GetSubscriptionTypes();
         Task<bool> AddNewUser(AddNewUserModel userModel);
         List<ShowUserModel> GetAllUsers();
+        Task<bool> RemoveUser(RemoveUserModel userModel);
     }
 }

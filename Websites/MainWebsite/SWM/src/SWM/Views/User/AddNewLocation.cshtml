@@ -1,0 +1,47 @@
+﻿@model AddNewUserLocationModel
+@{
+    ViewBag.Title = "Add New Farm Location";
+    ViewBag.PageHeader = "Add New Farm Locationr";
+    ViewBag.PageHeaderSmall = "Add new farm location details into your account";
+}
+<section class="content">
+    <form method="post">
+        <div class="box box-primary">
+            <div style="color:#dd4b39;font-size:20px;margin-top:20px;" asp-validation-summary="ModelOnly"></div>
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <h3 style="color:green;margin-left:10px;">@ViewBag.SuccessMessage</h3>
+            }
+            <div class="box-body">
+                <div class="form-group has-feedback">
+                    <label>Location Name:</label>
+                    <input asp-for="Name" type="text" class="form-control" placeholder="Enter location Name">
+                    <span asp-validation-for="Name"></span>
+                </div>
+                <div class="form-group has-feedback">
+                    <label>Address:</label>
+                    <input asp-for="Address" type="text" class="form-control" placeholder="Enter Address">
+                    <span asp-validation-for="Address"></span>
+                </div>
+                <div class="form-group has-feedback">
+                    <label>Pin no:</label>
+                    <input asp-for="PinNo" type="text" class="form-control" placeholder="Enter Pin no">
+                    <span asp-validation-for="PinNo"></span>
+                </div>
+                <div class="form-group has-feedback">
+                    <label>State:</label>
+                    <input asp-for="State" type="text" class="form-control" placeholder="Enter State">
+                    <span asp-validation-for="State"></span>
+                </div>
+                <div class="form-group has-feedback">
+                    <label>Country:</label>
+                    <input asp-for="Country" type="text" class="form-control" placeholder="Enter Country">
+                    <span asp-validation-for="Country"></span>
+                </div>
+            </div>
+            <div class="box-footer">
+                <button type="submit" class="btn btn-success">Add</button>
+            </div>
+        </div>
+    </form>
+</section>
