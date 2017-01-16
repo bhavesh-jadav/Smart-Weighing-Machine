@@ -427,6 +427,14 @@ namespace SWM.Models.Repositories
                         PinNo = userLocation.PinNo.ToString()
                     });
                 }
+                var ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == userId).ToArray();
+                var cropDatas = _ctx.CropDatas.Where(cd => ctou.Any(c => cd.CropToUserId == c.Id));
+                userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
+                userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
+                userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
+                var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
+                var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
+                userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
                 return userDashboard;
             }
             catch (Exception ex)
