@@ -20,7 +20,7 @@ namespace SWM.Models
         [Required]
         public string Address { get; set; }
         [Required]
-        public int PinId { get; set; }
+        public int PinNo { get; set; }
         [Required]
         public int StateId { get; set; }
         [Required]

@@ -34,12 +34,6 @@ namespace SWM.Models
                 _ctx.Countries.Add(con);
                 await _ctx.SaveChangesAsync();
             }
-            if(!_ctx.PinNumbers.Any())
-            {
-                var pin = new PinNumber() { Pin = 400097 };
-                _ctx.PinNumbers.Add(pin);
-                await _ctx.SaveChangesAsync();
-            }
             if (!_ctx.SubscriptionTypes.Any())
             {
                 var sub = new SubscriptionType()
@@ -117,14 +111,13 @@ namespace SWM.Models
                 var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
                 var state = _ctx.States.FirstOrDefault(s => s.Name == "Maharashtra");
                 var con = _ctx.Countries.FirstOrDefault(c => c.Name == "India");
-                var pin = _ctx.PinNumbers.FirstOrDefault(p => p.Pin == 400097);
 
                 var floc = new UserLocation()
                 {
                     UserId = user.Id,
                     Name = "Farm 1",
                     Address = "Gandhi Nagar, Thane",
-                    PinId = pin.Id,
+                    PinNo = 400097,
                     StateId = state.Id,
                     CountryId = con.Id
                 };

@@ -17,7 +17,6 @@ namespace SWM.Models.Repositories
         Task<SwmUser> GetUserByUserId(string id);
         string GetStateName(int stateId);
         string GetCountryName(int countryId);
-        int GetPinNumber(int pinId);
         List<ProductInfo> GetProductInfoByUserNameAndLocation(string locationName, string userName);
         ProductInformation GetProductInformation(int productId);
         UserInformation GetUserInformationForAPI(string userName);
@@ -28,5 +27,7 @@ namespace SWM.Models.Repositories
         Task<bool> AddNewUser(AddNewUserModel userModel);
         List<ShowUserModel> GetAllUsers();
         Task<bool> RemoveUser(RemoveUserModel userModel);
+        bool AddNewLocation(AddNewLocationModel newLocation, string userId);
+        UserDashboardModel GetDashBoardForUser(string userId);
     }
 }

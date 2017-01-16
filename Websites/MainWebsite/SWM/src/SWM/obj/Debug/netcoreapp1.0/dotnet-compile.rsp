@@ -226,6 +226,8 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migratio
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migrations\20170112144427_MigrationV2.Designer.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migrations\20170115125717_MigrationV3.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migrations\20170115125717_MigrationV3.Designer.cs
+F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migrations\20170116145500_MigrationV4.cs
+F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migrations\20170116145500_MigrationV4.Designer.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Migrations\SwmContextModelSnapshot.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\ApiModels\DataFromMachineModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseContext\SwmContext.cs
@@ -235,7 +237,6 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\D
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\MachineInformation.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\MachineToUser.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\OtherData.cs
-F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\PinNumber.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\ProductInformation.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\ProductsToUser.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\DatabaseModels\State.cs
@@ -249,8 +250,7 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\R
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Models\Repositories\SwmRepository.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Services\IMailService.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Services\MailService.cs
-F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AddNewMachineModel.cs
-F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AddNewUserLocationModel.cs
+F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AddNewLocationModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AddNewUserModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\AdminSettingsModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\ContactViewModel.cs
@@ -258,4 +258,5 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewMode
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\RemoveUserModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\ShowUserModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\TableDataModel.cs
+F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\UserDashboardModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\ViewModels\UserSettingsModel.cs

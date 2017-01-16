@@ -30,6 +30,14 @@ namespace SWM.Controllers
 
         public IActionResult Dashboard()
         {
+            if (User.IsInRole("admin"))
+            {
+                return View("AdminDashboard");
+            }
+            else if (User.IsInRole("user"))
+            {
+                return View("UserDashboard", _repo.GetDashBoardForUser(User.FindFirst(ClaimTypes.NameIdentifier).Value));
+            }
             return View();
         }
 
@@ -59,21 +67,6 @@ namespace SWM.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        public IActionResult AddNewMachine()
-        {
-
-            return View("~/Views/Admin/AddNewMachine.cshtml");
-        }
-
-        [Authorize(Roles = "admin")]
-        [HttpPost]
-        public IActionResult AddNewMachine(AddNewMachineModel newMachine)
-        {
-
-            return View("~/Views/Admin/AddNewMachine.cshtml");
-        }
-
-        [Authorize(Roles = "admin")]
         public IActionResult AddNewUser()
         {
             var res = _repo.GetSubscriptionTypes();
@@ -95,12 +88,16 @@ namespace SWM.Controllers
         public IActionResult AddNewUser(AddNewUserModel userModel)
         {
             if (_repo.AddNewUser(userModel).Result)
+            {
                 ViewBag.SuccessMessage = "Successfully Added New User";
+                ModelState.Clear();
+            }
             else
                 ModelState.AddModelError("", "Unable to register new user");
 
             var res = _repo.GetSubscriptionTypes();
             userModel = new AddNewUserModel();
+            ModelState.Clear();
             if (res.Length > 0)
             {
                 userModel.SubscriptionTypes = res;
@@ -130,7 +127,10 @@ namespace SWM.Controllers
         public IActionResult RemoveUser(RemoveUserModel userModel)
         {
             if (_repo.RemoveUser(userModel).Result)
+            {
                 ViewBag.SuccessMessage = "Successfully Removed User";
+                ModelState.Clear();
+            }
             else 
                 ModelState.AddModelError("", "Either user name or user id is incorrect");
             return View();
@@ -155,6 +155,20 @@ namespace SWM.Controllers
         [Authorize(Roles = "user")]
         public IActionResult AddNewLocation()
         {
+            return View();
+        }
+
+        [Authorize(Roles = "user")]
+        [HttpPost]
+        public IActionResult AddNewLocation(AddNewLocationModel newLocation)
+        {
+            if(_repo.AddNewLocation(newLocation, User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                ViewBag.SuccessMessage = "Successfully Added New User";
+                ModelState.Clear();
+            } 
+            else
+                ModelState.AddModelError("", "Unable to add new location. Try again later");
             return View();
         }
     }

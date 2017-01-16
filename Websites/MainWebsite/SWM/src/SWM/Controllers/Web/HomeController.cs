@@ -24,11 +24,14 @@ namespace SWM.Controllers.Web
         private RoleManager<UserRoleManager> _roleManager;
         private SwmContext _ctx;
 
-        public HomeController(SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager, SwmContext ctx)
+        public HomeController(SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager, SwmContext ctx,
+            IConfigurationRoot config, IMailService mailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _ctx = ctx;
+            _mailService = mailService;
+            _config = config;
         }
 
         [Route("/SignIn")]
@@ -57,11 +60,11 @@ namespace SWM.Controllers.Web
                     if (res.Succeeded)
                     {
                         Response.Cookies.Append("fullName", suser.FullName);
-                        if (_ctx.UserLocations.FirstOrDefault(ul => ul.UserId == suser.Id) == null)
+                        if (_ctx.UserLocations.FirstOrDefault(ul => ul.UserId == suser.Id) == null && User.IsInRole("user"))
                         {
                             return RedirectToAction("AddNewLocation", "User");
                         }
-                        if(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == suser.Id) == null)
+                        if(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == suser.Id) == null && User.IsInRole("user"))
                         {
                             //ADD PRODUCT ADDRESS
                         }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SWM.ViewModels
 {
-    public class AddNewUserLocationModel
+    public class AddNewLocationModel
     {
         [Required(ErrorMessage = "Name is required")]
         [StringLength(50, MinimumLength = 5, ErrorMessage = "Address must be inbetween 5 to 50 characters")]

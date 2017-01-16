@@ -42,7 +42,6 @@ namespace SWM.Models
         public DbSet<UserLocation> UserLocations { get; set; }
         public DbSet<UserLocationToMachine> UserLocationToMachines { get; set; }
         public DbSet<MachineToUser> MachineToUsers { get; set; }
-        public DbSet<PinNumber> PinNumbers { get; set; }
         public DbSet<SubscriptionType> SubscriptionTypes { get; set; }
         public DbSet<UserToSubscription> UserToSubscriptions { get; set; }
         public DbSet<OtherData> OtherDatas { get; set; }

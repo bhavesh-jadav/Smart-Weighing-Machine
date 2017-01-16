@@ -30,10 +30,6 @@ namespace SWM.Models.Repositories
         {
             return _ctx.Countries.FirstOrDefault(c => c.Id == countryId).Name;
         }
-        public int GetPinNumber(int pinId)
-        {
-            return _ctx.PinNumbers.FirstOrDefault(p => p.Id == pinId).Pin;
-        }
         public string GetStateName(int stateId)
         {
             return _ctx.States.FirstOrDefault(s => s.Id == stateId).Name;
@@ -53,7 +49,7 @@ namespace SWM.Models.Repositories
                         {
                             Name = floc.Name,
                             Address = floc.Address + ", " + GetStateName(floc.StateId) + ", " + GetCountryName(floc.CountryId) + ", " +
-                                      "Pin Number: " + GetPinNumber(floc.PinId).ToString()
+                                      "Pin Number: " + floc.PinNo.ToString()
                         });
                     }
                     return locationInfos;
@@ -309,7 +305,6 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-
         public List<ShowUserModel> GetAllUsers()
         {
             int counter = 1;
@@ -340,7 +335,6 @@ namespace SWM.Models.Repositories
                 return allUsers;
             }
         }
-
         public async Task<bool> RemoveUser(RemoveUserModel userModel)
         {
             try
@@ -380,6 +374,64 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+        public bool AddNewLocation(AddNewLocationModel newLocation, string userId)
+        {
+            try
+            {
+                var state = _ctx.States.FirstOrDefault(s => s.Name.ToLower() == newLocation.State.ToLower().Trim());
+                var country = _ctx.Countries.FirstOrDefault(s => s.Name.ToLower() == newLocation.Country.ToLower().Trim());
+
+                if (state == null)
+                {
+                    _ctx.States.Add(new State() { Name = newLocation.State });
+                    _ctx.SaveChanges();
+                    state = _ctx.States.FirstOrDefault(s => s.Name.ToLower() == newLocation.State.ToLower().Trim());
+                }
+                if (country == null)
+                {
+                    _ctx.Countries.Add(new Country() { Name = newLocation.Country });
+                    _ctx.SaveChanges();
+                    country = _ctx.Countries.FirstOrDefault(s => s.Name.ToLower() == newLocation.Country.ToLower().Trim());
+                }
+                _ctx.UserLocations.Add(new UserLocation() {
+                    Name = newLocation.Name,
+                    Address = newLocation.Address,
+                    StateId = state.Id,
+                    CountryId = country.Id,
+                    PinNo = Int32.Parse(newLocation.PinNo),
+                    UserId = userId
+                });
+                _ctx.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public UserDashboardModel GetDashBoardForUser(string userId)
+        {
+            var userDashboard = new UserDashboardModel();
+            try
+            {
+                foreach (var userLocation in _ctx.UserLocations.Where(l => l.UserId == userId).ToList())
+                {
+                    userDashboard.UserLocations.Add(new AddNewLocationModel() {
+                        Name = userLocation.Name,
+                        Address = userLocation.Address,
+                        Country = _ctx.Countries.FirstOrDefault(c => c.Id == userLocation.CountryId).Name,
+                        State = _ctx.States.FirstOrDefault(s => s.Id == userLocation.StateId).Name,
+                        PinNo = userLocation.PinNo.ToString()
+                    });
+                }
+                return userDashboard;
+            }
+            catch (Exception ex)
+            {
+                return userDashboard;
             }
         }
     }
