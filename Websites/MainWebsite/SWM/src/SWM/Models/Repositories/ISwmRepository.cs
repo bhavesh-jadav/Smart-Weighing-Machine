@@ -29,5 +29,6 @@ namespace SWM.Models.Repositories
         Task<bool> RemoveUser(RemoveUserModel userModel);
         bool AddNewLocation(AddNewLocationModel newLocation, string userId);
         UserDashboardModel GetDashBoardForUser(string userId);
+        bool AddNewProduct(string userId, AddNewProductModel newProduct);
     }
 }

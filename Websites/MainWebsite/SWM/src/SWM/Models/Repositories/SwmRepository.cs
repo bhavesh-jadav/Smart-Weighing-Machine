@@ -26,6 +26,7 @@ namespace SWM.Models.Repositories
             _mailService = mailService;
             _config = config;
         }
+
         public string GetCountryName(int countryId)
         {
             return _ctx.Countries.FirstOrDefault(c => c.Id == countryId).Name;
@@ -339,8 +340,8 @@ namespace SWM.Models.Repositories
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(userModel.UserId);
-                if (user != null && user.UserName == userModel.UserName)
+                var user = await _userManager.FindByIdAsync(userModel.UserId.Trim());
+                if (user != null && user.UserName == userModel.UserName.Trim())
                 {
                     await _userManager.DeleteAsync(user);
                     var pus = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
@@ -411,7 +412,6 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-
         public UserDashboardModel GetDashBoardForUser(string userId)
         {
             var userDashboard = new UserDashboardModel();
@@ -432,9 +432,18 @@ namespace SWM.Models.Repositories
                 userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
                 userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
                 userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
+
                 var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
                 var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
                 userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
+
+                foreach(var cu in ctou)
+                {
+                    var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == cu.ProductID);
+                    userDashboard.ProductsIntoAccount += product.Name;
+                    userDashboard.ProductsIntoAccount += ", ";
+                }
+                userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
                 return userDashboard;
             }
             catch (Exception ex)
@@ -442,5 +451,30 @@ namespace SWM.Models.Repositories
                 return userDashboard;
             }
         }
+        public bool AddNewProduct(string userId, AddNewProductModel newProduct)
+        {
+            try
+            {
+                var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Name == newProduct.Name);
+                if (product == null)
+                {
+                    _ctx.Add(new ProductInformation() { Name = newProduct.Name });
+                    _ctx.SaveChanges();
+                    product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Name == newProduct.Name);
+                }
+                var productToUser = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId && pu.ProductID == product.Id);
+                if(productToUser == null)
+                {
+                    _ctx.Add(new ProductsToUser() { UserId = userId, ProductID = product.Id });
+                    _ctx.SaveChanges();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
     }
 }

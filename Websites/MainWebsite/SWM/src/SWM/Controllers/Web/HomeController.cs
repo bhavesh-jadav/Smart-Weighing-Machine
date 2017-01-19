@@ -48,26 +48,26 @@ namespace SWM.Controllers.Web
 
         [HttpPost]
         [Route("/SignIn")]
-        public async Task<IActionResult> Index(LoginViewModel user, string returnUrl)
+        public async Task<IActionResult> Index(LoginViewModel loginData, string returnUrl)
         {
             if(ModelState.IsValid)
             {
                 ViewBag.Title = "Sign In";
-                var suser = await _userManager.FindByNameAsync(user.UserName);
-                if (suser != null)
+                var user = await _userManager.FindByNameAsync(loginData.UserName);
+                if (user != null)
                 {
-                    var res = await _signInManager.PasswordSignInAsync(suser.UserName, user.Password, user.Remember, false);
+                    var res = await _signInManager.PasswordSignInAsync(user.UserName, loginData.Password, loginData.Remember, false);
                     if (res.Succeeded)
                     {
-                        Response.Cookies.Append("fullName", suser.FullName);
-                        if (_ctx.UserLocations.FirstOrDefault(ul => ul.UserId == suser.Id) == null && User.IsInRole("user"))
-                        {
-                            return RedirectToAction("AddNewLocation", "User");
-                        }
-                        if(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == suser.Id) == null && User.IsInRole("user"))
-                        {
-                            //ADD PRODUCT ADDRESS
-                        }
+                        Response.Cookies.Append("fullName", user.FullName);
+                        //if (_ctx.UserLocations.FirstOrDefault(ul => ul.UserId == user.Id) == null && User.IsInRole("user"))
+                        //{
+                        //    return RedirectToAction("AddNewLocation", "User");
+                        //}
+                        //if(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) == null && User.IsInRole("user"))
+                        //{
+                        //    return RedirectToAction("AddNewProduct", "User");
+                        //}
                         if (string.IsNullOrWhiteSpace(returnUrl))
                             return RedirectToAction("Dashboard", "User");
                         else

@@ -171,5 +171,24 @@ namespace SWM.Controllers
                 ModelState.AddModelError("", "Unable to add new location. Try again later");
             return View();
         }
+
+        [Authorize(Roles = "user")]
+        public IActionResult AddNewProduct()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "user")]
+        [HttpPost]
+        public IActionResult AddNewProduct(AddNewProductModel newProduct)
+        {
+            if (_repo.AddNewProduct(User.FindFirst(ClaimTypes.NameIdentifier).Value, newProduct)){
+                ViewBag.SuccessMessage = "Successfully Added New Product";
+                ModelState.Clear();
+            }
+            else
+                ModelState.AddModelError("", "Unable to add new product. Try again later");
+            return View();
+        }
     }
 }

@@ -1,0 +1,39 @@
+﻿@model AddNewProductModel
+@{
+    ViewBag.Title = "Add New Product";
+    ViewBag.PageHeader = "Add New Poduct";
+    ViewBag.PageHeaderSmall = "Add new product into your account";
+}
+<section class="content">
+    <form method="post">
+        <div class="box box-primary">
+            <div style="color:#dd4b39;font-size:20px;margin-top:20px;" asp-validation-summary="ModelOnly"></div>
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <h3 style="color:green;margin-left:10px;">@ViewBag.SuccessMessage</h3>
+            }
+            <div class="box-body">
+                <div class="form-group has-feedback">
+                    <label>Name:</label>
+                    <input asp-for="Name" type="text" class="form-control" placeholder="Enter product Name">
+                    <span asp-validation-for="Name"></span>
+                </div>
+                @if (User.IsInRole("admin"))
+                {
+                    <div class="form-group has-feedback">
+                        <label>Description(optional):</label>
+                        <input asp-for="Description" type="text" class="form-control" placeholder="Enter description(optional)">
+                        <span asp-validation-for="Description"></span>
+                    </div>
+                }
+            </div>
+            <div class="box-footer">
+                <button type="submit" class="btn btn-success">Add</button>
+            </div>
+        </div>
+    </form>
+</section>
+@section scripts{
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}
