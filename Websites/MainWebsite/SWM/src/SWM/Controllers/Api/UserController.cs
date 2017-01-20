@@ -90,10 +90,10 @@ namespace SWM.Controllers.Api
         }
 
         [AllowAnonymous]
-        [HttpPost("{userId}/{machineId}")]
-        public IActionResult GetDataFromMachine([FromBody]DataFromMachineModel data, string userId, string machineId)
+        [HttpPost("machine_data")]
+        public IActionResult GetDataFromMachine([FromBody]DataFromMachineModel data)
         {
-            var res = _repo.AddNewDataFromMachine(data, userId, Int32.Parse(machineId));
+            var res = _repo.AddNewDataFromMachine(data);
             if (res)
                 return Ok("success");
             else
@@ -116,7 +116,6 @@ namespace SWM.Controllers.Api
             }
             else
                 return BadRequest("fail");
-
         }
     }
 }

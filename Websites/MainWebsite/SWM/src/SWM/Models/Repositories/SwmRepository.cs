@@ -18,6 +18,7 @@ namespace SWM.Models.Repositories
         private UserManager<SwmUser> _userManager;
         private IMailService _mailService;
         private IConfigurationRoot _config;
+        private RoleManager<UserRoleManager> _roleManager;
 
         public SwmRepository(SwmContext ctx, UserManager<SwmUser> userManager, IMailService mailService, IConfigurationRoot config)
         {
@@ -160,31 +161,31 @@ namespace SWM.Models.Repositories
         {
             return await _userManager.CheckPasswordAsync(user, password);
         }
-        public bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId)
+        public bool AddNewDataFromMachine(DataFromMachineModel data)
         {
             try
             {
-                var user = _userManager.FindByIdAsync(userId).Result;
-                var machine = _ctx.MachineInformations.FirstOrDefault(m => m.Id == machineId);
+                var user = _userManager.FindByIdAsync(data.UserId).Result;
+                var machine = _ctx.MachineInformations.FirstOrDefault(m => m.Id == data.MachineId);
                 var product = _ctx.ProductInformations.FirstOrDefault(p => p.Id == data.ProductId);
-                var location = _ctx.UserLocations.FirstOrDefault(l => (l.Id == data.LocationId) && (l.UserId == userId));
-                var ptou = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.ProductID == data.ProductId && pu.UserId == userId);
+                var location = _ctx.UserLocations.FirstOrDefault(l => (l.Id == data.LocationId) && (l.UserId == data.UserId));
+                var ptou = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.ProductID == data.ProductId && pu.UserId == data.UserId);
 
                 if (user != null && machine != null && product != null && location != null && ptou != null)
                 {
-                    var utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == machineId) && (um.UserLocationId == location.Id));
+                    var utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == data.MachineId) && (um.UserLocationId == location.Id));
                     if (utom == null)
                     {
                         _ctx.UserLocationToMachines.Add(new UserLocationToMachine()
                         {
-                            MachineId = machineId,
+                            MachineId = data.MachineId,
                             UserLocationId = location.Id
                         });
                         var mu = _ctx.MachineToUsers.FirstOrDefault(m => m.UserID == user.Id);
                         if (mu == null)
-                            _ctx.MachineToUsers.Add(new MachineToUser() { MachineId = machineId, UserID = user.Id });
+                            _ctx.MachineToUsers.Add(new MachineToUser() { MachineId = data.MachineId, UserID = user.Id });
                         _ctx.SaveChanges();
-                        utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == machineId) && (um.UserLocationId == location.Id));
+                        utom = _ctx.UserLocationToMachines.FirstOrDefault(um => (um.MachineId == data.MachineId) && (um.UserLocationId == location.Id));
                     }
 
                     _ctx.CropDatas.Add(new CropData
@@ -253,8 +254,8 @@ namespace SWM.Models.Repositories
         {
             try
             {
-                var userName = userModel.FullName.Replace(" ", String.Empty).ToLower() + userModel.SubscriptionTypes[0].Trim().ToLower();
-                var password = "bhavesh123";
+                var password = CreatePassword(10);
+                var userName = userModel.FullName.Replace(" ", String.Empty).ToLower() + userModel.SubscriptionTypes[0].Trim().ToLower() + password;
                 var state = _ctx.States.FirstOrDefault(s => s.Name.ToLower().Trim() == userModel.State.ToLower().Trim());
                 if (state == null)
                 {
@@ -285,12 +286,16 @@ namespace SWM.Models.Repositories
                 await _userManager.AddToRoleAsync(user, "user");
 
                 var subscriptionTypeId = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name.ToLower() == userModel.SubscriptionTypes[0].ToLower()).Id;
-                var subscriptionIdCount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
-                var subscriptionId = Int32.Parse(subscriptionIdCount.Value);
+                var subscriptionCount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
+                var subscriptionId = Int32.Parse(subscriptionCount.Value);
                 subscriptionId++;
                 _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionTypeId = subscriptionTypeId, SubscriptionId = subscriptionId });
-                subscriptionIdCount.Value = subscriptionId.ToString();
+                subscriptionCount.Value = subscriptionId.ToString();
                 _ctx.SaveChanges();
+
+                userName = userModel.SubscriptionTypes[0].Trim().ToLower() + subscriptionId.ToString();
+                user.UserName = userName;
+                await _userManager.UpdateAsync(user);
 
                 string body = String.Format(System.IO.File.ReadAllText("MailBodies/Registration.min.html"), userName, password);
                 var res = _mailService.SendMail("SWM", "noreply@swm", userModel.FullName,
@@ -305,6 +310,17 @@ namespace SWM.Models.Repositories
             {
                 return false;
             }
+        }
+        private string CreatePassword(int length)
+        {
+            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            while (0 < length--)
+            {
+                res.Append(valid[rnd.Next(valid.Length)]);
+            }
+            return res.ToString();
         }
         public List<ShowUserModel> GetAllUsers()
         {
@@ -433,17 +449,18 @@ namespace SWM.Models.Repositories
                 userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
                 userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
 
-                var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
-                var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
-                userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
-
-                foreach(var cu in ctou)
+                foreach (var cu in ctou)
                 {
                     var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == cu.ProductID);
                     userDashboard.ProductsIntoAccount += product.Name;
                     userDashboard.ProductsIntoAccount += ", ";
                 }
                 userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
+
+                var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
+                var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
+                userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
+
                 return userDashboard;
             }
             catch (Exception ex)
@@ -475,6 +492,27 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
+        public AdminDashboardModel GetDashBoardForAdmin()
+        {
+            AdminDashboardModel adminDashboard = new AdminDashboardModel();
+            try
+            {
+                adminDashboard.TotalLocations = _ctx.UserLocations.Count();
+                adminDashboard.TotalPorducts = _ctx.ProductsToUsers.Count();
+                var users = _ctx.SwmUsers.ToList();
+                foreach (var user in users)
+                {
+                    if (_userManager.IsInRoleAsync(user, "user").Result)
+                        adminDashboard.TotalUsers++;
+                }
+                adminDashboard.TotalWeight = _ctx.CropDatas.Select(cd => cd.Weight).Sum();
 
+                return adminDashboard;
+            }
+            catch (Exception ex)
+            {
+                return adminDashboard;
+            }
+        }
     }
 }

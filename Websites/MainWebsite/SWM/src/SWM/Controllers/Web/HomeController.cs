@@ -20,8 +20,6 @@ namespace SWM.Controllers.Web
         private IConfigurationRoot _config;
         private SignInManager<SwmUser> _signInManager;
         private UserManager<SwmUser> _userManager;
-        private IHostingEnvironment _env;
-        private RoleManager<UserRoleManager> _roleManager;
         private SwmContext _ctx;
 
         public HomeController(SignInManager<SwmUser> signInManager, UserManager<SwmUser> userManager, SwmContext ctx,

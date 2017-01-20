@@ -32,7 +32,7 @@ namespace SWM.Controllers
         {
             if (User.IsInRole("admin"))
             {
-                return View("AdminDashboard");
+                return View("AdminDashboard", _repo.GetDashBoardForAdmin());
             }
             else if (User.IsInRole("user"))
             {
@@ -189,6 +189,7 @@ namespace SWM.Controllers
             else
                 ModelState.AddModelError("", "Unable to add new product. Try again later");
             return View();
+            
         }
     }
 }

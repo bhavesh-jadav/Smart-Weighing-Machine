@@ -17,5 +17,9 @@ namespace SWM.Models.ApiModels
         public DateTime DateAndTime { get; set; }
         [Required]
         public int LocationId { get; set; }
+        [Required]
+        public string UserId { get; set; }
+        [Required]
+        public int MachineId { get; set; }
     }
 }

@@ -1,10 +1,69 @@
-﻿@*Admin Dashboard*@
+﻿@model AdminDashboardModel
 @{
     ViewBag.Title = "Dashboard";
     ViewBag.PageHeader = "Dashboard";
     ViewBag.PageHeaderSmall = "Overview of the users";
 }
-<!-- Main content -->
 <section class="content">
+    <div class="row">
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    @if (Model.TotalWeight > 1000)
+                    {
+                        <h3>@((Model.TotalWeight / 1000.0).ToString("n2")) Kg</h3>
+                    }
+                    else
+                    {
+                        <h3>@Model.TotalWeight Grams</h3>
+                    }
 
+                    <p>Weight</p>
+                </div>
+                <div class="icon" style="margin-top:-10px;">
+                    <i class="fa  fa-balance-scale" style="font-size:0.8em;"></i>
+                </div>
+                <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box bg-green">
+                <div class="inner">
+                    <h3>@Model.TotalUsers</h3>
+
+                    <p>Users</p>
+                </div>
+                <div class="icon" style="top:-20px;">
+                    <i class="fa  fa-user" style="font-size:0.8em;"></i>
+                </div>
+                <a asp-action="ShowUsers" asp-controller="User" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h3>@Model.TotalLocations</h3>
+
+                    <p>Locations</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-android-globe"></i>
+                </div>
+                <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h3>@Model.TotalPorducts</h3>
+
+                    <p>User products</p>
+                </div>
+                <div class="icon" style="top:-20px;">
+                    <i class="fa  fa-cube" style="font-size:0.8em;"></i>
+                </div>
+                <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
 </section>

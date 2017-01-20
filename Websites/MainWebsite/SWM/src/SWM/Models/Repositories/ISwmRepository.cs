@@ -21,7 +21,7 @@ namespace SWM.Models.Repositories
         ProductInformation GetProductInformation(int productId);
         UserInformation GetUserInformationForAPI(string userName);
         Task<bool> CheckUserPassword(SwmUser user, string password);
-        bool AddNewDataFromMachine(DataFromMachineModel data, string userId, int machineId);
+        bool AddNewDataFromMachine(DataFromMachineModel data);
         List<TableDataModel> GetDataForDataTable(SwmUser user);
         string[] GetSubscriptionTypes();
         Task<bool> AddNewUser(AddNewUserModel userModel);
@@ -30,5 +30,6 @@ namespace SWM.Models.Repositories
         bool AddNewLocation(AddNewLocationModel newLocation, string userId);
         UserDashboardModel GetDashBoardForUser(string userId);
         bool AddNewProduct(string userId, AddNewProductModel newProduct);
+        AdminDashboardModel GetDashBoardForAdmin();
     }
 }
