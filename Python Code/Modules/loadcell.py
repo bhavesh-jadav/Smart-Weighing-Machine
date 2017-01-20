@@ -168,7 +168,6 @@ def calibrate():
 		
 		#accept known weight in grams
 		keypad.send_value("n")
-		global_variables.textmode = "number"
 		lcd.display.clear()
 		lcd.draw.text("ENTER KNOWN WEIGHT IN", 0, 0)
 		lcd.draw.text("GRAMS", 0, 9)
