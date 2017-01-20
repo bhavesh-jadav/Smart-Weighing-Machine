@@ -1,4 +1,5 @@
 import serial
+from Modules.global_variables import global_variables
 ser = serial.Serial('/dev/ttyUSB0', 9600, timeout = 0)
 
 def get_value():
@@ -16,4 +17,10 @@ def get_value():
 		return ""
 		
 def send_value(value):
+	if value == 'n':
+		global_variables.textmode = "number"
+	elif value == 's':
+		global_variables.textmode = "small"
+	elif value == 'c':
+		global_variables.textmode = "caps"
 	ser.write(value)

@@ -8,6 +8,9 @@ import json
 from Modules.global_variables import global_variables
 import os
 import sys
+from string import whitespace
+import time
+millis = lambda: int(round(time.time() * 1000))
 
 date_and_time = ""
 old_date_and_time = ""
@@ -16,6 +19,8 @@ menu_pages = [["1.CHECK INTERNET", "2.RESTART SCRIPT", "3.SHUTDOWN MACHINE", "4.
 			  ["8.CONNECT TO WIFI", "9.ENTER IP ADDRESS"]]
 menu_page_number = 0
 menu_selected_function = 0
+
+
 lcd.display.clear()	
 loadcell.init()
 
@@ -84,6 +89,98 @@ def restart_machine():
 def calibrate_machine():
 	loadcell.calibrate()
 	
+def signin():
+	try:
+		username = ""
+		password = ""
+		display_password = ""
+		key = ""
+		line = 1
+		time_millis = millis()
+		time.sleep(1)
+		
+		#accept user name
+		lcd.display.clear()
+		lcd.draw.text("ENTER USER NAME", 0, 0)
+		keypad.send_value('s')
+		lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
+		lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+		lcd.display.commit()
+		while key != "right" or len(username) <= 0:
+			key = keypad.get_value()
+			if millis() - time_millis < 500 and (key.isalpha() or key.isdigit()):
+				username = username[:-1]
+				time_millis = millis()
+			if len(key) == 1 and (key.isalpha() or key.isdigit()):
+				username += key
+				time_millis = millis()
+			elif key == "left" and len(username) > 0:
+				username = username[:-1]
+			elif key == "number" or key == "small" or key == "caps":
+				lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
+				global_variables.textmode = key
+				lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+			if len(username) >= 0:
+				lcd.draw.clear(0, 9, 127, 16)
+				if len(username) != 0:
+					lcd.draw.text(username, 0, 10)
+				else:
+					lcd.draw.text(" ", 0, 10)
+			lcd.display.commit()
+			if key == "cancel":
+				sys.stdout.flush()
+				GPIO.cleanup()
+				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
+		
+		#accept password
+		lcd.display.clear()
+		lcd.draw.text("ENTER PASSWORD", 0, 0)
+		keypad.send_value('s')
+		lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
+		lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+		lcd.display.commit()
+		while key != "right" or len(password) <= 0:
+			key = keypad.get_value()
+			if millis() - time_millis < 500 and (key.isalpha() or key.isdigit()):
+				display_password = display_password[:-1]
+				password = password[:-1]
+				time_millis = millis()
+			if len(key) == 1 and (key.isalpha() or key.isdigit()):
+				password += key
+				display_password += key
+				time_millis = millis()
+			elif key == "left" and len(password) > 0:
+				display_password = display_password[:-1]
+				password = password[:-1]
+			elif key == "number" or key == "small" or key == "caps":
+				lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
+				global_variables.textmode = key
+				lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
+			if len(password) >= 0:
+				lcd.draw.clear(0, 9, 127, 16)
+				if len(display_password) != 0:
+					lcd.draw.text(display_password, 0, 10)
+				else:
+					lcd.draw.text(" ", 0, 10)
+			if millis() - time_millis > 300 and len(display_password) > 0:
+				display_password = display_password[:-1]
+				display_password += "*"
+			lcd.display.commit()
+			if key == "cancel":
+				sys.stdout.flush()
+				GPIO.cleanup()
+				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
+				
+		print username
+		print password
+	except:
+		lcd.display.clear()
+		lcd.draw.text("THERE IS A PROBLEM", 0, 0)
+		lcd.draw.text("IN SIGNIN PROCESS", 0, 9)
+		lcd.display.commit()
+		time.sleep(5)
+		
+		
 def call_menu_functions(function):
 	if function == menu_pages[0][0]:
 		check_internet()
@@ -95,6 +192,8 @@ def call_menu_functions(function):
 		restart_machine()
 	elif function == menu_pages[0][4]:
 		calibrate_machine()
+	elif function == menu_pages[0][5]:
+		signin()
 	
 def show_menu_page(menu):
 	global menu_selected_function
@@ -160,6 +259,7 @@ def show_menu():
 	menu_selected_function = 0
 	found = 0
 	while 1:
+		keypad.send_value('n')
 		val = show_menu_page(menu_pages[menu_page_number])
 		if val == "cancel":
 			lcd.display.clear()
@@ -198,7 +298,7 @@ def show_menu():
 				elif key == "right":
 					call_menu_functions(menu_fn)
 					break
-					
+
 		elif val == "next":
 			if menu_page_number < len(menu_pages)-1:
 				menu_page_number += 1
@@ -213,10 +313,10 @@ def show_menu():
 			else:
 				menu_page_number = len(menu_pages) - 1
 				menu_selected_function = len(menu_pages[menu_page_number])-1
+		number = ""
 			
 try:
 	while 1:
-		
 		display_date_and_time()
 		display_weight()
 		display_username()
