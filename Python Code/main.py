@@ -9,6 +9,7 @@ from Modules.global_variables import global_variables
 import os
 import sys
 from string import whitespace
+import requests
 import time
 millis = lambda: int(round(time.time() * 1000))
 
@@ -91,10 +92,11 @@ def calibrate_machine():
 	
 def signin():
 	try:
-		username = ""
+		userName = ""
 		password = ""
 		display_password = ""
 		key = ""
+		userId = ""
 		line = 1
 		time_millis = millis()
 		time.sleep(1)
@@ -106,24 +108,24 @@ def signin():
 		lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
 		lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
 		lcd.display.commit()
-		while key != "right" or len(username) <= 0:
+		while key != "right" or len(userName) <= 0:
 			key = keypad.get_value()
 			if millis() - time_millis < 500 and (key.isalpha() or key.isdigit()):
-				username = username[:-1]
+				userName = userName[:-1]
 				time_millis = millis()
 			if len(key) == 1 and (key.isalpha() or key.isdigit()):
-				username += key
+				userName += key
 				time_millis = millis()
-			elif key == "left" and len(username) > 0:
-				username = username[:-1]
+			elif key == "left" and len(userName) > 0:
+				userName = userName[:-1]
 			elif key == "number" or key == "small" or key == "caps":
 				lcd.draw.clear(127 - (len(global_variables.textmode))*6, 56, 127, 64)
 				global_variables.textmode = key
 				lcd.draw.text(global_variables.textmode, 127 - (len(global_variables.textmode))*6, 56)
-			if len(username) >= 0:
+			if len(userName) >= 0:
 				lcd.draw.clear(0, 9, 127, 16)
-				if len(username) != 0:
-					lcd.draw.text(username, 0, 10)
+				if len(userName) != 0:
+					lcd.draw.text(userName, 0, 10)
 				else:
 					lcd.draw.text(" ", 0, 10)
 			lcd.display.commit()
@@ -171,8 +173,29 @@ def signin():
 				GPIO.cleanup()
 				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
 				
-		print username
-		print password
+		lcd.display.clear()
+		lcd.draw.text("PLEASE WAIT...", 25, 25)
+		lcd.display.commit()
+		
+		url = "https://swm2016.azurewebsites.net/api/login"
+		payload = {'userName':userName, 'Password':password}
+		headers = {'content-type': 'application/json'}
+		response = requests.post(url, data=json.dumps(payload), headers=headers)
+		if response.status_code == 200:
+			userId = response.content
+			data = {'userName':userName, 'userId':userId}
+			with open('user_data.json', 'w') as f:
+				json.dump(data,f)
+			lcd.display.clear()
+			lcd.draw.text("SIGN IN SUCCESSFULL", 0, 0)
+			lcd.display.commit()
+			time.sleep(3)
+		else:
+			lcd.display.clear()
+			lcd.draw.text("SIGN IN FAILED", 0, 0)
+			lcd.display.commit()
+			time.sleep(3)
+		
 	except:
 		lcd.display.clear()
 		lcd.draw.text("THERE IS A PROBLEM", 0, 0)
