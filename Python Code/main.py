@@ -20,7 +20,7 @@ menu_pages = [["1.CHECK INTERNET", "2.RESTART SCRIPT", "3.SHUTDOWN MACHINE", "4.
 			  ["8.CONNECT TO WIFI", "9.ENTER IP ADDRESS"]]
 menu_page_number = 0
 menu_selected_function = 0
-
+user_data = None
 
 lcd.display.clear()	
 loadcell.init()
@@ -91,6 +91,7 @@ def calibrate_machine():
 	loadcell.calibrate()
 	
 def signin():
+	global user_data
 	try:
 		userName = ""
 		password = ""
@@ -183,9 +184,11 @@ def signin():
 		response = requests.post(url, data=json.dumps(payload), headers=headers)
 		if response.status_code == 200:
 			userId = response.content
-			data = {'userName':userName, 'userId':userId}
+	
+			user_data = {'userName':userName, 'userId':userId}
 			with open('user_data.json', 'w') as f:
-				json.dump(data,f)
+				json.dump(user_data,f)
+				
 			lcd.display.clear()
 			lcd.draw.text("SIGN IN SUCCESSFULL", 0, 0)
 			lcd.display.commit()
@@ -196,7 +199,8 @@ def signin():
 			lcd.display.commit()
 			time.sleep(3)
 		
-	except:
+	except Exception as e:
+		print str(e)
 		lcd.display.clear()
 		lcd.draw.text("THERE IS A PROBLEM", 0, 0)
 		lcd.draw.text("IN SIGNIN PROCESS", 0, 9)
@@ -337,6 +341,7 @@ def show_menu():
 				menu_page_number = len(menu_pages) - 1
 				menu_selected_function = len(menu_pages[menu_page_number])-1
 		number = ""
+	
 			
 try:
 	while 1:
@@ -350,7 +355,8 @@ try:
 		elif key == "tare":
 			loadcell.tare()
 		
-except:
+except Exception as e:
 	GPIO.cleanup()
+	print str(e)
 
 
