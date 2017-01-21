@@ -24,15 +24,70 @@ menu_selected_function = 0
 user_data = None
 products = []
 locations = []
+location_names = []
+product_names = []
 
 lcd.display.clear()	
 loadcell.init()
 
 def init():
-	with open('user_data.json', 'r') as f:
-		data = json.load(f)
-	if data['fullName']:
-		global_variables.username = data['fullName'].upper()
+	global location_names, product_names, locations, products
+	try:
+		with open('user_data.json', 'r') as f:
+			userContent = json.load(f)
+		if userContent['fullName']:
+			global_variables.username = userContent['fullName'].upper()
+			
+			count = 0
+			while count < len(userContent['locationNames']):
+				locations.append(userContent['locationNames'][count])
+				count += 1
+			count = 0
+			while count < len(userContent['productNames']):
+				products.append(userContent['productNames'][count])
+				count += 1
+			
+			if len(userContent['locationNames']) <= 7:
+				location_names.append([])
+				count = 0
+				while count < len(userContent['locationNames']):
+					location_names[0].append(str(count+1) + "." + userContent['locationNames'][count]['value'].upper())
+					count += 1
+			else:
+				count = (len(userContent['locationNames']) / 7) + 1
+				j = 0
+				for i in range(count):
+					if(j >= len(userContent['locationNames'])):
+						break
+					location_names.append([])
+					for k in range(7):
+						if(j >= len(userContent['locationNames'])):
+							break
+						location_names[i].append(str(j+1) + "." + userContent['locationNames'][j]['value'].upper())
+						j += 1
+						
+			if len(userContent['productNames']) <= 7:
+				product_names.append([])
+				count = 0
+				while count < len(userContent['productNames']):
+					product_names[0].append(str(count+1) + "." + userContent['productNames'][count]['value'].upper())
+					count += 1
+			else:
+				count = (len(userContent['productNames']) / 7) + 1
+				j = 0
+				for i in range(count):
+					if(j >= len(userContent['productNames'])):
+						break
+					product_names.append([])
+					for k in range(7):
+						if(j >= len(userContent['productNames'])):
+							break
+						product_names[i].append(str(j+1) + "." + userContent['productNames'][j]['value'].upper())
+						j += 1
+					
+	except Exception as e:
+		print str(e)
+		
 
 def display_date_and_time():
 	global date_and_time, old_date_and_time
@@ -101,7 +156,8 @@ def calibrate_machine():
 	
 def add_data():
 	if is_signed_in():
-		print "yeah"
+		val = show_menu(product_names)
+		print val.split('.', 1)[1]
 	else:
 		lcd.display.clear()
 		lcd.draw.text("NOT SIGNED IN", 0, 0)
@@ -110,12 +166,15 @@ def add_data():
 		time.sleep(4)
 		lcd.display.clear()
 		lcd.display.commit()
+	
+	lcd.display.clear()
+	lcd.display.commit()
 		
 	
 def is_signed_in():
 	with open('user_data.json', 'r') as f:
 		data = json.load(f)
-	if data['userName']:
+	if data['userId']:
 		return True
 	else:
 		return False
@@ -127,8 +186,7 @@ def signout():
 		lcd.display.commit()
 		with open('user_data.json', 'r') as f:
 			data = json.load(f)
-		if data['userName']:
-			data['userName'] = ""
+		if data['fullName']:
 			data['fullName'] = ""
 			data['userId'] = ""
 			with open('user_data.json', 'w') as f:
@@ -138,6 +196,7 @@ def signout():
 			lcd.draw.text("SIGN OUT SUCCESSFUL", 0, 0)
 			lcd.display.commit()
 			time.sleep(3)
+			restart_script()
 		else:
 			lcd.display.clear()
 			lcd.draw.text("NO USER SIGNED IN", 0, 0)
@@ -151,8 +210,9 @@ def signout():
 		lcd.display.commit()
 		time.sleep(5)
 
+
 def signin():
-	global user_data, products, locations
+	global user_data, product_names, location_names
 	try:
 		userName = "kaushal"
 		password = "kaushal123"
@@ -244,52 +304,10 @@ def signin():
 		headers = {'content-type': 'application/json'}
 		response = requests.post(url, data=json.dumps(payload), headers=headers)
 		if response.status_code == 200:
-
 			userContent = json.loads(response.content)
-			global_variables.username = userContent['fullName']
-			user_data = {'userName':userName, 'fullName':userContent['fullName'], 'userId':userContent['userId']}
 			with open('user_data.json', 'w') as f:
-				json.dump(user_data,f)
-				
-			if len(userContent['locationNames']) <= 7:
-				locations.append([])
-				count = 0
-				while count < len(userContent['locationNames']):
-					locations[0].append(userContent['locationNames'][count])
-					count += 1
-			else:
-				count = (len(userContent['locationNames']) / 7) + 1
-				j = 0
-				for i in range(count):
-					if(j >= len(userContent['locationNames'])):
-						break
-					locations.append([])
-					for k in range(7):
-						if(j >= len(userContent['locationNames'])):
-							break
-						locations[i].append(userContent['locationNames'][j])
-						j += 1
-						
-			if len(userContent['productNames']) <= 7:
-				products.append([])
-				count = 0
-				while count < len(userContent['productNames']):
-					products[0].append(userContent['productNames'][count])
-					count += 1
-			else:
-				count = (len(userContent['productNames']) / 7) + 1
-				j = 0
-				for i in range(count):
-					if(j >= len(userContent['productNames'])):
-						break
-					products.append([])
-					for k in range(7):
-						if(j >= len(userContent['productNames'])):
-							break
-						products[i].append(userContent['productNames'][j])
-						j += 1
-						
-			
+				json.dump(userContent,f)
+			restart_script()
 			lcd.display.clear()
 			lcd.draw.text("SIGN IN SUCCESSFUL", 0, 0)
 			lcd.display.commit()
@@ -345,7 +363,7 @@ def show_menu_page(menu):
 	while 1:
 		key = keypad.get_value()
 		if key == "left" or key == "cancel":
-			return "cancel"
+			return "__cancel__"
 		elif key.isdigit():
 			return key
 		elif key == "up":
@@ -359,7 +377,7 @@ def show_menu_page(menu):
 				lcd.draw.text(menu[counter],1, yaxis, clear = True)
 				lcd.display.commit()
 			else:
-				return "prev"
+				return "__prev__"
 				
 		elif key == "down":
 			if counter < len(menu) - 1:
@@ -372,7 +390,7 @@ def show_menu_page(menu):
 				lcd.draw.text(menu[counter],1, yaxis, clear = True)
 				lcd.display.commit()
 			else:
-				return "next"		
+				return "__next__"		
 		elif key ==  "right":
 			return menu[counter]		
 	lcd.display.clear()	
@@ -387,7 +405,7 @@ def show_menu(menu):
 	while 1:
 		keypad.send_value('n')
 		val = show_menu_page(menu[menu_page_number])
-		if val == "cancel":
+		if val == "__cancel__":
 			lcd.display.clear()
 			break	
 		elif val.isdigit():
@@ -423,14 +441,14 @@ def show_menu(menu):
 					os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
 				elif key == "right":
 					return menu_fn
-		elif val == "next":
+		elif val == "__next__":
 			if menu_page_number < len(menu)-1:
 				menu_page_number += 1
 				menu_selected_function = 0
 			else:
 				menu_page_number = 0
 				menu_selected_function = 0
-		elif val == "prev":
+		elif val == "__prev__":
 			if menu_page_number > 0:
 				menu_page_number -= 1
 				menu_selected_function = len(menu[menu_page_number])-1
