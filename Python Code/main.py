@@ -100,8 +100,26 @@ def calibrate_machine():
 	loadcell.calibrate()
 	
 def add_data():
-	print ""
+	if is_signed_in():
+		print "yeah"
+	else:
+		lcd.display.clear()
+		lcd.draw.text("NOT SIGNED IN", 0, 0)
+		lcd.draw.text("SIGN IN TO CONTINUE", 0, 9)
+		lcd.display.commit()
+		time.sleep(4)
+		lcd.display.clear()
+		lcd.display.commit()
+		
 	
+def is_signed_in():
+	with open('user_data.json', 'r') as f:
+		data = json.load(f)
+	if data['userName']:
+		return True
+	else:
+		return False
+
 def signout():
 	try:
 		lcd.display.clear()
@@ -354,13 +372,9 @@ def show_menu_page(menu):
 				lcd.draw.text(menu[counter],1, yaxis, clear = True)
 				lcd.display.commit()
 			else:
-				return "next"
-				
+				return "next"		
 		elif key ==  "right":
-			call_menu_functions(menu[counter])
-			return "cancel"
-			break
-			
+			return menu[counter]		
 	lcd.display.clear()	
 
 def show_menu(menu):
@@ -408,9 +422,7 @@ def show_menu(menu):
 					GPIO.cleanup()
 					os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
 				elif key == "right":
-					call_menu_functions(menu_fn)
-					break
-
+					return menu_fn
 		elif val == "next":
 			if menu_page_number < len(menu)-1:
 				menu_page_number += 1
@@ -425,8 +437,17 @@ def show_menu(menu):
 			else:
 				menu_page_number = len(menu) - 1
 				menu_selected_function = len(menu[menu_page_number])-1
+		else:
+			return val
+			
 		number = ""
 	
+	
+def show_main_menu():
+	menu_fn = show_menu(menu_pages)
+	call_menu_functions(menu_fn)
+	lcd.display.clear()
+	lcd.display.commit()
 			
 try:
 	init()
@@ -437,7 +458,7 @@ try:
 		
 		key = keypad.get_value()
 		if key == "menu":
-			show_menu(menu_pages)
+			show_main_menu()
 		elif key == "tare":
 			loadcell.tare()
 		elif key == "right":
