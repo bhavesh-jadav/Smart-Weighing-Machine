@@ -216,6 +216,7 @@ F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Controll
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Controllers\Web\HomeController.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\Controllers\Web\UserController.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\AddNewSubscription.cs
+F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\DataForMachineModel.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\LocationInfo.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\ProductInfo.cs
 F:\B.E. Project\Smart-Weighing-Machine\Websites\MainWebsite\SWM\src\SWM\JsonModels\UserInfo.cs

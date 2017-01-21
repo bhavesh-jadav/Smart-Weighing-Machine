@@ -514,5 +514,16 @@ namespace SWM.Models.Repositories
                 return adminDashboard;
             }
         }
+
+        public string[] GetProductNames(string userId)
+        {
+            var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId);
+            return _ctx.ProductInformations.Where(pi => ptou.Any(pu => pu.ProductID == pi.Id)).Select(pi => pi.Name).ToArray();
+        }
+
+        public string[] GetLocationNames(string userId)
+        {
+            return _ctx.UserLocations.Where(ul => ul.UserId == userId).Select(ul => ul.Name).ToArray();
+        }
     }
 }

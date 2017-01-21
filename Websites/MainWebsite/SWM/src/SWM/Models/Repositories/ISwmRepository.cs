@@ -31,5 +31,7 @@ namespace SWM.Models.Repositories
         UserDashboardModel GetDashBoardForUser(string userId);
         bool AddNewProduct(string userId, AddNewProductModel newProduct);
         AdminDashboardModel GetDashBoardForAdmin();
+        string[] GetProductNames(string userId);
+        string[] GetLocationNames(string userId);
     }
 }

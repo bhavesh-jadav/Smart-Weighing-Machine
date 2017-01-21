@@ -110,7 +110,14 @@ namespace SWM.Controllers.Api
             {
                 var res = _repo.CheckUserPassword(user.Result, user_login.Password).Result;
                 if (res)
-                    return Ok(user.Result.Id);
+                {
+                    DataForMachineModel data = new DataForMachineModel();
+                    data.UserId = user.Result.Id;
+                    data.FullName = user.Result.FullName;
+                    data.LocationNames = _repo.GetLocationNames(user.Result.Id);
+                    data.ProductNames = _repo.GetProductNames(user.Result.Id);
+                    return Ok(data);
+                }
                 else
                     return BadRequest("fail");
             }
