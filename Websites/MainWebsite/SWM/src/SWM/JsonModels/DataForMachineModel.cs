@@ -11,7 +11,7 @@ namespace SWM.JsonModels
     {
         public string UserId { get; set; }
         public string FullName { get; set; }
-        public string[] LocationNames { get; set; }
-        public string[] ProductNames { get; set; }
+        public List<KeyValuePair<int, string>> LocationNames { get; set; }
+        public List<KeyValuePair<int, string>> ProductNames { get; set; }
     }
 }

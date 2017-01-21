@@ -514,16 +514,22 @@ namespace SWM.Models.Repositories
                 return adminDashboard;
             }
         }
-
-        public string[] GetProductNames(string userId)
+        public List<KeyValuePair<int, string>> GetProductNames(string userId)
         {
             var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId);
-            return _ctx.ProductInformations.Where(pi => ptou.Any(pu => pu.ProductID == pi.Id)).Select(pi => pi.Name).ToArray();
+            var pr = _ctx.ProductInformations.Where(pi => ptou.Any(pu => pu.ProductID == pi.Id)).ToList();
+            List<KeyValuePair<int, string>> produts = new List<KeyValuePair<int, string>>();
+            foreach (var product in pr)
+                produts.Add(new KeyValuePair<int, string>(product.Id, product.Name));
+            return produts;
         }
-
-        public string[] GetLocationNames(string userId)
+        public List<KeyValuePair<int, string>> GetLocationNames(string userId)
         {
-            return _ctx.UserLocations.Where(ul => ul.UserId == userId).Select(ul => ul.Name).ToArray();
+            var lc = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToList();
+            List<KeyValuePair<int, string>> locations = new List<KeyValuePair<int, string>>();
+            foreach (var location in lc)
+                locations.Add(new KeyValuePair<int, string>(location.Id, location.Name));
+            return locations;
         }
     }
 }
