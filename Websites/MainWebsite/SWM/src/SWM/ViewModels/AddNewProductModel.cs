@@ -17,6 +17,7 @@ namespace SWM.ViewModels
 
         [Required(ErrorMessage = "Product name is required")]
         [StringLength(100, MinimumLength =3, ErrorMessage = "Product name must be between 3 to 100 characters")]
+        [RegularExpression(@"^[^\\/:*;\.\)\(]+$", ErrorMessage = "The characters ':', '.' ';', '*', '/' and '\' are not allowed")]
         public string Name { get; set; }
 
         public string Description { get; set; }
