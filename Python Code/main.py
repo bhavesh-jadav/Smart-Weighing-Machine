@@ -10,6 +10,7 @@ import os
 import sys
 from string import whitespace
 import requests
+import numpy
 import time
 millis = lambda: int(round(time.time() * 1000))
 
@@ -21,9 +22,17 @@ menu_pages = [["1.CHECK INTERNET", "2.RESTART SCRIPT", "3.SHUTDOWN MACHINE", "4.
 menu_page_number = 0
 menu_selected_function = 0
 user_data = None
+products = []
+locations = []
 
 lcd.display.clear()	
 loadcell.init()
+
+def init():
+	with open('user_data.json', 'r') as f:
+		data = json.load(f)
+	if data['fullName']:
+		global_variables.username = data['fullName'].upper()
 
 def display_date_and_time():
 	global date_and_time, old_date_and_time
@@ -90,11 +99,45 @@ def restart_machine():
 def calibrate_machine():
 	loadcell.calibrate()
 	
-def signin():
-	global user_data
+def add_data():
+	print ""
+	
+def signout():
 	try:
-		userName = ""
-		password = ""
+		lcd.display.clear()
+		lcd.draw.text("SIGNINIG OUT...", 0, 0)
+		lcd.display.commit()
+		with open('user_data.json', 'r') as f:
+			data = json.load(f)
+		if data['userName']:
+			data['userName'] = ""
+			data['fullName'] = ""
+			data['userId'] = ""
+			with open('user_data.json', 'w') as f:
+				json.dump(data,f)
+			global_variables.username = ""
+			lcd.display.clear()
+			lcd.draw.text("SIGN OUT SUCCESSFUL", 0, 0)
+			lcd.display.commit()
+			time.sleep(3)
+		else:
+			lcd.display.clear()
+			lcd.draw.text("NO USER SIGNED IN", 0, 0)
+			lcd.display.commit()
+			time.sleep(3)
+	except Exception as e:
+		print str(e)
+		lcd.display.clear()
+		lcd.draw.text("THERE IS A PROBLEM", 0, 0)
+		lcd.draw.text("IN SIGNOUT PROCESS", 0, 9)
+		lcd.display.commit()
+		time.sleep(5)
+
+def signin():
+	global user_data, products, locations
+	try:
+		userName = "kaushal"
+		password = "kaushal123"
 		display_password = ""
 		key = ""
 		userId = ""
@@ -102,7 +145,7 @@ def signin():
 		time_millis = millis()
 		time.sleep(1)
 		
-		#accept user name
+		'''#accept user name
 		lcd.display.clear()
 		lcd.draw.text("ENTER USER NAME", 0, 0)
 		keypad.send_value('s')
@@ -172,7 +215,7 @@ def signin():
 			if key == "cancel":
 				sys.stdout.flush()
 				GPIO.cleanup()
-				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
+				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')'''
 				
 		lcd.display.clear()
 		lcd.draw.text("PLEASE WAIT...", 25, 25)
@@ -183,14 +226,54 @@ def signin():
 		headers = {'content-type': 'application/json'}
 		response = requests.post(url, data=json.dumps(payload), headers=headers)
 		if response.status_code == 200:
-			userId = response.content
-	
-			user_data = {'userName':userName, 'userId':userId}
+
+			userContent = json.loads(response.content)
+			global_variables.username = userContent['fullName']
+			user_data = {'userName':userName, 'fullName':userContent['fullName'], 'userId':userContent['userId']}
 			with open('user_data.json', 'w') as f:
 				json.dump(user_data,f)
 				
+			if len(userContent['locationNames']) <= 7:
+				locations.append([])
+				count = 0
+				while count < len(userContent['locationNames']):
+					locations[0].append(userContent['locationNames'][count])
+					count += 1
+			else:
+				count = (len(userContent['locationNames']) / 7) + 1
+				j = 0
+				for i in range(count):
+					if(j >= len(userContent['locationNames'])):
+						break
+					locations.append([])
+					for k in range(7):
+						if(j >= len(userContent['locationNames'])):
+							break
+						locations[i].append(userContent['locationNames'][j])
+						j += 1
+						
+			if len(userContent['productNames']) <= 7:
+				products.append([])
+				count = 0
+				while count < len(userContent['productNames']):
+					products[0].append(userContent['productNames'][count])
+					count += 1
+			else:
+				count = (len(userContent['productNames']) / 7) + 1
+				j = 0
+				for i in range(count):
+					if(j >= len(userContent['productNames'])):
+						break
+					products.append([])
+					for k in range(7):
+						if(j >= len(userContent['productNames'])):
+							break
+						products[i].append(userContent['productNames'][j])
+						j += 1
+						
+			
 			lcd.display.clear()
-			lcd.draw.text("SIGN IN SUCCESSFULL", 0, 0)
+			lcd.draw.text("SIGN IN SUCCESSFUL", 0, 0)
 			lcd.display.commit()
 			time.sleep(3)
 		else:
@@ -221,6 +304,8 @@ def call_menu_functions(function):
 		calibrate_machine()
 	elif function == menu_pages[0][5]:
 		signin()
+	elif function == menu_pages[0][6]:
+		signout()
 	
 def show_menu_page(menu):
 	global menu_selected_function
@@ -278,7 +363,7 @@ def show_menu_page(menu):
 			
 	lcd.display.clear()	
 
-def show_menu():
+def show_menu(menu):
 	global menu_page_number, menu_selected_function
 	number = ""
 	menu_fn = ""
@@ -287,7 +372,7 @@ def show_menu():
 	found = 0
 	while 1:
 		keypad.send_value('n')
-		val = show_menu_page(menu_pages[menu_page_number])
+		val = show_menu_page(menu[menu_page_number])
 		if val == "cancel":
 			lcd.display.clear()
 			break	
@@ -299,7 +384,7 @@ def show_menu():
 					number += val
 				val = ""
 				lcd.draw.text(number,1,54)
-				for menu_page in menu_pages:
+				for menu_page in menu:
 					for menu_function in menu_page:
 						if number in menu_function:
 							found = 1
@@ -308,7 +393,7 @@ def show_menu():
 					if found == 1:
 						break
 				if found == 0:
-					lcd.draw.text("NO FUNCTION FOUND",1,1)
+					lcd.draw.text("NOTHING FOUND",1,1)
 				else:
 					lcd.draw.text(menu_fn,1,1)
 				lcd.display.commit()
@@ -327,7 +412,7 @@ def show_menu():
 					break
 
 		elif val == "next":
-			if menu_page_number < len(menu_pages)-1:
+			if menu_page_number < len(menu)-1:
 				menu_page_number += 1
 				menu_selected_function = 0
 			else:
@@ -336,14 +421,15 @@ def show_menu():
 		elif val == "prev":
 			if menu_page_number > 0:
 				menu_page_number -= 1
-				menu_selected_function = len(menu_pages[menu_page_number])-1
+				menu_selected_function = len(menu[menu_page_number])-1
 			else:
-				menu_page_number = len(menu_pages) - 1
-				menu_selected_function = len(menu_pages[menu_page_number])-1
+				menu_page_number = len(menu) - 1
+				menu_selected_function = len(menu[menu_page_number])-1
 		number = ""
 	
 			
 try:
+	init()
 	while 1:
 		display_date_and_time()
 		display_weight()
@@ -351,9 +437,11 @@ try:
 		
 		key = keypad.get_value()
 		if key == "menu":
-			show_menu()
+			show_menu(menu_pages)
 		elif key == "tare":
 			loadcell.tare()
+		elif key == "right":
+			add_data()
 		
 except Exception as e:
 	GPIO.cleanup()
