@@ -159,7 +159,6 @@ def calibrate_machine():
 	loadcell.calibrate()
 	
 def add_data():
-	
 	global machine_id, user_id
 	if is_signed_in():
 		lcd.display.clear()
@@ -275,8 +274,8 @@ def signout():
 def signin():
 	global product_names, location_names
 	try:
-		userName = "kaushal"
-		password = "kaushal123"
+		userName = ""
+		password = ""
 		display_password = ""
 		key = ""
 		userId = ""
@@ -284,7 +283,7 @@ def signin():
 		time_millis = millis()
 		time.sleep(1)
 		
-		'''#accept user name
+		#accept user name
 		lcd.display.clear()
 		lcd.draw.text("ENTER USER NAME", 0, 0)
 		keypad.send_value('s')
@@ -354,7 +353,7 @@ def signin():
 			if key == "cancel":
 				sys.stdout.flush()
 				GPIO.cleanup()
-				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')'''
+				os.execl('/home/pi/Desktop/Smart-Weighing-Machine/Bash Scripts/main.sh', '')
 				
 		lcd.display.clear()
 		lcd.draw.text("PLEASE WAIT...", 25, 25)
