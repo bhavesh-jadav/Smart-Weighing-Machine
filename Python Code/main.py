@@ -18,10 +18,11 @@ date_and_time = ""
 old_date_and_time = ""
 #One menu function should only take one line and there only will be 7 menu function per one menu page
 menu_pages = [["1.CHECK INTERNET", "2.RESTART SCRIPT", "3.SHUTDOWN MACHINE", "4.RESTART MACHINE", "5.CALIBRATE MACHINE", "6.SIGN IN", "7.SIGN OUT"],
-			  ["8.CONNECT TO WIFI", "9.ENTER IP ADDRESS"]]
+			  ["8.CONNECT TO WIFI", "9.SHOW STATS"]]
 menu_page_number = 0
 menu_selected_function = 0
-user_data = None
+machine_id = 0
+user_id = ""
 products = []
 locations = []
 location_names = []
@@ -31,13 +32,13 @@ lcd.display.clear()
 loadcell.init()
 
 def init():
-	global location_names, product_names, locations, products
+	global location_names, product_names, locations, products, machine_id, user_id
 	try:
 		with open('user_data.json', 'r') as f:
 			userContent = json.load(f)
 		if userContent['fullName']:
 			global_variables.username = userContent['fullName'].upper()
-			
+			user_id = userContent['userId']
 			count = 0
 			while count < len(userContent['locationNames']):
 				locations.append(userContent['locationNames'][count])
@@ -84,6 +85,9 @@ def init():
 							break
 						product_names[i].append(str(j+1) + "." + userContent['productNames'][j]['value'].upper())
 						j += 1
+		with open('machine_data.json', 'r') as f:
+			machine_data= json.load(f)
+		machine_id = machine_data["machine_id"]
 					
 	except Exception as e:
 		print str(e)
@@ -155,9 +159,70 @@ def calibrate_machine():
 	loadcell.calibrate()
 	
 def add_data():
+	
+	global machine_id, user_id
 	if is_signed_in():
+		lcd.display.clear()
+		lcd.draw.text("PLEASE WAIT...", 25, 25)
+		lcd.display.commit()
+		
+		weight = loadcell.weight_in_gram(10)
+		f = '%Y-%m-%d %H:%M:%S'
+		dateAndTime = datetime.datetime.now().strftime(f)
+     
+		
+		if len(locations) > 1:
+			val = show_menu(location_names)
+			if val == "__cancel__":
+				return
+			location = val.split('.', 1)[1]
+			count = 0
+			while locations[count]['value'].lower() != location.lower():
+				count += 1
+			location_id = locations[count]['key']
+		else:
+			location_id = locations[0]['key']
+			
 		val = show_menu(product_names)
-		print val.split('.', 1)[1]
+		if val == "__cancel__":
+			return
+		product = val.split('.', 1)[1]
+		count = 0
+		while products[count]['value'].lower() != product.lower():
+			count += 1
+		product_id = products[count]['key']
+		
+		'''print location_id
+		print product_id
+		print weight
+		print dateAndTime
+		print machine_id
+		print user_id'''
+		
+		url = "https://swm2016.azurewebsites.net/api/machine_data"
+		payload = {
+					'ProductId':int(product_id),
+					'Weight':int(weight),
+					'LocationId':int(location_id),
+					'DateAndTime':str(dateAndTime),
+					'UserId':str(user_id),
+					'MachineId':int(machine_id)
+				  }		  
+		headers = {'content-type': 'application/json'}
+		response = requests.post(url, data=json.dumps(payload), headers=headers)
+		if response.status_code == 200:
+			lcd.display.clear()
+			lcd.draw.text("SUCCESSFULLY ADDED", 0, 0)
+			lcd.draw.text("DATA TO SERVER", 0, 9)
+			lcd.display.commit()
+			time.sleep(3)
+		else:
+			lcd.display.clear()
+			lcd.draw.text("THERE IS AN PROBLEM", 0, 0)
+			lcd.draw.text("ADDING DATA TO SERVER", 0, 9)
+			lcd.display.commit()
+			time.sleep(3)
+		
 	else:
 		lcd.display.clear()
 		lcd.draw.text("NOT SIGNED IN", 0, 0)
@@ -166,10 +231,6 @@ def add_data():
 		time.sleep(4)
 		lcd.display.clear()
 		lcd.display.commit()
-	
-	lcd.display.clear()
-	lcd.display.commit()
-		
 	
 def is_signed_in():
 	with open('user_data.json', 'r') as f:
@@ -212,7 +273,7 @@ def signout():
 
 
 def signin():
-	global user_data, product_names, location_names
+	global product_names, location_names
 	try:
 		userName = "kaushal"
 		password = "kaushal123"
@@ -343,6 +404,7 @@ def call_menu_functions(function):
 	elif function == menu_pages[0][6]:
 		signout()
 	
+#displays single menu page used by show_menu()
 def show_menu_page(menu):
 	global menu_selected_function
 	lcd.display.clear()
@@ -395,6 +457,7 @@ def show_menu_page(menu):
 			return menu[counter]		
 	lcd.display.clear()	
 
+#displays menu and return selected funtion as a string. else returns command
 def show_menu(menu):
 	global menu_page_number, menu_selected_function
 	number = ""
@@ -406,8 +469,7 @@ def show_menu(menu):
 		keypad.send_value('n')
 		val = show_menu_page(menu[menu_page_number])
 		if val == "__cancel__":
-			lcd.display.clear()
-			break	
+			return "__cancel__"	
 		elif val.isdigit():
 			while 1:
 				found = 0
@@ -481,6 +543,8 @@ try:
 			loadcell.tare()
 		elif key == "right":
 			add_data()
+			lcd.display.clear()
+			lcd.display.commit()
 		
 except Exception as e:
 	GPIO.cleanup()
