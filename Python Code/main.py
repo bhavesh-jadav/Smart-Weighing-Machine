@@ -4,13 +4,14 @@ import RPi.GPIO as GPIO
 import datetime
 import urllib2
 from Modules import keypad
+from Modules import send_data
 import json
 from Modules.global_variables import global_variables
 import os
 import sys
 from string import whitespace
 import requests
-import numpy
+import MySQLdb as sqldb
 import time
 millis = lambda: int(round(time.time() * 1000))
 
@@ -18,7 +19,7 @@ date_and_time = ""
 old_date_and_time = ""
 #One menu function should only take one line and there only will be 7 menu function per one menu page
 menu_pages = [["1.CHECK INTERNET", "2.RESTART SCRIPT", "3.SHUTDOWN MACHINE", "4.RESTART MACHINE", "5.CALIBRATE MACHINE", "6.SIGN IN", "7.SIGN OUT"],
-			  ["8.CONNECT TO WIFI", "9.SHOW STATS"]]
+			  ["8.CONNECT TO WIFI", "9.SEND DATA"]]
 menu_page_number = 0
 menu_selected_function = 0
 machine_id = 0
@@ -160,76 +161,72 @@ def calibrate_machine():
 	
 def add_data():
 	global machine_id, user_id
-	if is_signed_in():
-		lcd.display.clear()
-		lcd.draw.text("PLEASE WAIT...", 25, 25)
-		lcd.display.commit()
-		
-		weight = loadcell.weight_in_gram(10)
-		f = '%Y-%m-%d %H:%M:%S'
-		dateAndTime = datetime.datetime.now().strftime(f)
-     
-		
-		if len(locations) > 1:
-			val = show_menu(location_names)
+	
+	try:
+		if is_signed_in():
+			lcd.display.clear()
+			lcd.draw.text("PLEASE WAIT...", 25, 25)
+			lcd.display.commit()
+			
+			weight = loadcell.weight_in_gram(10)
+			f = '%Y-%m-%d %H:%M:%S'
+			dateAndTime = datetime.datetime.now().strftime(f)
+		 
+			
+			if len(locations) > 1:
+				val = show_menu(location_names)
+				if val == "__cancel__":
+					return
+				location = val.split('.', 1)[1]
+				count = 0
+				while locations[count]['value'].lower() != location.lower():
+					count += 1
+				location_id = locations[count]['key']
+			else:
+				location_id = locations[0]['key']
+				
+			val = show_menu(product_names)
 			if val == "__cancel__":
 				return
-			location = val.split('.', 1)[1]
-			count = 0
-			while locations[count]['value'].lower() != location.lower():
-				count += 1
-			location_id = locations[count]['key']
-		else:
-			location_id = locations[0]['key']
 			
-		val = show_menu(product_names)
-		if val == "__cancel__":
-			return
-		product = val.split('.', 1)[1]
-		count = 0
-		while products[count]['value'].lower() != product.lower():
-			count += 1
-		product_id = products[count]['key']
-		
-		'''print location_id
-		print product_id
-		print weight
-		print dateAndTime
-		print machine_id
-		print user_id'''
-		
-		url = "https://swm2016.azurewebsites.net/api/machine_data"
-		payload = {
-					'ProductId':int(product_id),
-					'Weight':int(weight),
-					'LocationId':int(location_id),
-					'DateAndTime':str(dateAndTime),
-					'UserId':str(user_id),
-					'MachineId':int(machine_id)
-				  }		  
-		headers = {'content-type': 'application/json'}
-		response = requests.post(url, data=json.dumps(payload), headers=headers)
-		if response.status_code == 200:
+			product = val.split('.', 1)[1]
+			count = 0
+			while products[count]['value'].lower() != product.lower():
+				count += 1
+			product_id = products[count]['key']
+			
+			
 			lcd.display.clear()
-			lcd.draw.text("SUCCESSFULLY ADDED", 0, 0)
-			lcd.draw.text("DATA TO SERVER", 0, 9)
+			lcd.draw.text("PLEASE WAIT...", 25, 25)
 			lcd.display.commit()
-			time.sleep(3)
+			
+			#add data to local database
+			try:
+				db = sqldb.connect(host = "localhost", user="local", db="swm")
+				cursor = db.cursor()
+				cursor.execute("INSERT INTO data (location_id, product_id, weight, date_and_time, machine_id, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
+								(int(location_id), int(product_id), int(weight), str(dateAndTime), int(machine_id), str(user_id)))
+				db.commit()
+			except Exception as e:
+				lcd.display.clear()
+				lcd.draw.text("UNABLE TO ADD DATA", 0, 0)
+				lcd.draw.text("INTO LOCAL DB", 0, 9)
+				lcd.display.commit()
+			finally:
+				cursor.close()
+				db.close()
+			
 		else:
 			lcd.display.clear()
-			lcd.draw.text("THERE IS AN PROBLEM", 0, 0)
-			lcd.draw.text("ADDING DATA TO SERVER", 0, 9)
+			lcd.draw.text("NOT SIGNED IN", 0, 0)
+			lcd.draw.text("SIGN IN TO CONTINUE", 0, 9)
 			lcd.display.commit()
-			time.sleep(3)
-		
-	else:
-		lcd.display.clear()
-		lcd.draw.text("NOT SIGNED IN", 0, 0)
-		lcd.draw.text("SIGN IN TO CONTINUE", 0, 9)
-		lcd.display.commit()
-		time.sleep(4)
-		lcd.display.clear()
-		lcd.display.commit()
+			time.sleep(4)
+			lcd.display.clear()
+			lcd.display.commit()
+			
+	except Exception as e:
+		print str(e)
 	
 def is_signed_in():
 	with open('user_data.json', 'r') as f:
@@ -367,11 +364,11 @@ def signin():
 			userContent = json.loads(response.content)
 			with open('user_data.json', 'w') as f:
 				json.dump(userContent,f)
-			restart_script()
 			lcd.display.clear()
 			lcd.draw.text("SIGN IN SUCCESSFUL", 0, 0)
 			lcd.display.commit()
 			time.sleep(3)
+			restart_script()
 		else:
 			lcd.display.clear()
 			lcd.draw.text("SIGN IN FAILED", 0, 0)
@@ -385,7 +382,52 @@ def signin():
 		lcd.draw.text("IN SIGNIN PROCESS", 0, 9)
 		lcd.display.commit()
 		time.sleep(5)
-		
+	
+def send_data_to_server():
+	lcd.display.clear()
+	lcd.draw.text("PLEASE WAIT...", 0, 0)
+	lcd.display.commit()
+	url = "https://swm2016.azurewebsites.net/api/machine_data"
+	headers = {'content-type': 'application/json'}
+	f = '%Y-%m-%d %H:%M:%S'
+	try:
+		db = sqldb.connect(host = "localhost", user="local", db="swm")
+		cursor = db.cursor()
+		cursor.execute("SELECT * FROM data")
+		rows = cursor.fetchall()
+		no_of_data = len(rows)
+		for row in rows:
+			lcd.draw.clear(0,9,127,19)
+			lcd.draw.text("DATA REMAINING: " + str(no_of_data), 0, 9)
+			lcd.display.commit()
+			payload = {
+						'ProductId':int(row[2]),
+						'Weight':int(row[3]),
+						'LocationId':int(row[1]),
+						'DateAndTime':row[4].strftime(f),
+						'UserId':str(row[6]),
+						'MachineId':int(row[5])
+					  }
+			response = requests.post(url, data=json.dumps(payload), headers=headers)
+			if response.status_code == 200:
+				cursor.execute("DELETE FROM data WHERE id = %s", (row[0], ))
+				db.commit()
+			no_of_data -= 1
+		lcd.display.clear()
+		lcd.draw.text("SUCCESSFULLY SENT", 0, 0)
+		lcd.draw.text("DATA TO SERVER", 0, 9)
+		lcd.display.commit()
+		time.sleep(4)
+	except Exception as e:
+		print str(e)
+		lcd.display.clear()
+		lcd.draw.text("ERROR IN SENDING", 0, 0)
+		lcd.draw.text("DATA TO SERVER", 0, 9)
+		lcd.display.commit()
+		time.sleep(4)
+	finally:
+		cursor.close()
+		db.close()
 		
 def call_menu_functions(function):
 	if function == menu_pages[0][0]:
@@ -402,6 +444,8 @@ def call_menu_functions(function):
 		signin()
 	elif function == menu_pages[0][6]:
 		signout()
+	elif function == menu_pages[1][1]:
+		send_data_to_server()
 	
 #displays single menu page used by show_menu()
 def show_menu_page(menu):

@@ -36,12 +36,12 @@ display.commit(full = True)
 
 #draw.fill_screen(draw.PATTERN_HORIZONTAL_STRIPES)
 #draw.line(10,10,60,60)
-
-for i in range(10):
-    display.clear()
-    draw.text(str(i), 10, 10, size=34)
+i = 10
+while i != 0:
+    draw.progress_bar(0,0,120,15,i/10.0, clear=True)
     display.commit()
-    time.sleep(0.2)
+    time.sleep(1)
+    i -= 1
 
 display.clear()
 display.commit()
