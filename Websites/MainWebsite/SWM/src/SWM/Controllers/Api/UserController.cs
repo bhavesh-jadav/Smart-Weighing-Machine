@@ -16,7 +16,6 @@ using SWM.Models.ApiModels;
 namespace SWM.Controllers.Api
 {
     [Route("api")]
-    [Authorize]
     public class UserController : Controller
     {
         private ISwmRepository _repo;

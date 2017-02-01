@@ -1,7 +1,8 @@
 {
-	"name": "asp.net",
-	"private": true,
+  "name": "asp.net",
+  "private": true,
   "dependencies": {
-    "angular": "1.5.8"
+    "angular": "1.5.8",
+    "Chart.js": "2.0.2"
   }
 }
