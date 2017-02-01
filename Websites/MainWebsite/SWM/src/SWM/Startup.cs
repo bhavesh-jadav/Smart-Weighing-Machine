@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using SWM.Models.Repositories;
 using System;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Http;
 
 namespace SWM
 {
@@ -78,7 +79,13 @@ namespace SWM
 
             app.UseStaticFiles();
             app.UseIdentity();
-            app.UseStatusCodePagesWithRedirects("~/Error/{0}");
+
+            Func<HttpContext, bool> isApiRequest = (HttpContext context) => context.Request.Path.ToString().Contains("api");
+            app.UseWhen(context => !isApiRequest(context), appBuilder =>
+            {
+                appBuilder.UseStatusCodePagesWithRedirects("~/Error/{0}");
+            });
+
             app.UseMvc(config =>
             {
                 config.MapRoute(
