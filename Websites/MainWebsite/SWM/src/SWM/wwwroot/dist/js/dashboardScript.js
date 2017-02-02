@@ -1,10 +1,11 @@
 ﻿function user_dashboard(username) {
+    "use strict";
     var chart1data = [];
     var chart2data = [];
 
     var chart2Labels = []
     
-    var startDate, endDate;
+    var startDate, endDate, chart2 = null;
     var monthNames = [
                           "January", "February", "March",
                           "April", "May", "June", "July",
@@ -44,7 +45,7 @@
                 var min_x = chart2data.length - 6;
             else
                 var min_x = 0;
-            max_x = chart2data.length;
+            var max_x = chart2data.length;
             for (var i = 0; i < chart2data.length; i++) {
                 var date = new Date(chart2data[i].date)
                 chart2Labels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
@@ -62,7 +63,12 @@
         $scope.displayChart2 = function () {
             startDate = $scope.startDate;
             endDate = $scope.endDate;
-            draw_chart2(startDate, endDate);
+            if (startDate != endDate) {
+                draw_chart2(startDate, endDate);
+                $scope.chart2Error = "";
+            }
+            else
+                $scope.chart2Error = "Start date and end date must not have same value";
         };
     };
 
@@ -83,26 +89,32 @@
         const flatten = a =>[].concat.apply([], a)
 
         // step 1: find the distinct dates: ["2016-05-01T00:00:00", ... ]
-        const dates = chart2data.map(e => e.date)
+        var dates = chart2data.map(function (e) {
+            return e.date;
+        });
 
         // step 2: find the distinct labels: [Apple, Mango, ... ]
-        const labels = uniq(
-          flatten(chart2data.map(e => e.productInformation))
-          .map(e => e.productName))
+        var labels = uniq(flatten(chart2data.map(function (e) {
+            return e.productInformation;
+        })).map(function (e) {
+            return e.productName;
+        }));
 
         // step 3: map the labels to entries containing their data by searching the original data array
-        const result = labels.map(label => {
+        var result = labels.map(function (label) {
             return {
-                label,
-                data: dates.map(date => {
-                    const hit = chart2data.find(e => e.date === date)
-                      .productInformation
-                      .find(p => p.productName === label)
-                    return hit ? hit.totalWeight : 0
+                label: label,
+                data: dates.map(function (date) {
+                    var hit = chart2data.find(function (e) {
+                        return e.date === date;
+                    }).productInformation.find(function (p) {
+                        return p.productName === label;
+                    });
+                    return hit ? hit.totalWeight : 0;
                 }).slice(min_x, max_x + 1),
                 backgroundColor: getRandomColor()
-            }
-        })
+            };
+        });
 
         var chartLabels = [];
         for (var i = min_x; i <= max_x; i++) {
@@ -137,8 +149,10 @@
                 }]
             }
         }
+        $('#chart2div').empty();
+        $('#chart2div').append('<canvas id="chart2" height=400></canvas>');
         var ctx = document.getElementById("chart2").getContext("2d");
-        var myBar = new Chart(ctx, {
+        chart2 = new Chart(ctx, {
             type: 'bar',
             data: barChartData,
             options: chartOptions
