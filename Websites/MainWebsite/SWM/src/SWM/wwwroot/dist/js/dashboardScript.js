@@ -2,6 +2,16 @@
     var chart1data = [];
     var chart2data = [];
 
+    var chart2Labels = []
+    
+    var startDate, endDate;
+    var monthNames = [
+                          "January", "February", "March",
+                          "April", "May", "June", "July",
+                          "August", "September", "October",
+                          "November", "December"
+    ];
+
     //Angular part
     //Defining a Module
     angular.module("app-dashboard", []);
@@ -30,27 +40,43 @@
             for (var i = 0; i < $scope.data.length; i++) {
                 chart2data.push($scope.data[i]);
             }
+            if (chart2data.length >= 6)
+                var min_x = chart2data.length - 6;
+            else
+                var min_x = 0;
+            max_x = chart2data.length;
+            for (var i = 0; i < chart2data.length; i++) {
+                var date = new Date(chart2data[i].date)
+                chart2Labels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
+            }
+
+            $scope.startDate = chart2Labels[min_x];
+            $scope.endDate = chart2Labels[max_x - 1];
+            $scope.chart2Dates = chart2Labels;
             $scope.isBusyChart2 = false;
-            draw_chart2();
+            draw_chart2($scope.startDate, $scope.endDate);
+            
         }, function (error) {
             $scope.chart2Error = "Unable to display chart"
         });
+        $scope.displayChart2 = function () {
+            startDate = $scope.startDate;
+            endDate = $scope.endDate;
+            draw_chart2(startDate, endDate);
+        };
     };
 
     //month wise data chart
-    function draw_chart2() {
-        var monthNames = [
-                          "January", "February", "March",
-                          "April", "May", "June", "July",
-                          "August", "September", "October",
-                          "November", "December"
-                          ];
+    function draw_chart2(startDate, endDate) {
 
-        var chartLabels = []
-        var max_x, min_x = 0, max_product=0, index;
+        var max_x, min_x;
 
-        var firstDate = chart2data[0].date;
-        var lastDate = chart2data[chart2data.length - 1].date;
+        for (var i = 0; i < chart2Labels.length; i++) {
+            if (chart2Labels[i] === startDate)
+                min_x = i;
+            else if (chart2Labels[i] === endDate)
+                max_x = i;
+        }
 
         //credit to Christian Zosel on stack overflow. converts json data into chart data
         const uniq = a =>[...new Set(a)]
@@ -73,26 +99,19 @@
                       .productInformation
                       .find(p => p.productName === label)
                     return hit ? hit.totalWeight : 0
-                }),
+                }).slice(min_x, max_x + 1),
                 backgroundColor: getRandomColor()
             }
         })
-        console.log(result);
-        if (chart2data.length >= 6)
-            max_x = 6;
-        else
-            max_x = chart2data.length;
 
-        for (var i = max_x-1; i >= min_x; i--) {
-            var date = new Date(chart2data[i].date)
-            chartLabels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
+        var chartLabels = [];
+        for (var i = min_x; i <= max_x; i++) {
+            chartLabels.push(chart2Labels[i])
         }
-
         var barChartData = {
-            labels: ["May 2016", "September 2016", "January 2017"],
+            labels: chartLabels,
             datasets: result
         };
-
         var chartOptions = {
             responsive:true,
             legend: {

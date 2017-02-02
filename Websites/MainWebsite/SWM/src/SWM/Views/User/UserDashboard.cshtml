@@ -95,6 +95,27 @@
                             <h3 class="box-title">
                                 Month Wise Data
                             </h3>
+                            <div class="pull-right">
+                                <span class="input-group-addon" style="width:0;">Show data from</span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <select class="form-control" ng-model="startDate">
+                                        <option ng-repeat="item in chart2Dates" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-addon" style="width:0;">to</span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <select class="form-control" ng-model="endDate">
+                                        <option ng-repeat="item in chart2Dates" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart2()">Go!</button>
+                                </span>
+                            </div>
                             <div style="color:red;">{{chart2Error}}</div>
                         </div>
                         <div class="box-body">
