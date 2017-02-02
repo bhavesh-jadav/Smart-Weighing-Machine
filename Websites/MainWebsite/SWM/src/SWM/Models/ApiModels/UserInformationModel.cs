@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SWM.JsonModels
+namespace SWM.Models.ApiModels
 {
-    public class UserInformation
+    public class UserInformationModel
     {
         public int TotalProducts { get; set; }
         public int TotalWeight { get; set; }

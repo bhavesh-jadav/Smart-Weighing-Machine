@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SWM.JsonModels;
 using Microsoft.AspNetCore.Identity;
 using SWM.Models.ApiModels;
 using SWM.ViewModels;
@@ -36,18 +35,18 @@ namespace SWM.Models.Repositories
         {
             return _ctx.States.FirstOrDefault(s => s.Id == stateId).Name;
         }
-        public List<LocationInfo> GetLocationInfoByUserName(string userName)
+        public List<LocationInfoModel> GetLocationInfoByUserName(string userName)
         {
             try
             {
-                List<LocationInfo> locationInfos = new List<LocationInfo>();
+                List<LocationInfoModel> locationInfos = new List<LocationInfoModel>();
                 var user = GetUserByUserName(userName).Result;
                 if (user != null)
                 {
                     UserLocation[] farmLocations = _ctx.UserLocations.Where(f => f.UserId == user.Id).ToArray();
                     foreach (var floc in farmLocations)
                     {
-                        locationInfos.Add(new LocationInfo()
+                        locationInfos.Add(new LocationInfoModel()
                         {
                             Name = floc.Name,
                             Address = floc.Address + ", " + GetStateName(floc.StateId) + ", " + GetCountryName(floc.CountryId) + ", " +
@@ -57,26 +56,26 @@ namespace SWM.Models.Repositories
                     return locationInfos;
                 }
                 else
-                    return new List<LocationInfo>();
+                    return new List<LocationInfoModel>();
 
             }
             catch (Exception ex)
             {
-                return new List<LocationInfo>();
+                return new List<LocationInfoModel>();
             }
         }
-        public List<ProductInfo> GetProductInfoByUserName(string userName)
+        public List<ProductInfoModel> GetProductInfoByUserName(string userName)
         {
             try
             {
-                List<ProductInfo> productInfo = new List<ProductInfo>();
+                List<ProductInfoModel> productInfo = new List<ProductInfoModel>();
                 var user = GetUserByUserName(userName).Result;
                 if (user != null)
                 {
                     ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
                     foreach(var cu in ctou)
                     {
-                        productInfo.Add(new ProductInfo()
+                        productInfo.Add(new ProductInfoModel()
                         {
                             ProductName = GetProductInformation(cu.ProductID).Name,
                             TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id).Select(cd => cd.Weight).Sum()
@@ -86,23 +85,23 @@ namespace SWM.Models.Repositories
                 }
                 else
                 {
-                    return new List<ProductInfo>();
+                    return new List<ProductInfoModel>();
                 }
             }
             catch (Exception ex)
             {
-                return new List<ProductInfo>();
+                return new List<ProductInfoModel>();
             }
         }
         public async Task<SwmUser> GetUserByUserName(string userName)
         {
             return await _userManager.FindByNameAsync(userName);
         }
-        public List<ProductInfo> GetProductInfoByUserNameAndLocation(string locationName, string userName)
+        public List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName)
         {
             try
             {
-                List<ProductInfo> productInfos = new List<ProductInfo>();
+                List<ProductInfoModel> productInfos = new List<ProductInfoModel>();
                 var user = GetUserByUserName(userName).Result;
                 var location = _ctx.UserLocations.FirstOrDefault(l => l.Name == locationName);
                 if (user != null && location != null)
@@ -110,7 +109,7 @@ namespace SWM.Models.Repositories
                     ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
                     foreach (var cu in ctou)
                     {
-                        productInfos.Add(new ProductInfo()
+                        productInfos.Add(new ProductInfoModel()
                         {
                             ProductName = GetProductInformation(cu.ProductID).Name,
                             TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id && 
@@ -120,28 +119,28 @@ namespace SWM.Models.Repositories
                     return productInfos;
                 }
                 else
-                    return new List<ProductInfo>();
+                    return new List<ProductInfoModel>();
             }
             catch (Exception ex)
             {
-                return new List<ProductInfo>();
+                return new List<ProductInfoModel>();
             }
         }
         public ProductInformation GetProductInformation(int productId)
         {
             return _ctx.ProductInformations.FirstOrDefault(p => p.Id == productId);
         }
-        public UserInformation GetUserInformationForAPI(string userName)
+        public UserInformationModel GetUserInformationForAPI(string userName)
         {
             try
             {
                 var user = GetUserByUserName(userName).Result;
                 if (user != null)
                 {
-                    UserInformation userInformation = new UserInformation();
+                    UserInformationModel userInformation = new UserInformationModel();
                     userInformation.TotalProducts = _ctx.ProductsToUsers.Where(p => p.UserId == user.Id).Count();
 
-                    List<ProductInfo> productInfo = GetProductInfoByUserName(userName);
+                    List<ProductInfoModel> productInfo = GetProductInfoByUserName(userName);
                     foreach (var pinfo in productInfo)
                         userInformation.TotalWeight += pinfo.TotalWeight;
 
@@ -150,11 +149,11 @@ namespace SWM.Models.Repositories
                     return userInformation;
                 }
                 else
-                    return new UserInformation();
+                    return new UserInformationModel();
             }
             catch (Exception ex)
             {
-                return new UserInformation();
+                return new UserInformationModel();
             }
         }
         public async Task<bool> CheckUserPassword(SwmUser user, string password)
@@ -530,6 +529,41 @@ namespace SWM.Models.Repositories
             foreach (var location in lc)
                 locations.Add(new KeyValuePair<int, string>(location.Id, location.Name));
             return locations;
+        }
+
+        private string getProductNameFromProductToUserId(int ptouId)
+        {
+            return _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == ptouId).ProductID).Name;
+        }
+
+        public List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName)
+        {
+            List<ProductDataMonthWiseModel> monthWiseData = new List<ProductDataMonthWiseModel>();
+            try
+            {
+                var user = _userManager.FindByNameAsync(userName).Result;
+                var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                foreach (var cropData in cropDatas)
+                {
+                    if (monthWiseData.Any(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year))
+                    {
+                        var d = monthWiseData.Find(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year);
+                        if (d.ProductInformation.Any(pi => pi.ProductName == getProductNameFromProductToUserId(cropData.CropToUserId)))
+                            d.ProductInformation.Find(pi => pi.ProductName == getProductNameFromProductToUserId(cropData.CropToUserId)).TotalWeight += cropData.Weight;
+                        else
+                            d.ProductInformation.Add(new ProductInfoModel() { ProductName = getProductNameFromProductToUserId(cropData.CropToUserId), TotalWeight = cropData.Weight });
+                    }
+                    else
+                        monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = getProductNameFromProductToUserId(cropData.CropToUserId), TotalWeight = cropData.Weight}}});
+                }
+
+                return monthWiseData;
+            }
+            catch (Exception ex)
+            {
+                return monthWiseData;
+            }
         }
     }
 }

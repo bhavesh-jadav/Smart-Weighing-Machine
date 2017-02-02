@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SWM.JsonModels
+namespace SWM.Models.ApiModels
 {
     public class DataForMachineModel
     {

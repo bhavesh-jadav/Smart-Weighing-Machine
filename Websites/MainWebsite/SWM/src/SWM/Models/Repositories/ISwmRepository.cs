@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SWM.JsonModels;
 using SWM.Models.ApiModels;
 using SWM.ViewModels;
 
@@ -11,15 +10,15 @@ namespace SWM.Models.Repositories
 {
     public interface ISwmRepository
     {
-        List<ProductInfo> GetProductInfoByUserName(string userName);
-        List<LocationInfo> GetLocationInfoByUserName(string userName);
+        List<ProductInfoModel> GetProductInfoByUserName(string userName);
+        List<LocationInfoModel> GetLocationInfoByUserName(string userName);
         Task<SwmUser> GetUserByUserName(string userName);
         Task<SwmUser> GetUserByUserId(string id);
         string GetStateName(int stateId);
         string GetCountryName(int countryId);
-        List<ProductInfo> GetProductInfoByUserNameAndLocation(string locationName, string userName);
+        List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName);
         ProductInformation GetProductInformation(int productId);
-        UserInformation GetUserInformationForAPI(string userName);
+        UserInformationModel GetUserInformationForAPI(string userName);
         Task<bool> CheckUserPassword(SwmUser user, string password);
         bool AddNewDataFromMachine(DataFromMachineModel data);
         List<TableDataModel> GetDataForDataTable(SwmUser user);
@@ -33,5 +32,6 @@ namespace SWM.Models.Repositories
         AdminDashboardModel GetDashBoardForAdmin();
         List<KeyValuePair<int, string>> GetProductNames(string userId);
         List<KeyValuePair<int, string>> GetLocationNames(string userId);
+        List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName);
     }
 }

@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SWM.JsonModels;
 using SWM.Models;
 using SWM.Models.Repositories;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using SWM.ViewModels;
 using SWM.Models.ApiModels;
 
@@ -50,9 +44,19 @@ namespace SWM.Controllers.Api
         [HttpGet("{userName}/product_info")]
         public IActionResult GetProductInfo(string userName)
         {
-            List<ProductInfo> productInfos = _repo.GetProductInfoByUserName(userName);
+            List<ProductInfoModel> productInfos = _repo.GetProductInfoByUserName(userName);
             if (productInfos.Count > 0)
                 return Ok(productInfos);
+            else
+                return BadRequest("Unable to process requrest");
+        }
+
+        [HttpGet("{userName}/product_info_month_wise")]
+        public IActionResult GetProductInforMonthWise(string userName)
+        {
+            var res = _repo.GetProductDataMonthWise(userName);
+            if (res.Count > 0)
+                return Ok(res);
             else
                 return BadRequest("Unable to process requrest");
         }
@@ -60,7 +64,7 @@ namespace SWM.Controllers.Api
         [HttpGet("{userName}/location_info")]
         public IActionResult GetLocationInfo(string userName)
         {
-            List<LocationInfo> locationInfos = _repo.GetLocationInfoByUserName(userName);
+            List<LocationInfoModel> locationInfos = _repo.GetLocationInfoByUserName(userName);
             if (locationInfos.Count > 0)
                 return Ok(locationInfos);
             else
@@ -70,7 +74,7 @@ namespace SWM.Controllers.Api
         [HttpGet("{userName}/{locationName}/product_info")]
         public IActionResult GetProductInfo(string userName, string locationName)
         {
-            List<ProductInfo> productInfos = _repo.GetProductInfoByUserNameAndLocation(locationName, userName);
+            List<ProductInfoModel> productInfos = _repo.GetProductInfoByUserNameAndLocation(locationName, userName);
             if (productInfos.Count > 0)
                 return Ok(productInfos);
             else
@@ -79,7 +83,7 @@ namespace SWM.Controllers.Api
 
         [Authorize(Roles = "admin")]
         [HttpPost("add_subscirption")]
-        public IActionResult AddNewSubscription([FromBody]AddNewSubscription addNewSubscription)
+        public IActionResult AddNewSubscription([FromBody]AddNewSubscriptionModel addNewSubscription)
         {
             if (ModelState.IsValid)
             {

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SWM.JsonModels
+namespace SWM.Models.ApiModels
 {
-    public class AddNewSubscription
+    public class AddNewSubscriptionModel
     {
         [Required(ErrorMessage = "Enter user name")]
         public string UserName { get; set; }
