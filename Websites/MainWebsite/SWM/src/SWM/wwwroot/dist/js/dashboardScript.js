@@ -55,7 +55,7 @@
             $scope.endDate = chart2Labels[max_x - 1];
             $scope.chart2Dates = chart2Labels;
             $scope.isBusyChart2 = false;
-            draw_chart2($scope.startDate, $scope.endDate);
+            $scope.chart2Error = draw_chart2($scope.startDate, $scope.endDate);
             
         }, function (error) {
             $scope.chart2Error = "Unable to display chart"
@@ -63,17 +63,15 @@
         $scope.displayChart2 = function () {
             startDate = $scope.startDate;
             endDate = $scope.endDate;
-            if (startDate != endDate) {
-                draw_chart2(startDate, endDate);
-                $scope.chart2Error = "";
-            }
-            else
-                $scope.chart2Error = "Start date and end date must not have same value";
+            $scope.chart2Error = draw_chart2(startDate, endDate);
         };
     };
 
     //month wise data chart
     function draw_chart2(startDate, endDate) {
+
+        if (startDate == endDate)
+            return "Start month and end month must not have same value";
 
         var max_x, min_x;
 
@@ -83,6 +81,8 @@
             else if (chart2Labels[i] === endDate)
                 max_x = i;
         }
+        if(min_x > max_x)
+            return "Start month must come before end date"
 
         //credit to Christian Zosel on stack overflow. converts json data into chart data
         const uniq = a =>[...new Set(a)]
@@ -157,6 +157,7 @@
             data: barChartData,
             options: chartOptions
         });
+        return "";
     }
 
     //product to weight chart
