@@ -558,7 +558,7 @@ namespace SWM.Models.Repositories
                         monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = getProductNameFromProductToUserId(cropData.CropToUserId), TotalWeight = cropData.Weight}}});
                 }
 
-                return monthWiseData;
+                return monthWiseData.OrderBy(md => md.Date).ToList();
             }
             catch (Exception ex)
             {
