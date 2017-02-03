@@ -3,9 +3,9 @@
     var chart1data = [];
     var chart2data = [];
 
-    var chart2Labels = []
+    var chart2Labels = [];
+    var products = [];
     
-    var startDate, endDate, chart2 = null;
     var monthNames = [
                           "January", "February", "March",
                           "April", "May", "June", "July",
@@ -50,24 +50,112 @@
                 var date = new Date(chart2data[i].date)
                 chart2Labels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
             }
+            populateProductsArray(chart2data);
+            $scope.products = products;
+            $scope.chart3ProductName = products[0];
+            $scope.chart3StartDate = chart2Labels[min_x];
+            $scope.chart3EndDate = chart2Labels[max_x - 1];
 
-            $scope.startDate = chart2Labels[min_x];
-            $scope.endDate = chart2Labels[max_x - 1];
+            $scope.chart2StartDate = chart2Labels[min_x];
+            $scope.chart2EndDate = chart2Labels[max_x - 1];
             $scope.chart2Dates = chart2Labels;
+
             $scope.isBusyChart2 = false;
-            $scope.chart2Error = draw_chart2($scope.startDate, $scope.endDate);
+            $scope.chart2Error = draw_chart2($scope.chart2StartDate, $scope.chart2EndDate);
+            $scope.chart3Error = draw_chart3($scope.chart3ProductName, $scope.chart3StartDate, $scope.chart3EndDate);
             
         }, function (error) {
             $scope.chart2Error = "Unable to display chart"
         });
         $scope.displayChart2 = function () {
-            startDate = $scope.startDate;
-            endDate = $scope.endDate;
-            $scope.chart2Error = draw_chart2(startDate, endDate);
+            $scope.chart2Error = draw_chart2($scope.chart2StartDate, $scope.chart2EndDate);
+        };
+        $scope.displayChart3 = function () {
+            $scope.chart3Error = draw_chart3($scope.chart3ProductName, $scope.chart3StartDate, $scope.chart3EndDate);
         };
     };
 
-    //month wise data chart
+    //single product monthly data chart
+    function draw_chart3(productName, startDate, endDate) {
+        if (startDate == endDate)
+            return "Start month and end month must not have same value";
+
+        var max_x, min_x;
+
+        for (var i = 0; i < chart2Labels.length; i++) {
+            if (chart2Labels[i] === startDate)
+                min_x = i;
+            else if (chart2Labels[i] === endDate)
+                max_x = i;
+        }
+        if (min_x > max_x)
+            return "Start month must come before end month"
+        var chartLabels = [];
+        for (var i = min_x; i <= max_x; i++) {
+            chartLabels.push(chart2Labels[i])
+        }
+
+        var productData = []
+        var j;
+        for (var i = 0; i < chart2data.length; i++) {
+            for (j = 0; j < chart2data[i].productInformation.length; j++) {
+                if (chart2data[i].productInformation[j].productName == productName) {
+                    productData.push(chart2data[i].productInformation[j].totalWeight);
+                    break;
+                }
+            }
+            if (j == chart2data[i].productInformation.length)
+                productData.push(0);
+        }
+        productData = productData.slice(min_x, max_x + 1);
+        var result = [{
+            label: productName,
+            data: productData,
+            backgroundColor: "#f7ab40"
+        }];
+
+        var barChartData = {
+            labels: chartLabels,
+            datasets: result
+        };
+        var chartOptions = {
+            responsive: true,
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    stacked: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Months'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    stacked: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Weight In Grams'
+                    }
+                }]
+            }
+        }
+
+        $('#chart3div').empty();
+        $('#chart3div').append('<canvas id="chart3" height=400></canvas>');
+        var ctx = document.getElementById("chart3").getContext("2d");
+        var chart3 = new Chart(ctx, {
+            type: 'line',
+            data: barChartData,
+            options: chartOptions
+        });
+        return "";
+    }
+
+    //all products monthly data chart
     function draw_chart2(startDate, endDate) {
 
         if (startDate == endDate)
@@ -82,7 +170,7 @@
                 max_x = i;
         }
         if(min_x > max_x)
-            return "Start month must come before end date"
+            return "Start month must come before end month"
 
         //credit to Christian Zosel on stack overflow. converts json data into chart data
         const uniq = a =>[...new Set(a)]
@@ -152,7 +240,7 @@
         $('#chart2div').empty();
         $('#chart2div').append('<canvas id="chart2" height=400></canvas>');
         var ctx = document.getElementById("chart2").getContext("2d");
-        chart2 = new Chart(ctx, {
+        var chart2 = new Chart(ctx, {
             type: 'bar',
             data: barChartData,
             options: chartOptions
@@ -199,7 +287,7 @@
             }
         }
         var ctx = document.getElementById("chart1").getContext("2d");
-        var myBar = new Chart(ctx, {
+        var chart1 = new Chart(ctx, {
             type: 'bar',
             data: barChartData,
             options: chartOptions
@@ -213,5 +301,18 @@
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
+    }
+
+    function populateProductsArray(data) {
+        var index, max = 0;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].productInformation.length > max) {
+                max = data[i].productInformation.length;
+                index = i;
+            }
+        }
+        for (var i = 0; i < max; i++) {
+            products.push(data[index].productInformation[i].productName);
+        }
     }
 };
