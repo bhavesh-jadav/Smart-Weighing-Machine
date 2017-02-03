@@ -459,7 +459,7 @@ namespace SWM.Models.Repositories
                 var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
                 var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
                 userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
-
+                userDashboard.UserName = _userManager.FindByIdAsync(userId).Result.UserName;
                 return userDashboard;
             }
             catch (Exception ex)

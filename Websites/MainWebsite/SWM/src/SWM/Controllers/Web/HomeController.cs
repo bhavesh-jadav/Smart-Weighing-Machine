@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -58,14 +59,6 @@ namespace SWM.Controllers.Web
                     if (res.Succeeded)
                     {
                         Response.Cookies.Append("fullName", user.FullName);
-                        //if (_ctx.UserLocations.FirstOrDefault(ul => ul.UserId == user.Id) == null && User.IsInRole("user"))
-                        //{
-                        //    return RedirectToAction("AddNewLocation", "User");
-                        //}
-                        //if(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) == null && User.IsInRole("user"))
-                        //{
-                        //    return RedirectToAction("AddNewProduct", "User");
-                        //}
                         if (string.IsNullOrWhiteSpace(returnUrl))
                             return RedirectToAction("Dashboard", "User");
                         else

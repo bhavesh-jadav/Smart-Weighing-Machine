@@ -225,7 +225,7 @@
 @section scripts{
     <script src="~/lib/angular/angular.min.js"></script>
     <script src="~/plugins/Chart.min.js"></script>
-    <script src="~/dist/js/dashboardScript.js"></script>
-    @*<script src="~/dist/js/dashboardScript.min.js"></script>*@
-    <script>var username = "@User.Identity.Name.ToString()";user_dashboard(username);</script>
+    @*<script src="~/dist/js/dashboardScript.js"></script>*@
+    <script src="~/dist/js/dashboardScript.min.js"></script>
+    <script>var username = "@Model.UserName.ToString()";user_dashboard(username);</script>
 }

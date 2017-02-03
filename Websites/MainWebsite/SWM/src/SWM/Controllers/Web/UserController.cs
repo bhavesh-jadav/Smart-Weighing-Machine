@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SWM.Models.Repositories;
 using System.Security.Claims;
 
-namespace SWM.Controllers
+namespace SWM.Controllers.Web
 {
     [Authorize]
     public class UserController : Controller
@@ -28,7 +28,7 @@ namespace SWM.Controllers
 
         /*---------------------Commen actions between all type of users------------------------------*/
 
-        public IActionResult Dashboard()
+        public virtual IActionResult Dashboard()
         {
             if (User.IsInRole("admin"))
             {
@@ -43,10 +43,13 @@ namespace SWM.Controllers
 
         [AllowAnonymous]
         [Route("/SignOut")]
-        public async Task<IActionResult> SignOut()
+        public virtual async Task<IActionResult> SignOut()
         {
             if (User.Identity.IsAuthenticated)
+            {
+                Response.Cookies.Delete("fullName");
                 await _signInManager.SignOutAsync();
+            }
 
             return RedirectToAction("Index", "Home");
         }
@@ -136,6 +139,19 @@ namespace SWM.Controllers
             return View();
         }
 
+        [Route("/User/{userName}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> UserAcess(string userName)
+        {
+            var user = _repo.GetUserByUserName(userName).Result;
+            if(user != null)
+            {
+                await SignOut();
+                await _signInManager.SignInAsync(user, false, null);
+                Response.Cookies.Append("fullName", user.FullName);
+            }
+            return RedirectToAction("Dashboard", "User");
+        }
         /*--------------------------------User actions--------------------------------------*/
 
         [HttpPost]

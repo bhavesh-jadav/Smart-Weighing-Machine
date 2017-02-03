@@ -23,5 +23,6 @@ namespace SWM.ViewModels
         public int TotalLocation { get; set; }
         public string LastUpdatedProduct { get; set; }
         public string ProductsIntoAccount { get; set; }
+        public string UserName { get; set; }
     }
 }

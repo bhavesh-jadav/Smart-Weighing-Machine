@@ -89,7 +89,7 @@
                 max_x = i;
         }
         if (min_x > max_x)
-            return "Start month must come before end month"
+            return "Start month must come before end month";
         var chartLabels = [];
         for (var i = min_x; i <= max_x; i++) {
             chartLabels.push(chart2Labels[i])
@@ -111,7 +111,10 @@
         var result = [{
             label: productName,
             data: productData,
-            backgroundColor: "#f7ab40"
+            backgroundColor: "#f7ab40",
+            borderWidth: 5,
+            borderColor: "#d68413",
+            lineTension: 0
         }];
 
         var barChartData = {
@@ -119,28 +122,27 @@
             datasets: result
         };
         var chartOptions = {
-            responsive: true,
-            legend: {
-                display: true,
-                position: 'top'
-            },
             scales: {
                 xAxes: [{
                     display: true,
-                    stacked: true,
                     scaleLabel: {
                         display: true,
-                        labelString: 'Months'
+                        labelString: 'Products'
                     }
                 }],
                 yAxes: [{
                     display: true,
-                    stacked: true,
                     scaleLabel: {
                         display: true,
                         labelString: 'Weight In Grams'
                     }
                 }]
+            },
+            legend: {
+                display: false,
+                labels: {
+                    display: false
+                }
             }
         }
 
@@ -169,8 +171,8 @@
             else if (chart2Labels[i] === endDate)
                 max_x = i;
         }
-        if(min_x > max_x)
-            return "Start month must come before end month"
+        if (min_x > max_x)
+            return "Start month must come before end month";
 
         //credit to Christian Zosel on stack overflow. converts json data into chart data
         const uniq = a =>[...new Set(a)]
@@ -213,7 +215,7 @@
             datasets: result
         };
         var chartOptions = {
-            responsive:true,
+            responsive: true,
             legend: {
                 display: true,
                 position: 'top'
@@ -236,7 +238,7 @@
                     }
                 }]
             }
-        }
+        };
         $('#chart2div').empty();
         $('#chart2div').append('<canvas id="chart2" height=400></canvas>');
         var ctx = document.getElementById("chart2").getContext("2d");

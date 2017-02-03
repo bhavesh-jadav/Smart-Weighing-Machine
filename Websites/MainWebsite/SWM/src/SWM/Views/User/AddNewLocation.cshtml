@@ -7,11 +7,16 @@
 <section class="content">
     <form method="post">
         <div class="box box-primary">
-            <div style="color:#dd4b39;font-size:20px;margin-top:20px;" asp-validation-summary="ModelOnly"></div>
             @if (ViewBag.SuccessMessage != null)
             {
                 <h3 style="color:green;margin-left:10px;">@ViewBag.SuccessMessage</h3>
             }
+            <div class="box-header with-border">
+                <h3 class="box-title" style="color:#db9a02;">
+                    Please double check the information before submitting location data
+                </h3>
+                <div style="color:#dd4b39;font-size:20px;margin-top:0px;" asp-validation-summary="ModelOnly"></div>
+            </div>
             <div class="box-body">
                 <div class="form-group">
                     <label>Location Name:</label>
