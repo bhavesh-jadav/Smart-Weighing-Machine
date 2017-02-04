@@ -50,7 +50,8 @@ namespace SWM.Models.Repositories
                         {
                             Name = floc.Name,
                             Address = floc.Address + ", " + GetStateName(floc.StateId) + ", " + GetCountryName(floc.CountryId) + ", " +
-                                      "Pin Number: " + floc.PinNo.ToString()
+                                      "Pin Number: " + floc.PinNo.ToString(),
+                            TotalWeight = _ctx.CropDatas.Where(cd => cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(um => um.UserLocationId == floc.Id).Id).Select(cd => cd.Weight).Sum()
                         });
                     }
                     return locationInfos;
@@ -432,35 +433,47 @@ namespace SWM.Models.Repositories
             var userDashboard = new UserDashboardModel();
             try
             {
-                foreach (var userLocation in _ctx.UserLocations.Where(l => l.UserId == userId).ToList())
+                bool newUser = true;
+                if (_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == userId) != null)
                 {
-                    userDashboard.UserLocations.Add(new AddNewLocationModel() {
-                        Name = userLocation.Name,
-                        Address = userLocation.Address,
-                        Country = _ctx.Countries.FirstOrDefault(c => c.Id == userLocation.CountryId).Name,
-                        State = _ctx.States.FirstOrDefault(s => s.Id == userLocation.StateId).Name,
-                        PinNo = userLocation.PinNo.ToString()
-                    });
-                }
-                var ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == userId).ToArray();
-                var cropDatas = _ctx.CropDatas.Where(cd => ctou.Any(c => cd.CropToUserId == c.Id));
-                userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
-                userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
-                userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
+                    newUser = false;
+                    foreach (var userLocation in _ctx.UserLocations.Where(l => l.UserId == userId).ToList())
+                    {
+                        userDashboard.UserLocations.Add(new AddNewLocationModel()
+                        {
+                            Name = userLocation.Name,
+                            Address = userLocation.Address,
+                            Country = _ctx.Countries.FirstOrDefault(c => c.Id == userLocation.CountryId).Name,
+                            State = _ctx.States.FirstOrDefault(s => s.Id == userLocation.StateId).Name,
+                            PinNo = userLocation.PinNo.ToString()
+                        });
+                    }
+                    var ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == userId).ToArray();
+                    var cropDatas = _ctx.CropDatas.Where(cd => ctou.Any(c => cd.CropToUserId == c.Id));
+                    userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
+                    userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
+                    userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
 
-                foreach (var cu in ctou)
+                    foreach (var cu in ctou)
+                    {
+                        var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == cu.ProductID);
+                        userDashboard.ProductsIntoAccount += product.Name;
+                        userDashboard.ProductsIntoAccount += ", ";
+                    }
+                    userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
+
+                    var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
+                    var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
+                    userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
+                    userDashboard.UserName = _userManager.FindByIdAsync(userId).Result.UserName;
+                    userDashboard.IsNewUser = newUser;
+                    return userDashboard;
+                }
+                else
                 {
-                    var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == cu.ProductID);
-                    userDashboard.ProductsIntoAccount += product.Name;
-                    userDashboard.ProductsIntoAccount += ", ";
+                    userDashboard.IsNewUser = newUser;
+                    return userDashboard;
                 }
-                userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
-
-                var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
-                var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
-                userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
-                userDashboard.UserName = _userManager.FindByIdAsync(userId).Result.UserName;
-                return userDashboard;
             }
             catch (Exception ex)
             {

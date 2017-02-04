@@ -16,6 +16,7 @@ namespace SWM.ViewModels
             this.TotalProducts = 0;
             this.ProductsIntoAccount = "";
             this.TotalWeight = 0;
+            this.UserName = "";
         }
         public List<AddNewLocationModel> UserLocations { get; set; }
         public int TotalWeight { get; set; }
@@ -24,5 +25,6 @@ namespace SWM.ViewModels
         public string LastUpdatedProduct { get; set; }
         public string ProductsIntoAccount { get; set; }
         public string UserName { get; set; }
+        public bool IsNewUser { get; set; }
     }
 }

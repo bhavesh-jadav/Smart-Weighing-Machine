@@ -5,7 +5,7 @@
     var products = [];
     var locations = [];
     var max_x_label = 10;
-    
+    var locationsTotalWeight = [];
     var monthNames = [
                           "January", "February", "March",
                           "April", "May", "June", "July",
@@ -23,16 +23,20 @@
         
         //getting chart1 information
         $http.isBusyChart1 = true;
+        $http.isBusyChart5 = true;
         $http.get("/api/" + username + "/location_info").then(function (response) {
             var data = response.data;
             for (var i = 0; i < data.length; i++) {
                 locations.push(data[i].name);
+                locationsTotalWeight.push(data[i].totalWeight);
             }
             if (locations.length > 1)
                 locations.push("All");
             $scope.locations = locations;
             $scope.selectedLocation = locations[locations.length - 1];
             $scope.displayChart1();
+            $http.isBusyChart5 = false;
+            draw_chart5();
         }, function (error) {
             $scope.chart1Error = "Unable to display chart"
         });
@@ -72,7 +76,8 @@
             $scope.chart4Error = draw_chart4($scope.chart4StartDate, $scope.chart4EndDate);
             
         }, function (error) {
-            $scope.chart2Error = "Unable to display chart"
+            $scope.chart2Error = $scope.chart3Error = $scope.chart4Error = "Unable to display chart";
+            $scope.isBusyChart2 = false;
         });
         $scope.displayChart1 = function () {
             var chart1data = [];
@@ -86,7 +91,7 @@
                     $scope.isBusyChart1 = false;
                     draw_chart1(chart1data);
                 }, function (error) {
-                    $scope.chart1Error = "Unable to display chart"
+                    $scope.chart1Error = "Unable to display chart";
                 });
             }
             else {
@@ -117,6 +122,71 @@
         };
     };
 
+    //location wise total weight
+    function draw_chart5() {
+        var labels = [];
+        var data = [];
+
+        for (var i = 0; i < locations.length - 1; i++) {
+            labels.push(locations[i]);
+        }
+        var barChartData = {
+            labels: labels,
+            datasets: [{
+                data: locationsTotalWeight,
+                backgroundColor: "#ff7272"
+            }]
+        };
+        var chartOptions = {
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Weight'
+                    },
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Locations'
+                    }
+                }]
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        var weight = tooltipItems.yLabel;
+                        if (weight <= 1000)
+                            return tooltipItems.xLabel + ' gm';
+                        else
+                            return tooltipItems.xLabel / 1000 + ' kg';
+                    }
+                },
+                displayColors: false
+            }
+        }
+
+        var height = $('#locations').height() - 200;
+
+        $('#chart5div').empty();
+        $('#chart5div').append('<canvas id="chart5" style="height:' + height + '" height="' + height + '" width="787"></canvas>');
+        var ctx = document.getElementById("chart5").getContext("2d");
+        var chart4 = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: barChartData,
+            options: chartOptions
+        });
+    }
 
     //monthly total weight chart
     function draw_chart4(startDate, endDate) {
@@ -202,6 +272,9 @@
                     scaleLabel: {
                         display: true,
                         labelString: 'Months'
+                    },
+                    ticks: {
+                        beginAtZero: true
                     }
                 }],
                 yAxes: [{
@@ -220,9 +293,14 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        return "Weight: " + tooltipItems.xLabel + ' gm';
+                        var weight = tooltipItems.yLabel;
+                        if (weight <= 1000)
+                            return tooltipItems.xLabel + ' gm';
+                        else
+                            return tooltipItems.xLabel / 1000 + ' kg';
                     }
-                }
+                },
+                displayColors: false
             }
         }
 
@@ -276,7 +354,8 @@
             data: productData,
             backgroundColor: "#f7ab40",
             borderWidth: 5,
-            borderColor: "#d68413"
+            borderColor: "#d68413",
+            cubicInterpolationMode: "monotone"
         }];
 
         var barChartData = {
@@ -297,6 +376,9 @@
                     scaleLabel: {
                         display: true,
                         labelString: 'Weight In Grams'
+                    },
+                    ticks: {
+                        beginAtZero: true
                     }
                 }]
             },
@@ -305,6 +387,20 @@
                 labels: {
                     display: false
                 }
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        var weight = tooltipItems.yLabel;
+                        if (weight <= 1000)
+                            return tooltipItems.yLabel + ' gm';
+                        else
+                            return tooltipItems.yLabel / 1000 + ' kg';
+                    }
+                },
+                displayColors: false
             }
         }
 
@@ -335,38 +431,6 @@
         }
         if (min_x > max_x)
             return "Start month must come before end month";
-
-        ////credit to Christian Zosel on stack overflow. converts json data into chart data
-        //const uniq = a =>[...new Set(a)]
-        //const flatten = a =>[].concat.apply([], a)
-
-        //// step 1: find the distinct dates: ["2016-05-01T00:00:00", ... ]
-        //var dates = chart2data.map(function (e) {
-        //    return e.date;
-        //});
-
-        //// step 2: find the distinct labels: [Apple, Mango, ... ]
-        //var labels = uniq(flatten(chart2data.map(function (e) {
-        //    return e.productInformation;
-        //})).map(function (e) {
-        //    return e.productName;
-        //}));
-
-        //// step 3: map the labels to entries containing their data by searching the original data array
-        //var result = labels.map(function (label) {
-        //    return {
-        //        label: label,
-        //        data: dates.map(function (date) {
-        //            var hit = chart2data.find(function (e) {
-        //                return e.date === date;
-        //            }).productInformation.find(function (p) {
-        //                return p.productName === label;
-        //            });
-        //            return hit ? hit.totalWeight : 0;
-        //        }).slice(min_x, max_x + 1),
-        //        backgroundColor: getRandomColor()
-        //    };
-        //});
 
         function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length) ; i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -448,6 +512,8 @@
                 }
             }
         };
+
+       
         $('#chart2div').empty();
         $('#chart2div').append('<canvas id="chart2" style="height:300px;" height="300"></canvas>');
         var ctx = document.getElementById("chart2").getContext("2d");
@@ -489,6 +555,9 @@
                     scaleLabel: {
                         display: true,
                         labelString: 'Weight In Grams'
+                    },
+                    ticks: {
+                        beginAtZero: true
                     }
                 }]
             },
@@ -500,13 +569,18 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        return "Weight: " + tooltipItems.yLabel + ' gm';
+                        var weight = tooltipItems.yLabel;
+                        if (weight <= 1000)
+                            return tooltipItems.yLabel + ' gm';
+                        else
+                            return tooltipItems.yLabel/1000 + ' kg';
                     }
-                }
+                },
+                displayColors: false
             }
         }
         $('#chart1div').empty();
-        $('#chart1div').append('<canvas id="chart1" style="height: 265px;" height="265" width="787"></canvas>');
+        $('#chart1div').append('<canvas id="chart1" style="height: 250px;" height="250" width="787"></canvas>');
         var ctx = document.getElementById("chart1").getContext("2d");
         var chart1 = new Chart(ctx, {
             type: 'bar',
@@ -536,4 +610,4 @@
             products.push(data[index].productInformation[i].productName);
         }
     }
-};
+}

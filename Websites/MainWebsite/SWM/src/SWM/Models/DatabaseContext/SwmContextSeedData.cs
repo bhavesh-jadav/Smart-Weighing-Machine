@@ -114,7 +114,7 @@ namespace SWM.Models
                         UserId = user.Id,
                         Name = "Farm 1",
                         Address = "Palghar, Thane",
-                        PinNo = 370001,
+                        PinNo = 401404,
                         StateId = 1,
                         CountryId = 1
                     },
@@ -123,7 +123,7 @@ namespace SWM.Models
                         UserId = user.Id,
                         Name = "Farm 2",
                         Address = "Bhuj, Kutch",
-                        PinNo = 400097,
+                        PinNo = 370001,
                         StateId = 2,
                         CountryId = 1
                     }

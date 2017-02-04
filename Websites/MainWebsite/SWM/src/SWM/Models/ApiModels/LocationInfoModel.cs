@@ -10,5 +10,6 @@ namespace SWM.Models.ApiModels
     {
         public string Name { get; set; }
         public string Address { get; set; }
+        public int TotalWeight { get; set; }
     }
 }
