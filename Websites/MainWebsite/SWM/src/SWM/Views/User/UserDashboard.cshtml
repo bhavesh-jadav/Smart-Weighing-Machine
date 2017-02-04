@@ -69,20 +69,72 @@
         </div>
         <div ng-controller="chartsController">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">
-                                Products Information With Weight (in grams) 
+                                Location Wise Product Information
                             </h3>
+                            <div class="pull-right">
+                                <span class="input-group-addon" style="width:0;">Select location</span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <select class="form-control" ng-model="selectedLocation">
+                                        <option ng-repeat="item in locations" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart1()">Go!</button>
+                                </span>
+                            </div>
                             <div style="color:red;">{{chart1Error}}</div>
                         </div>
-                        <div class="box-body" style="height:220px;">
+                        <div id="chart1div" class="box-body">
                             <div class="chart">
-                                <canvas id="chart1" height="200"></canvas>
+                                <canvas id="chart1" style="height: 265px;" height="265" width="787"></canvas>
                             </div>
                         </div>
                         <div class="overlay" ng-show="isBusyChart1">
+                            <i class="fa fa-refresh fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">
+                                Monthly Total Weight
+                            </h3>
+                            <div class="pull-right">
+                                <span class="input-group-addon" style="width:0;">Show data from</span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <select class="form-control" ng-model="chart4StartDate">
+                                        <option ng-repeat="item in chart2Dates" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-addon" style="width:0;">to</span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <select class="form-control" ng-model="chart4EndDate">
+                                        <option ng-repeat="item in chart2Dates" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-btn" style="width:0;">
+                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart4()">Go!</button>
+                                </span>
+                            </div>
+                            <div style="color:red;">{{chart4Error}}</div>
+                        </div>
+                        <div class="box-body">
+                            <div id="chart4div" class="chart">
+                                <canvas id="chart4" style="height: 250px;" height="250" width="787"></canvas>
+                            </div>
+                        </div>
+                        <div class="overlay" ng-show="isBusyChart2">
                             <i class="fa fa-refresh fa-spin"></i>
                         </div>
                     </div>
@@ -118,9 +170,9 @@
                             </div>
                             <div style="color:red;">{{chart2Error}}</div>
                         </div>
-                        <div class="box-body" style="height:420px;">
+                        <div class="box-body">
                             <div id="chart2div" class="chart">
-                                <canvas id="chart2" height="400"></canvas>
+                                <canvas id="chart2" style="height:300px;" height="300"></canvas>
                             </div>
                         </div>
                         <div class="overlay" ng-show="isBusyChart2">
@@ -167,9 +219,9 @@
                             </div>
                             <div style="color:red;">{{chart3Error}}</div>
                         </div>
-                        <div class="box-body" style="height:420px;">
+                        <div class="box-body">
                             <div id="chart3div" class="chart">
-                                <canvas id="chart3" height="400"></canvas>
+                                <canvas id="chart3" style="height:250px;" height="250"></canvas>
                             </div>
                         </div>
                         <div class="overlay" ng-show="isBusyChart2">
@@ -225,7 +277,7 @@
 @section scripts{
     <script src="~/lib/angular/angular.min.js"></script>
     <script src="~/plugins/Chart.min.js"></script>
-    @*<script src="~/dist/js/dashboardScript.js"></script>*@
-    <script src="~/dist/js/dashboardScript.min.js"></script>
+    <script src="~/dist/js/dashboardScript.js"></script>
+    @*<script src="~/dist/js/_app/dashboardScript.min.js"></script>*@
     <script>var username = "@Model.UserName.ToString()";user_dashboard(username);</script>
 }

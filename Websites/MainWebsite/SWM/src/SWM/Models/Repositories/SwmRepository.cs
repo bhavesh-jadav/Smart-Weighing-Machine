@@ -296,7 +296,7 @@ namespace SWM.Models.Repositories
                 user.UserName = userName;
                 await _userManager.UpdateAsync(user);
 
-                string body = String.Format(System.IO.File.ReadAllText("MailBodies/Registration.min.html"), userName, password);
+                string body = String.Format(System.IO.File.ReadAllText("MailBodies/_mailBodies/Registration.html"), userName, password);
                 var res = _mailService.SendMail("SWM", "noreply@swm", userModel.FullName,
                       userModel.Email, "Welcome to SWM", body);
 
@@ -530,7 +530,6 @@ namespace SWM.Models.Repositories
                 locations.Add(new KeyValuePair<int, string>(location.Id, location.Name));
             return locations;
         }
-
         private string getProductNameFromProductToUserId(int ptouId)
         {
             return _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == ptouId).ProductID).Name;

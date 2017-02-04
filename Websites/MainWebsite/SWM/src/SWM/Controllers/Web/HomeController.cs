@@ -85,7 +85,7 @@ namespace SWM.Controllers.Web
         [Route("/Contact")]
         public IActionResult Contact(ContactViewModel model)
         {
-            string body = String.Format(System.IO.File.ReadAllText("MailBodies/Contact.min.html"),
+            string body = String.Format(System.IO.File.ReadAllText("MailBodies/_mailBodies/Contact.html"),
                 model.Name,
                 model.Email,
                 model.Message);
