@@ -214,6 +214,15 @@
             },
             legend: {
                 display: false
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        return "Weight: " + tooltipItems.xLabel + ' gm';
+                    }
+                }
             }
         }
 
@@ -428,6 +437,15 @@
                         labelString: 'Weight In Grams'
                     }
                 }]
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        return data.datasets[tooltipItems.datasetIndex].label + ": " + tooltipItems.yLabel + ' gm';
+                    }
+                }
             }
         };
         $('#chart2div').empty();
@@ -476,6 +494,15 @@
             },
             legend: {
                 display:false
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        return "Weight: " + tooltipItems.yLabel + ' gm';
+                    }
+                }
             }
         }
         $('#chart1div').empty();
