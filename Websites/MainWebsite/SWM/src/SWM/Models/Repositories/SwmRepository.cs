@@ -433,10 +433,8 @@ namespace SWM.Models.Repositories
             var userDashboard = new UserDashboardModel();
             try
             {
-                bool newUser = true;
                 if (_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == userId) != null)
                 {
-                    newUser = false;
                     foreach (var userLocation in _ctx.UserLocations.Where(l => l.UserId == userId).ToList())
                     {
                         userDashboard.UserLocations.Add(new AddNewLocationModel()
@@ -461,17 +459,20 @@ namespace SWM.Models.Repositories
                         userDashboard.ProductsIntoAccount += ", ";
                     }
                     userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
-
-                    var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
-                    var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
-                    userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
                     userDashboard.UserName = _userManager.FindByIdAsync(userId).Result.UserName;
-                    userDashboard.IsNewUser = newUser;
+                    if(cropDatas.ToArray().Length > 0)
+                    {
+                        var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
+                        var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
+                        userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
+                    }
+                    else
+                        userDashboard.HaveSomeData = false;
                     return userDashboard;
                 }
                 else
                 {
-                    userDashboard.IsNewUser = newUser;
+                    userDashboard.IsNewUser = true;
                     return userDashboard;
                 }
             }
