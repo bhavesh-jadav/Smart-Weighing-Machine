@@ -257,8 +257,7 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        var weight = tooltipItems.yLabel;
-                        if (weight <= 1000)
+                        if (tooltipItems.xLabel <= 1000)
                             return tooltipItems.xLabel + ' gm';
                         else
                             return tooltipItems.xLabel / 1000 + ' kg';
@@ -377,8 +376,7 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        var weight = tooltipItems.yLabel;
-                        if (weight <= 1000)
+                        if (tooltipItems.xLabel <= 1000)
                             return tooltipItems.xLabel + ' gm';
                         else
                             return tooltipItems.xLabel / 1000 + ' kg';
