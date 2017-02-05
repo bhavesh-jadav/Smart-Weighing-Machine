@@ -32,6 +32,7 @@ namespace SWM.Models.Repositories
         AdminDashboardModel GetDashBoardForAdmin();
         List<KeyValuePair<int, string>> GetProductNames(string userId);
         List<KeyValuePair<int, string>> GetLocationNames(string userId);
-        List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName);
+        List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear);
+        List<DateTime> GetUserMonths(string userName);
     }
 }

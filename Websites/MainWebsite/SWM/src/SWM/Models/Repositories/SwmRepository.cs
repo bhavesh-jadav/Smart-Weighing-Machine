@@ -548,15 +548,20 @@ namespace SWM.Models.Repositories
         {
             return _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == ptouId).ProductID).Name;
         }
-
-        public List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName)
+        private bool IsBetween(DateTime dt, DateTime start, DateTime end)
+        {
+            return dt >= start && dt <= end;
+        }
+        public List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear)
         {
             List<ProductDataMonthWiseModel> monthWiseData = new List<ProductDataMonthWiseModel>();
             try
             {
+                DateTime startDate = new DateTime(startYear, startMonth, 1);
+                DateTime endDate = new DateTime(endYear, endMonth, DateTime.DaysInMonth(endYear, endMonth));
                 var user = _userManager.FindByNameAsync(userName).Result;
                 var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId) && IsBetween(cd.DateTime,startDate, endDate)).ToList();
                 foreach (var cropData in cropDatas)
                 {
                     if (monthWiseData.Any(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year))
@@ -576,6 +581,24 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return monthWiseData;
+            }
+        }
+
+        public List<DateTime> GetUserMonths(string userName)
+        {
+            List<DateTime> userMonths = new List<DateTime>();
+            try
+            {
+                var user = _userManager.FindByNameAsync(userName).Result;
+                var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).OrderBy(cd => cd.DateTime).GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList();
+                foreach (var cropData in cropDatas)
+                    userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
+                return userMonths;
+            }
+            catch (Exception)
+            {
+                return userMonths;
             }
         }
     }

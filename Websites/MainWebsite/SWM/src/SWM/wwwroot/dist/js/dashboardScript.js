@@ -1,10 +1,11 @@
 ﻿function user_dashboard(username) {
     "use strict";
+    var dates = [];
     var chart2data = [];
-    var chart2Labels = [];
+    var monthLabels = [];
     var products = [];
     var locations = [];
-    var max_x_label = 10;
+    var max_x_label = 8;
     var locationsTotalWeight = [];
     var monthNames = [
                           "January", "February", "March",
@@ -21,7 +22,7 @@
 
     function chartsController($scope, $http) {
         
-        //getting chart1 information
+        //getting chart1 information and drawing chart 1 and 5
         $scope.isBusyChart1 = true;
         $scope.isBusyChart5 = true;
         $http.get("/api/" + username + "/location_info").then(function (response) {
@@ -41,52 +42,57 @@
             $scope.chart1Error = "Unable to display chart"
         });
 
-        //getting chart2
-        $scope.isBusyChart2 = true;
+        //getting user months and calling chart 2, 3 and 4 drawing funcitions
         $scope.showMonthlyCharts = true;
         $scope.chartClass = "col-md-6";
-        $http.get("/api/" + username + "/product_info_month_wise").then(function (response) {
-            var data = response.data;
-            if (data.length > 1) {
-                for (var i = 0; i < data.length; i++) {
-                    chart2data.push(data[i]);
+        $scope.isBusyChart2 = $scope.isBusyChart4 = $scope.isBusyChart3 = true;
+        $http.get("/api/" + username + "/user_months").then(function (response) {
+            dates = response.data;
+            if (dates.length > 1) {
+                for (var i = 0; i < dates.length; i++) {
+                    var date = new Date(dates[i])
+                    monthLabels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
                 }
-                if (chart2data.length >= max_x_label)
-                    var min_x = chart2data.length - max_x_label;
+
+                //decide min and max bound for charts
+                if (dates.length >= max_x_label)
+                    var min_x = dates.length - max_x_label;
                 else
                     var min_x = 0;
-                var max_x = chart2data.length;
-                for (var i = 0; i < chart2data.length; i++) {
-                    var date = new Date(chart2data[i].date)
-                    chart2Labels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
-                }
-                populateProductsArray(chart2data);
-                $scope.products = products;
-                $scope.chart3ProductName = products[0];
-                $scope.chart3StartDate = chart2Labels[min_x];
-                $scope.chart3EndDate = chart2Labels[max_x - 1];
+                var max_x = dates.length;
+                $scope.monthLabels = monthLabels;
 
-                $scope.chart2StartDate = chart2Labels[min_x];
-                $scope.chart2EndDate = chart2Labels[max_x - 1];
-                $scope.chart2Dates = chart2Labels;
+                $scope.chart2StartDate = monthLabels[min_x];
+                $scope.chart2EndDate = monthLabels[max_x - 1];
 
-                $scope.chart4StartDate = chart2Labels[min_x];
-                $scope.chart4EndDate = chart2Labels[max_x - 1];
+                //pupulate the product array for chart3
+                $http.get("/api/" + username + "/product_info").then(function (response) {
+                    populateProductsArray(response.data);
+                    $scope.products = products;
+                    $scope.chart3ProductName = products[0];
+                    $scope.chart3StartDate = monthLabels[min_x];
+                    $scope.chart3EndDate = monthLabels[max_x - 1];
+                    $scope.displayChart3();
+                }, function (error) {
+                    $scope.chart3Error = "Unable to display chart";
+                })
 
-                $scope.isBusyChart2 = false;
-                $scope.chart2Error = draw_chart2($scope.chart2StartDate, $scope.chart2EndDate);
-                $scope.chart3Error = draw_chart3($scope.chart3ProductName, $scope.chart3StartDate, $scope.chart3EndDate);
-                $scope.chart4Error = draw_chart4($scope.chart4StartDate, $scope.chart4EndDate);
+                $scope.chart4StartDate = monthLabels[min_x];
+                $scope.chart4EndDate = monthLabels[max_x - 1];
+
+                $scope.displayChart2();
+                $scope.displayChart4();
             }
             else {
                 $scope.showMonthlyCharts = false;
                 $scope.chartClass = "col-md-12";
             }
-            
+
         }, function (error) {
             $scope.chart2Error = $scope.chart3Error = $scope.chart4Error = "Unable to display chart";
-            $scope.isBusyChart2 = false;
+            $scope.isBusyChart2 = $scope.isBusyChart3 = $scope.isBusyChart4 = false;
         });
+
         $scope.displayChart1 = function () {
             var chart1data = [];
             $scope.isBusyChart1 = true;
@@ -120,17 +126,95 @@
             }
         };
         $scope.displayChart2 = function () {
-            $scope.chart2Error = draw_chart2($scope.chart2StartDate, $scope.chart2EndDate);
+            if ($scope.chart2StartDate == $scope.chart2EndDate)
+                return $scope.chart2Error = "Start month and end month must not have same value";
+            var max_x, min_x;
+            for (var i = 0; i < monthLabels.length; i++) {
+                if (monthLabels[i] === $scope.chart2StartDate)
+                    min_x = i;
+                else if (monthLabels[i] === $scope.chart2EndDate)
+                    max_x = i;
+            }
+            if (min_x > max_x)
+            return $scope.chart2Error = "Start month must come before end month";
+
+            $scope.isBusyChart2 = true;
+            var startDate, endDate;
+            for (var i = 0; i < dates.length; i++) {
+                if (monthLabels[i] == $scope.chart2StartDate)
+                    startDate = new Date(dates[i]);
+                if (monthLabels[i] == $scope.chart2EndDate)
+                    endDate = new Date(dates[i]);
+            }
+            $http.get("/api/" + username + "/product_info_month_wise/" + (startDate.getMonth()+1) + "/" + startDate.getFullYear() + "/" + (endDate.getMonth()+1) + "/" + endDate.getFullYear()).then(function (response) {
+                $scope.isBusyChart2 = false;
+                $scope.chart2Error = draw_chart2($scope.chart2StartDate, $scope.chart2EndDate, response.data);
+            }, function (error) {
+                $scope.isBusyChart2 = false;
+                $scope.chart2Error = "Unable to display chart";
+            });
         };
         $scope.displayChart3 = function () {
-            $scope.chart3Error = draw_chart3($scope.chart3ProductName, $scope.chart3StartDate, $scope.chart3EndDate);
+            if ($scope.chart3StartDate == $scope.chart3EndDate)
+                return $scope.chart3Error = "Start month and end month must not have same value";
+            var max_x, min_x;
+            for (var i = 0; i < monthLabels.length; i++) {
+                if (monthLabels[i] === $scope.chart3StartDate)
+                    min_x = i;
+                else if (monthLabels[i] === $scope.chart3EndDate)
+                    max_x = i;
+            }
+            if (min_x > max_x)
+                return $scope.chart3Error = "Start month must come before end month";
+
+            $scope.isBusyChart3 = true;
+            var startDate, endDate;
+            for (var i = 0; i < dates.length; i++) {
+                if (monthLabels[i] == $scope.chart3StartDate)
+                    startDate = new Date(dates[i]);
+                if (monthLabels[i] == $scope.chart3EndDate)
+                    endDate = new Date(dates[i]);
+            }
+            $http.get("/api/" + username + "/product_info_month_wise/" + (startDate.getMonth() + 1) + "/" + startDate.getFullYear() + "/" + (endDate.getMonth() + 1) + "/" + endDate.getFullYear()).then(function (response) {
+                $scope.isBusyChart3 = false;
+                $scope.chart3Error = draw_chart3($scope.chart3ProductName, $scope.chart3StartDate, $scope.chart3EndDate, response.data);
+            }, function (error) {
+                $scope.isBusyChart3 = false;
+                $scope.chart3Error = "Unable to display chart";
+            });
         };
         $scope.displayChart4 = function () {
-            $scope.chart4Error = draw_chart4($scope.chart4StartDate, $scope.chart4EndDate);
+            if ($scope.chart2StartDate == $scope.chart2EndDate)
+                return $scope.chart4Error = "Start month and end month must not have same value";
+            var max_x, min_x;
+            for (var i = 0; i < monthLabels.length; i++) {
+                if (monthLabels[i] === $scope.chart2StartDate)
+                    min_x = i;
+                else if (monthLabels[i] === $scope.chart2EndDate)
+                    max_x = i;
+            }
+            if (min_x > max_x)
+                return $scope.chart4Error = "Start month must come before end month";
+
+            $scope.isBusyChart4 = true;
+            var startDate, endDate;
+            for (var i = 0; i < dates.length; i++) {
+                if (monthLabels[i] == $scope.chart4StartDate)
+                    startDate = new Date(dates[i]);
+                if (monthLabels[i] == $scope.chart4EndDate)
+                    endDate = new Date(dates[i]);
+            }
+            $http.get("/api/" + username + "/product_info_month_wise/" + (startDate.getMonth()+1) + "/" + startDate.getFullYear() + "/" + (endDate.getMonth()+1) + "/" + endDate.getFullYear()).then(function (response) {
+                $scope.isBusyChart4 = false;
+                $scope.chart4Error = draw_chart4($scope.chart4StartDate, $scope.chart4EndDate, response.data);
+            }, function (error) {
+                $scope.isBusyChart4 = false;
+                $scope.chart4Error = "Unable to display chart";
+            });
         };
     };
-
-    //location wise total weight
+    
+    //monthly total weight chart
     function draw_chart5() {
         var labels = [];
         var data = [];
@@ -195,22 +279,16 @@
         });
     }
 
-    //monthly total weight chart
-    function draw_chart4(startDate, endDate) {
-
-        if (startDate == endDate)
-            return "Start month and end month must not have same value";
+    //location wise total weight
+    function draw_chart4(startDate, endDate, data) {
 
         var max_x, min_x;
-
-        for (var i = 0; i < chart2Labels.length; i++) {
-            if (chart2Labels[i] === startDate)
+        for (var i = 0; i < monthLabels.length; i++) {
+            if (monthLabels[i] === startDate)
                 min_x = i;
-            else if (chart2Labels[i] === endDate)
+            else if (monthLabels[i] === endDate)
                 max_x = i;
         }
-        if (min_x > max_x)
-            return "Start month must come before end month";
 
         //credit to Christian Zosel on stack overflow. converts json data into chart data original was in ES6 converted to ES5
         function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length) ; i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -224,12 +302,12 @@
         };
 
         // step 1: find the distinct dates: ["2016-05-01T00:00:00", ... ]
-        var dates = chart2data.map(function (e) {
+        var dates = data.map(function (e) {
             return e.date;
         });
 
         // step 2: find the distinct labels: [Apple, Mango, ... ]
-        var labels = uniq(flatten(chart2data.map(function (e) {
+        var labels = uniq(flatten(data.map(function (e) {
             return e.productInformation;
         })).map(function (e) {
             return e.productName;
@@ -239,19 +317,18 @@
         var result = labels.map(function (label) {
             return {
                 data: dates.map(function (date) {
-                    var hit = chart2data.find(function (e) {
+                    var hit = data.find(function (e) {
                         return e.date === date;
                     }).productInformation.find(function (p) {
                         return p.productName === label;
                     });
                     return hit ? hit.totalWeight : 0;
-                }).slice(min_x, max_x + 1)
+                })
             };
         });
-
         var chartLabels = [];
         for (var i = min_x; i <= max_x; i++) {
-            chartLabels.push(chart2Labels[i])
+            chartLabels.push(monthLabels[i])
         }
 
         var datas = [];
@@ -324,38 +401,32 @@
     }
 
     //single product monthly data chart
-    function draw_chart3(productName, startDate, endDate) {
-        if (startDate == endDate)
-            return "Start month and end month must not have same value";
-
+    function draw_chart3(productName, startDate, endDate, data) {
         var max_x, min_x;
-
-        for (var i = 0; i < chart2Labels.length; i++) {
-            if (chart2Labels[i] === startDate)
+        for (var i = 0; i < monthLabels.length; i++) {
+            if (monthLabels[i] === startDate)
                 min_x = i;
-            else if (chart2Labels[i] === endDate)
+            else if (monthLabels[i] === endDate)
                 max_x = i;
         }
-        if (min_x > max_x)
-            return "Start month must come before end month";
+
         var chartLabels = [];
         for (var i = min_x; i <= max_x; i++) {
-            chartLabels.push(chart2Labels[i])
+            chartLabels.push(monthLabels[i])
         }
 
         var productData = []
         var j;
-        for (var i = 0; i < chart2data.length; i++) {
-            for (j = 0; j < chart2data[i].productInformation.length; j++) {
-                if (chart2data[i].productInformation[j].productName == productName) {
-                    productData.push(chart2data[i].productInformation[j].totalWeight);
+        for (var i = 0; i < data.length; i++) {
+            for (j = 0; j < data[i].productInformation.length; j++) {
+                if (data[i].productInformation[j].productName == productName) {
+                    productData.push(data[i].productInformation[j].totalWeight);
                     break;
                 }
             }
-            if (j == chart2data[i].productInformation.length)
+            if (j == data[i].productInformation.length)
                 productData.push(0);
         }
-        productData = productData.slice(min_x, max_x + 1);
         var result = [{
             label: productName,
             data: productData,
@@ -400,8 +471,7 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        var weight = tooltipItems.yLabel;
-                        if (weight <= 1000)
+                        if (tooltipItems.yLabel <= 1000)
                             return tooltipItems.yLabel + ' gm';
                         else
                             return tooltipItems.yLabel / 1000 + ' kg';
@@ -423,21 +493,15 @@
     }
 
     //all products monthly data chart
-    function draw_chart2(startDate, endDate) {
-
-        if (startDate == endDate)
-            return "Start month and end month must not have same value";
-
+    function draw_chart2(startDate, endDate, data) {
+        
         var max_x, min_x;
-
-        for (var i = 0; i < chart2Labels.length; i++) {
-            if (chart2Labels[i] === startDate)
+        for (var i = 0; i < monthLabels.length; i++) {
+            if (monthLabels[i] === startDate)
                 min_x = i;
-            else if (chart2Labels[i] === endDate)
+            else if (monthLabels[i] === endDate)
                 max_x = i;
         }
-        if (min_x > max_x)
-            return "Start month must come before end month";
 
         function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length) ; i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -450,12 +514,12 @@
         };
 
         // step 1: find the distinct dates: ["2016-05-01T00:00:00", ... ]
-        var dates = chart2data.map(function (e) {
+        var dates = data.map(function (e) {
             return e.date;
         });
 
         // step 2: find the distinct labels: [Apple, Mango, ... ]
-        var labels = uniq(flatten(chart2data.map(function (e) {
+        var labels = uniq(flatten(data.map(function (e) {
             return e.productInformation;
         })).map(function (e) {
             return e.productName;
@@ -466,20 +530,20 @@
             return {
                 label: label,
                 data: dates.map(function (date) {
-                    var hit = chart2data.find(function (e) {
+                    var hit = data.find(function (e) {
                         return e.date === date;
                     }).productInformation.find(function (p) {
                         return p.productName === label;
                     });
                     return hit ? hit.totalWeight : 0;
-                }).slice(min_x, max_x + 1),
+                }),
                 backgroundColor: getRandomColor()
             };
         });
 
         var chartLabels = [];
         for (var i = min_x; i <= max_x; i++) {
-            chartLabels.push(chart2Labels[i])
+            chartLabels.push(monthLabels[i])
         }
         var barChartData = {
             labels: chartLabels,
@@ -514,7 +578,10 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        return data.datasets[tooltipItems.datasetIndex].label + ": " + tooltipItems.yLabel + ' gm';
+                        if (tooltipItems.yLabel <= 1000)
+                            return data.datasets[tooltipItems.datasetIndex].label + ": " + tooltipItems.yLabel + ' gm';
+                        else
+                            return data.datasets[tooltipItems.datasetIndex].label + ": " + tooltipItems.yLabel/1000 + ' kg';
                     }
                 }
             }
@@ -606,15 +673,8 @@
     }
 
     function populateProductsArray(data) {
-        var index, max = 0;
         for (var i = 0; i < data.length; i++) {
-            if (data[i].productInformation.length > max) {
-                max = data[i].productInformation.length;
-                index = i;
-            }
-        }
-        for (var i = 0; i < max; i++) {
-            products.push(data[index].productInformation[i].productName);
+            products.push(data[i].productName);
         }
     }
 }
