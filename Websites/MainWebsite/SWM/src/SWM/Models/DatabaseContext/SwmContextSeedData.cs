@@ -227,7 +227,7 @@ namespace SWM.Models
             if(!_ctx.CropDatas.Any())
             {
                 Random random = new Random();
-                int dataSize = 300;
+                int dataSize = 20;
 
                 //before adding data into this table verify data in ProductsToUser and UserLocationToMachine tables
                 CropData[] cropDatas = new CropData[dataSize];
