@@ -22,7 +22,7 @@ namespace SWM.Models
             if(_env.IsEnvironment("Production"))
                 optionsBuilder.UseSqlServer(_config["dbstring_s"]);
             else
-                optionsBuilder.UseSqlServer(_config["dbstring_s"]);
+                optionsBuilder.UseSqlServer(_config["dbstring"]);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

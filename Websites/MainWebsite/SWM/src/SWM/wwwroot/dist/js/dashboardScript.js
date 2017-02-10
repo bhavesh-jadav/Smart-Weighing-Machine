@@ -385,9 +385,13 @@
                 displayColors: false
             }
         }
-
+        var height = 0;
+        if (data.length > 15)
+            height = 250 + Math.floor((data.length * 100) * 0.09);
+        else
+            height = 250;
         $('#chart4div').empty();
-        $('#chart4div').append('<canvas id="chart4" style="height: 250px;" height="250" width="787"></canvas>');
+        $('#chart4div').append('<canvas id="chart4" style="height: ' + height + 'px;" height="' + height + '" width="787"></canvas>');
         var ctx = document.getElementById("chart4").getContext("2d");
         var chart4 = new Chart(ctx, {
             type: 'horizontalBar',
