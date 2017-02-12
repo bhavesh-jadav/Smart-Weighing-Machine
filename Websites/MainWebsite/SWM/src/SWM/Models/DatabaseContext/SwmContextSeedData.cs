@@ -51,12 +51,19 @@ namespace SWM.Models
                 };
                 await _roleManager.CreateAsync(role);
             }
-
             if (await _roleManager.FindByNameAsync("user") == null)
             {
                 var role = new UserRoleManager()
                 {
                     Name = "user"
+                };
+                await _roleManager.CreateAsync(role);
+            }
+            if (await _roleManager.FindByNameAsync("testuser") == null)
+            {
+                var role = new UserRoleManager()
+                {
+                    Name = "testuser"
                 };
                 await _roleManager.CreateAsync(role);
             }
@@ -74,7 +81,7 @@ namespace SWM.Models
                     CountryId = 1
                 };
 
-                await _userManager.CreateAsync(user, "bhavesh123");
+                await _userManager.CreateAsync(user, "bhavesh@9769194780");
 
                 if (!await _userManager.IsInRoleAsync(user, "admin"))
                 {
@@ -86,7 +93,7 @@ namespace SWM.Models
             {
                 var user = new SwmUser()
                 {
-                    UserName = "farming101",
+                    UserName = "farming102",
                     Email = "xyz@lolol.com",
                     FullName = "Kaushal Mania",
                     PhoneNumber = "+918888888888",
@@ -101,6 +108,28 @@ namespace SWM.Models
                 if (!await _userManager.IsInRoleAsync(user, "user"))
                 {
                     await _userManager.AddToRoleAsync(user, "user");
+                }
+            }
+
+            if (await _userManager.FindByEmailAsync("pqr@lolol.com") == null)
+            {
+                var user = new SwmUser()
+                {
+                    UserName = "farming101",
+                    Email = "pqr@lolol.com",
+                    FullName = "Bhavesh Jadav",
+                    PhoneNumber = "+918888888888",
+                    Address = "Malad, Mumbai",
+                    PinNo = 400097,
+                    StateId = 1,
+                    CountryId = 1
+                };
+
+                await _userManager.CreateAsync(user, "bhavesh123");
+
+                if (!await _userManager.IsInRoleAsync(user, "testuser"))
+                {
+                    await _userManager.AddToRoleAsync(user, "testuser");
                 }
             }
 
@@ -129,6 +158,31 @@ namespace SWM.Models
                     }
                 };
                 _ctx.UserLocations.AddRange(userLocations);
+
+                user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "pqr@lolol.com");
+                UserLocation[] userLocations2 =
+                {
+                    new UserLocation()
+                    {
+                        UserId = user.Id,
+                        Name = "Farm 1",
+                        Address = "Palghar, Thane",
+                        PinNo = 401404,
+                        StateId = 1,
+                        CountryId = 1
+                    },
+                    new UserLocation()
+                    {
+                        UserId = user.Id,
+                        Name = "Farm 2",
+                        Address = "Bhuj, Kutch",
+                        PinNo = 370001,
+                        StateId = 2,
+                        CountryId = 1
+                    }
+                };
+                _ctx.UserLocations.AddRange(userLocations2);
+
                 await _ctx.SaveChangesAsync();
             }
             //machine data will be updated by its manufacturer
@@ -144,6 +198,12 @@ namespace SWM.Models
                 var mid = _ctx.MachineInformations.FirstOrDefault(m => m.Id == 70000);
                 var mtou = new MachineToUser() { UserID = user.Id, MachineId = mid.Id };
                 _ctx.MachineToUsers.Add(mtou);
+
+                user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "pqr@lolol.com");
+                mid = _ctx.MachineInformations.FirstOrDefault(m => m.Id == 70000);
+                mtou = new MachineToUser() { UserID = user.Id, MachineId = mid.Id };
+                _ctx.MachineToUsers.Add(mtou);
+
                 await _ctx.SaveChangesAsync();
             }
 
@@ -160,7 +220,7 @@ namespace SWM.Models
 
             if (!_ctx.UserToSubscriptions.Any())
             {
-                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
+                var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "pqr@lolol.com");
                 var scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
                 int count = Convert.ToInt16(scount.Value);
                 count++;
@@ -172,7 +232,22 @@ namespace SWM.Models
                     SubscriptionTypeId = subtype.Id,
                     SubscriptionId = count
                 };
+                _ctx.UserToSubscriptions.Add(utos);
+                scount.Value = count.ToString();
+                await _ctx.SaveChangesAsync();
 
+                user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
+                scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
+                count = Convert.ToInt16(scount.Value);
+                count++;
+                subtype = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name == "Farming");
+
+                utos = new UserToSubscription()
+                {
+                    UserID = user.Id,
+                    SubscriptionTypeId = subtype.Id,
+                    SubscriptionId = count
+                };
                 _ctx.UserToSubscriptions.Add(utos);
                 scount.Value = count.ToString();
                 await _ctx.SaveChangesAsync();
@@ -207,6 +282,19 @@ namespace SWM.Models
                 };
                 _ctx.AddRange(ptou);
                 await _ctx.SaveChangesAsync();
+
+                user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "pqr@lolol.com");
+                ProductsToUser[] ptou2 = {
+                    new ProductsToUser { ProductID = 1, UserId = user.Id },
+                    new ProductsToUser { ProductID = 2, UserId = user.Id },
+                    new ProductsToUser { ProductID = 3, UserId = user.Id },
+                    new ProductsToUser { ProductID = 4, UserId = user.Id },
+                    new ProductsToUser { ProductID = 5, UserId = user.Id },
+                    new ProductsToUser { ProductID = 6, UserId = user.Id },
+                    new ProductsToUser { ProductID = 7, UserId = user.Id }
+                };
+                _ctx.AddRange(ptou2);
+                await _ctx.SaveChangesAsync();
             }
             if(!_ctx.UserLocationToMachines.Any())
             {
@@ -217,7 +305,9 @@ namespace SWM.Models
                 UserLocationToMachine[] userLocationsToMachines = new UserLocationToMachine[]
                 {
                     new UserLocationToMachine() { UserLocationId = 1, MachineId = 70000 },
-                    new UserLocationToMachine() { UserLocationId = 2, MachineId = 70000 }
+                    new UserLocationToMachine() { UserLocationId = 2, MachineId = 70000 },
+                    new UserLocationToMachine() { UserLocationId = 3, MachineId = 70000 },
+                    new UserLocationToMachine() { UserLocationId = 4, MachineId = 70000 }
                 };
 
                 _ctx.UserLocationToMachines.AddRange(userLocationsToMachines);
@@ -227,12 +317,18 @@ namespace SWM.Models
             if(!_ctx.CropDatas.Any())
             {
                 Random random = new Random();
-                int dataSize = 300;
+                int dataSize = 600;
 
                 //before adding data into this table verify data in ProductsToUser and UserLocationToMachine tables
                 CropData[] cropDatas = new CropData[dataSize];
                 for (int i = 0; i < dataSize; i++)
-                    cropDatas[i] = new CropData { CropToUserId = random.Next(1, 8), DateTime = new DateTime(random.Next(2015, 2017), random.Next(1, 13), random.Next(1, 29), random.Next(0, 23), random.Next(0, 60), random.Next(0, 60)), UserLocationToMachineId = random.Next(1,3), Weight = random.Next(1, 3001) };
+                    cropDatas[i] = new CropData
+                    {
+                        CropToUserId = random.Next(1, 15),
+                        DateTime = new DateTime(random.Next(2015, 2017), random.Next(1, 13), random.Next(1, 29), random.Next(0, 23), random.Next(0, 60), random.Next(0, 60)),
+                        UserLocationToMachineId = random.Next(1,5),
+                        Weight = random.Next(1, 3001)
+                    };
                 _ctx.AddRange(cropDatas);
                 await _ctx.SaveChangesAsync();
             }

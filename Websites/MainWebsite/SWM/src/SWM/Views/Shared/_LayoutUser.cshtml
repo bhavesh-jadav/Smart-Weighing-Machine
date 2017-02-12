@@ -24,7 +24,7 @@
     {
         ViewBag.color = "skin-green";
     }
-    else if (User.IsInRole("user"))
+    else if (User.IsInRole("user") || User.IsInRole("testuser"))
     {
         ViewBag.color = "skin-blue";
     }
@@ -43,7 +43,6 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </a>
-
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
                         <li>
@@ -55,8 +54,10 @@
         </header>
         <aside class="main-sidebar">
             <section class="sidebar">
-                <div class="user-panel">
-                    <p style="color:white; font-size:20px; margin-bottom:0px;" class="text-center hide-on-sidebar-collapse">@ViewBag.FullName</p>
+                <div class="user-panel info">
+                    <div class="info" style="position:initial;">
+                        <p style="color:white; font-size:20px; margin-bottom:0px;" class="text-center">@ViewBag.FullName</p>
+                    </div>
                 </div>
                 <ul class="sidebar-menu">
                     <li class="header">MAIN NAVIGATION</li>
@@ -65,7 +66,7 @@
                             <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                         </a>
                     </li>
-                    @if (User.IsInRole("user"))
+                    @if (User.IsInRole("user") || User.IsInRole("testuser"))
                     {
                         <li class="">
                             <a asp-controller="User" asp-action="ShowData">
@@ -115,6 +116,16 @@
             </section>
         </aside>
         <div class="content-wrapper">
+            @if (User.IsInRole("testuser"))
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <a class="btn btn-block btn-primary btn-flat" style="border:none;" href="/Contact">
+                            This is a test user account. You won't be able to submit any data to database. The purpose of this user account is to demonstrate functionality, design and layout of this website. Click on this message to contact and get a real user account information.
+                        </a>
+                    </div>
+                </div>
+            }
             <section class="content-header">
                 <h1>
                     @ViewBag.PageHeader

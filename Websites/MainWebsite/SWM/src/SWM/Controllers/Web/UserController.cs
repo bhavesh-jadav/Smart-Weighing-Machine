@@ -34,7 +34,7 @@ namespace SWM.Controllers.Web
             {
                 return View("AdminDashboard", _repo.GetDashBoardForAdmin());
             }
-            else if (User.IsInRole("user"))
+            else if (User.IsInRole("user") || User.IsInRole("testuser"))
             {
                 return View("UserDashboard", _repo.GetDashBoardForUser(User.FindFirst(ClaimTypes.NameIdentifier).Value));
             }
@@ -55,8 +55,7 @@ namespace SWM.Controllers.Web
         }
 
         public IActionResult Settings()
-        {
-            
+        { 
             return View();
         }
 
@@ -154,21 +153,21 @@ namespace SWM.Controllers.Web
         }
         /*--------------------------------User actions--------------------------------------*/
 
-        [HttpPost]
-        [Authorize(Roles = "user")]
-        public IActionResult UserSettings(UserSettingsModel settings)
-        {
-            return View(settings);
-        }
+        //[HttpPost]
+        //[Authorize(Roles = "user")]
+        //public IActionResult UserSettings(UserSettingsModel settings)
+        //{
+        //    return View(settings);
+        //}
 
-        [Authorize(Roles = "user")]
+        [Authorize(Roles = "user,testuser")]
         public IActionResult ShowData()
         {
             List<TableDataModel> tableData = _repo.GetDataForDataTable(_repo.GetUserByUserId(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result);
             return View(tableData);
         }
 
-        [Authorize(Roles = "user")]
+        [Authorize(Roles = "user,testuser")]
         public IActionResult AddNewLocation()
         {
             return View();
@@ -188,7 +187,7 @@ namespace SWM.Controllers.Web
             return View();
         }
 
-        [Authorize(Roles = "user")]
+        [Authorize(Roles = "user,testuser")]
         public IActionResult AddNewProduct()
         {
             return View();

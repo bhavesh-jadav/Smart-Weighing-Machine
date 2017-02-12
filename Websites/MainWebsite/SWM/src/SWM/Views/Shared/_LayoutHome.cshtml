@@ -11,19 +11,19 @@
         <link href="~/distribution/css/site.css" rel="stylesheet" />
         @RenderSection("css", false)
     </head>
-    <body class="hold-transition login-page">
-        <div class="login-box">
-            <div class="login-logo">
-                <a asp-controller="Home" asp-action="Index"><b>SWM</b></a>
-            </div>
-            @RenderBody()
+<body class="hold-transition login-page" style="padding:1px;">
+    <div class="login-box">
+        <div class="login-logo">
+            <a asp-controller="Home" asp-action="Index"><b>SWM</b></a>
         </div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        @RenderSection("scripts", false)
-        <footer style="position: absolute;bottom: auto;text-align: center;width: 100%;margin-left: auto;margin-right: auto;">
-            <strong>Made by <a href="https://www.linkedin.com/in/bhavesh-jadav" target="_blank">Bhavesh Jadav</a> &copy; 2016-2017. Front end by <a href="http://almsaeedstudio.com">Almsaeed Studio</a> &copy; 2014-2016.</strong> All rights
-            reserved.
-        </footer>
-    </body>
+        @RenderBody()
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    @RenderSection("scripts", false)
+    <footer style="position: absolute;bottom: auto;text-align: center;width: 100%;margin-left: auto;margin-right: auto;">
+        <strong>Made by <a href="https://www.linkedin.com/in/bhavesh-jadav" target="_blank">Bhavesh Jadav</a> &copy; 2016-2017. Front end by <a href="http://almsaeedstudio.com">Almsaeed Studio</a> &copy; 2014-2016.</strong> All rights
+        reserved.
+    </footer>
+</body>
 </html>
