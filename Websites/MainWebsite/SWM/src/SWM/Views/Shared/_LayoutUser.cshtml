@@ -118,12 +118,8 @@
         <div class="content-wrapper">
             @if (User.IsInRole("testuser"))
             {
-                <div class="row">
-                    <div class="col-md-12">
-                        <a class="btn btn-block btn-primary btn-flat" style="border:none;" href="/Contact">
-                            This is a test user account. You won't be able to submit any data to database. The purpose of this user account is to demonstrate functionality, design and layout of this website. Click on this message to contact and get a real user account information.
-                        </a>
-                    </div>
+                <div class="callout callout-info" style="margin:0;">
+                    <p>This is a test user account. You won't be able to submit any data to database. The purpose of this user account is to demonstrate functionality, design and layout of this website. <a href="/Contact">Contact Us</a> to get a real user account information.</p>
                 </div>
             }
             <section class="content-header">
