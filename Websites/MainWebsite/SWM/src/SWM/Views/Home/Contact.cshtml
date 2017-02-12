@@ -1,9 +1,12 @@
 ﻿@model ContactViewModel
-<style>
-    .register-box{
-        width:25%;
+@section css{
+    <style>
+    .register-box {
+        width: 25%;
     }
-</style>
+    </style>
+}
+
 <div class="register-box-body">
     <h2 class="login-box-msg">Contact Us</h2>
     @if (ViewBag.SuccessMessage != null)
@@ -33,4 +36,8 @@
         </div>
     </form>
 </div>
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.16.0/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.6/jquery.validate.unobtrusive.min.js"></script>
+}
         

@@ -57,8 +57,8 @@ namespace SWM
             services.AddLogging();
             services.AddMvc(config =>
             {
-                if (_env.IsEnvironment("Production"))
-                    config.Filters.Add(new RequireHttpsAttribute());
+                //if (_env.IsEnvironment("Production"))
+                //    config.Filters.Add(new RequireHttpsAttribute());
                 
             });
             services.Configure<RazorViewEngineOptions>(options => {

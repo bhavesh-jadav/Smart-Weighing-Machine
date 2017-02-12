@@ -1,7 +1,5 @@
 {
   "name": "asp.net",
   "private": true,
-  "dependencies": {
-    "angular": "1.5.8"
-  }
+  "dependencies": {}
 }

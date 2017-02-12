@@ -14,14 +14,20 @@
                         <div class="inner">
                             @if (Model.TotalWeight > 1000)
                             {
-                                <h3>@((Model.TotalWeight / 1000.0).ToString("n2")) Kg</h3>
+                                <h3>@((Model.TotalWeight / 1000.0).ToString("n2"))</h3>
                             }
                             else
                             {
-                                <h3>@Model.TotalWeight Grams</h3>
+                                <h3>@Model.TotalWeight</h3>
                             }
-
-                            <p>Weight</p>
+                            @if (Model.TotalWeight > 1000)
+                            {
+                                <p>Weight in KGs</p>
+                            }
+                            else
+                            {
+                                <p>Weight in Grams</p>
+                            }
                         </div>
                         <div class="icon" style="margin-top:-10px;">
                             <i class="fa  fa-balance-scale" style="font-size:0.73em;"></i>
@@ -193,33 +199,70 @@
                                         Single Product Monthly Information
                                     </h3>
                                     <div class="pull-right">
-                                        <span class="input-group-addon" style="width:0;">Select Product</span>
-                                        <span class="input-group-btn" style="width:0;">
-                                            <select class="form-control" ng-model="chart3ProductName">
-                                                <option ng-repeat="item in products" value="{{item}}">
-                                                    {{item}}
-                                                </option>
-                                            </select>
-                                        </span>
-                                        <span class="input-group-addon" style="width:0;">Show data from</span>
-                                        <span class="input-group-btn" style="width:0;">
-                                            <select class="form-control" ng-model="chart3StartDate">
-                                                <option ng-repeat="item in monthLabels" value="{{item}}">
-                                                    {{item}}
-                                                </option>
-                                            </select>
-                                        </span>
-                                        <span class="input-group-addon" style="width:0;">to</span>
-                                        <span class="input-group-btn" style="width:0;">
-                                            <select class="form-control" ng-model="chart3EndDate">
-                                                <option ng-repeat="item in monthLabels" value="{{item}}">
-                                                    {{item}}
-                                                </option>
-                                            </select>
-                                        </span>
-                                        <span class="input-group-btn" style="width:0;">
-                                            <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart3()">Go!</button>
-                                        </span>
+                                        <div class="row hidden-sm hidden-md hidden-lg">
+                                            <div class="col-xs-12">
+                                                <span class="input-group-addon" style="width:0;">For Product</span>
+                                                <span class="input-group-btn" style="width:0;">
+                                                    <select class="form-control" ng-model="chart3ProductName">
+                                                        <option ng-repeat="item in products" value="{{item}}">
+                                                            {{item}}
+                                                        </option>
+                                                    </select>
+                                                </span>
+                                            </div>
+                                            <div class="col-xs-12">
+                                                <span class="input-group-addon" style="width:0;">Show data from</span>
+                                                <span class="input-group-btn" style="width:0;">
+                                                    <select class="form-control" ng-model="chart3StartDate">
+                                                        <option ng-repeat="item in monthLabels" value="{{item}}">
+                                                            {{item}}
+                                                        </option>
+                                                    </select>
+                                                </span>
+                                            </div>
+                                            <div class="col-xs-12">
+                                                <span class="input-group-addon" style="width:0;">to</span>
+                                                <span class="input-group-btn" style="width:0;">
+                                                    <select class="form-control" ng-model="chart3EndDate">
+                                                        <option ng-repeat="item in monthLabels" value="{{item}}">
+                                                            {{item}}
+                                                        </option>
+                                                    </select>
+                                                </span>
+                                                <span class="input-group-btn" style="width:0;">
+                                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart3()">Go!</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="hidden-xs">
+                                            <span class="input-group-addon" style="width:0;">For Product</span>
+                                            <span class="input-group-btn" style="width:0;">
+                                                <select class="form-control" ng-model="chart3ProductName">
+                                                    <option ng-repeat="item in products" value="{{item}}">
+                                                        {{item}}
+                                                    </option>
+                                                </select>
+                                            </span>
+                                            <span class="input-group-addon" style="width:0;">Show data from</span>
+                                            <span class="input-group-btn" style="width:0;">
+                                                <select class="form-control" ng-model="chart3StartDate">
+                                                    <option ng-repeat="item in monthLabels" value="{{item}}">
+                                                        {{item}}
+                                                    </option>
+                                                </select>
+                                            </span>
+                                            <span class="input-group-addon" style="width:0;">to</span>
+                                            <span class="input-group-btn" style="width:0;">
+                                                <select class="form-control" ng-model="chart3EndDate">
+                                                    <option ng-repeat="item in monthLabels" value="{{item}}">
+                                                        {{item}}
+                                                    </option>
+                                                </select>
+                                            </span>
+                                            <span class="input-group-btn" style="width:0;">
+                                                <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart3()">Go!</button>
+                                            </span>
+                                        </div>
                                     </div>
                                     <div style="color:red;">{{chart3Error}}</div>
                                 </div>
@@ -351,10 +394,9 @@
         </section>
     </div>
     @section scripts{
-        <script src="~/lib/angular/angular.min.js"></script>
-        <script src="~/plugins/Chart.min.js"></script>
-        @*<script src="~/dist/js/dashboardScript.js"></script>*@
-        <script src="~/dist/js/_app/dashboardScript.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+        <script src="~/distribution/js/dashboardScript.js"></script>
         <script>var username = "@Model.UserName.ToString()"; user_dashboard(username);</script>
     }
 }

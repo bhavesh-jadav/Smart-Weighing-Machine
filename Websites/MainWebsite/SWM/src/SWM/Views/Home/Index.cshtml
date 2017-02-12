@@ -1,16 +1,17 @@
 ﻿@model LoginViewModel
+@section css{
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/iCheck/1.0.2/skins/all.css">
+}
 <div class="login-box-body">
     <p class="login-box-msg">Sign in to continue</p>
     <form method="post" novalidate>
         <div style="color:#dd4b39" asp-validation-summary="ModelOnly"></div>
         <div class="form-group has-feedback">
             <input asp-for="UserName" type="text" class="form-control" placeholder="User Name">
-            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             <span asp-validation-for="UserName"></span>
         </div>
         <div class="form-group has-feedback">
             <input asp-for="Password" type="password" class="form-control" placeholder="Password">
-            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             <span asp-validation-for="Password"></span>
         </div>
         <div class="row">
@@ -29,3 +30,16 @@
     <a asp-controller="Home" asp-action="PasswordReset">I forgot my password</a><br>
     <a asp-controller="Home" asp-action="Contact">Any other difficulties? Click here</a>
 </div>
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/iCheck/1.0.2/icheck.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.16.0/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.6/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+            $(function () {
+            $('input').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                    radioClass: 'iradio_square-blue',
+                });
+            });
+        </script>
+}
