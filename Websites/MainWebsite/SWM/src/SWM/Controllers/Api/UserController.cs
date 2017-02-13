@@ -6,6 +6,7 @@ using SWM.Models.Repositories;
 using System.Collections.Generic;
 using SWM.ViewModels;
 using SWM.Models.ApiModels;
+using System.Security.Claims;
 
 namespace SWM.Controllers.Api
 {
@@ -112,6 +113,14 @@ namespace SWM.Controllers.Api
             else
                 return BadRequest("fail");
         }
+
+        //[HttpGet("{userName}/dashboardInfo")]
+        //public IActionResult GetUserDashBoardInformation(string userName)
+        //{
+        //    var user = _userManager.FindByNameAsync(userName).Result;
+        //    var res = _repo.GetDashBoardForUser(user.Id);
+        //    return Ok(res);
+        //}
 
         [AllowAnonymous]
         [HttpPost("login")]

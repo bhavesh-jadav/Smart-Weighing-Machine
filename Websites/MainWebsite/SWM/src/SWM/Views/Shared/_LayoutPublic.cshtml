@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title - SWM</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/css/skins/_all-skins.min.css">
+    <link href="~/distribution/css/site.css" rel="stylesheet" />
+    @RenderSection("css", false)
+</head>
+<body class="hold-transition skin-red sidebar-mini">
+    <div class="wrapper">
+        <header class="main-header">
+            <nav class="navbar navbar-static-top" style="margin:0;">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <a asp-action="Index" asp-controller="Public" class="navbar-brand"><b>SWM</b></a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                    </div>
+                    <div class="collapse navbar-collapse" id="navbar-collapse">
+                        <form class="navbar-form navbar-left" role="search">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="navbar-search-input" placeholder="Search specific user">
+                            </div>
+                        </form>
+                        <ul class="nav navbar-nav">
+                            <li><a href="#">Advance search</a></li>
+                        </ul>
+                        <ul class="nav navbar-nav">
+                            <li><a href="#">Show all users</a></li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a asp-action="SignIn" asp-controller="Home">Sign In</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="content-wrapper" style="margin:0;">
+            @*<section class="content-header">
+                <h1>
+                    @ViewBag.PageHeader
+                    <small>@ViewBag.PageHeaderSmall</small>
+                </h1>
+            </section>*@
+            @RenderBody()
+        </div>
+        <footer class="main-footer" style="margin:0;">
+            <strong>Made by <a href="https://www.linkedin.com/in/bhavesh-jadav" target="_blank">Bhavesh Jadav</a> &copy; 2016-2017. Front end by <a href="http://almsaeedstudio.com">Almsaeed Studio</a> &copy; 2014-2016.</strong> All rights
+            reserved.
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    @RenderSection("scripts", false)
+</body>
+</html>

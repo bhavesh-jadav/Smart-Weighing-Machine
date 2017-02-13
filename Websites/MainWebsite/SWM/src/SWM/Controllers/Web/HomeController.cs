@@ -34,7 +34,7 @@ namespace SWM.Controllers.Web
         }
 
         [Route("/SignIn")]
-        public IActionResult Index()
+        public IActionResult SignIn()
         {
             if (!User.Identity.IsAuthenticated)
             {
@@ -47,7 +47,7 @@ namespace SWM.Controllers.Web
 
         [HttpPost]
         [Route("/SignIn")]
-        public async Task<IActionResult> Index(LoginViewModel loginData, string returnUrl)
+        public async Task<IActionResult> SignIn(LoginViewModel loginData, string returnUrl)
         {
             if(ModelState.IsValid)
             {

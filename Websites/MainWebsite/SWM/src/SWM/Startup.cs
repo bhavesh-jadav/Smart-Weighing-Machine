@@ -80,6 +80,7 @@ namespace SWM
             app.UseStaticFiles();
             app.UseIdentity();
 
+            //do not use error pages when invalid api is called instead return 404 status code.
             Func<HttpContext, bool> isApiRequest = (HttpContext context) => context.Request.Path.ToString().Contains("api");
             app.UseWhen(context => !isApiRequest(context), appBuilder =>
             {
@@ -88,6 +89,12 @@ namespace SWM
 
             app.UseMvc(config =>
             {
+                config.MapRoute(
+                    name: "PublicRoute",
+                    template: "Public/{action}",
+                    defaults: new { controller = "Public", action = "Index" }
+                );
+
                 config.MapRoute(
                     name: "UserRoute",
                     template: "{action}",

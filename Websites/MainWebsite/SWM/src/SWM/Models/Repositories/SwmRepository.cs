@@ -213,7 +213,7 @@ namespace SWM.Models.Repositories
                 int counter = 1;
                 List<TableDataModel> tableData = new List<TableDataModel>();
                 List<ProductsToUser> produtToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => produtToUsers.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => produtToUsers.Any(pu => pu.Id == cd.CropToUserId)).OrderByDescending(cd => cd.DateTime).ToList();
                 List<UserLocationToMachine> userLocationToMachine = _ctx.UserLocationToMachines.Where(ul => cropDatas.Any(cd => cd.UserLocationToMachineId == ul.Id)).ToList();
                 List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => userLocationToMachine.Any(um => um.UserLocationId == ul.Id)).ToList();
 
