@@ -39,7 +39,6 @@ namespace SWM
             services.AddSingleton(_config);
             services.AddIdentity<SwmUser, UserRoleManager>(config =>
             {
-                config.User.RequireUniqueEmail = true;
                 config.Cookies.ApplicationCookie.LoginPath = "/SignIn";
                 config.Cookies.ApplicationCookie.AccessDeniedPath = "/AccessDenied";
                 config.Cookies.ApplicationCookie.ExpireTimeSpan = TimeSpan.FromDays(1);

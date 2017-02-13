@@ -17,7 +17,8 @@
     //getting instance of module and adding controller to the modules
     angular.module("public").controller("chartsController", ["$scope", "$http", chartsController]);
     function chartsController($scope, $http) {
-        $scope.isBusyChart2 = $scope.isBusyChart1 = true;
+        $scope.isBusyChart2 = true;
+        $scope.isBusyChart1 = true;
         $http.get("/api/user_dates").then(function (response) {
             dates = response.data;
             for (var i = 0; i < dates.length; i++) {
@@ -45,8 +46,16 @@
             $scope.chart2StartDate = monthLabels[min_x];
             $scope.chart2EndDate = monthLabels[max_x - 1];
 
+            $http.get("/api/product_info").then(function (response) {
+                populateProductsArray(response.data);
+                $scope.products = products;
+                $scope.chart2ProductName = products[0];
+                $scope.displayChart2();
+            }, function (error) {
+                $scope.chart2Error = "Unable to display chart";
+                $scope.isBusyChart2 = false;
+            });
             $scope.displayChart1();
-            $scope.displayChart2();
         }, function (error) {
             $scope.chart1Error = "Unable to display chart";
             $scope.isBusyChart1 = $scope.isBusyChart2 = false;
@@ -104,7 +113,13 @@
                     endDate = new Date(dates[i]);
             }
 
-
+            $http.get("/api/product_info_month_wise/" + (startDate.getMonth() + 1) + "/" + startDate.getFullYear() + "/" + (endDate.getMonth() + 1) + "/" + endDate.getFullYear()).then(function (response) {
+                $scope.isBusyChart2 = false;
+                $scope.chart2Error = draw_chart2($scope.chart2ProductName, $scope.chart2StartDate, $scope.chart2EndDate, response.data);
+            }, function (error) {
+                $scope.isBusyChart2 = false;
+                $scope.chart2Error = "Unable to display chart";
+            });
 
         }
     }
@@ -225,6 +240,105 @@
             options: chartOptions
         });
         return "";
+    }
+
+    //single product monthly data chart
+    function draw_chart2(productName, startDate, endDate, data) {
+        var max_x, min_x;
+        for (var i = 0; i < monthLabels.length; i++) {
+            if (monthLabels[i] === startDate)
+                min_x = i;
+            else if (monthLabels[i] === endDate)
+                max_x = i;
+        }
+
+        var chartLabels = [];
+        for (var i = min_x; i <= max_x; i++) {
+            chartLabels.push(monthLabels[i])
+        }
+
+        var productData = []
+        var j;
+        for (var i = 0; i < data.length; i++) {
+            for (j = 0; j < data[i].productInformation.length; j++) {
+                if (data[i].productInformation[j].productName == productName) {
+                    productData.push(data[i].productInformation[j].totalWeight);
+                    break;
+                }
+            }
+            if (j == data[i].productInformation.length)
+                productData.push(0);
+        }
+        var result = [{
+            label: productName,
+            data: productData,
+            backgroundColor: "#f7ab40",
+            borderWidth: 5,
+            borderColor: "#d68413",
+            cubicInterpolationMode: "monotone"
+        }];
+
+        var barChartData = {
+            labels: chartLabels,
+            datasets: result
+        };
+        var chartOptions = {
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Products'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Weight In Grams'
+                    },
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+            legend: {
+                display: false,
+                labels: {
+                    display: false
+                }
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        if (tooltipItems.yLabel <= 1000)
+                            return tooltipItems.yLabel + ' gm';
+                        else
+                            return tooltipItems.yLabel / 1000 + ' kg';
+                    }
+                },
+                displayColors: false
+            }
+        }
+
+        $('#chart2div').empty();
+        $('#chart2div').append('<canvas id="chart2" style="height:250px;" height="250"></canvas>');
+        var ctx = document.getElementById("chart2").getContext("2d");
+        var chart2 = new Chart(ctx, {
+            type: 'line',
+            data: barChartData,
+            options: chartOptions
+        });
+        return "";
+    }
+
+    function populateProductsArray(data) {
+        for (var i = 0; i < data.length; i++) {
+            products.push(data[i].productName);
+        }
     }
 }
 )();
