@@ -86,7 +86,23 @@ namespace SWM.Models.Repositories
                 }
                 else
                 {
-                    return new List<ProductInfoModel>();
+                    ProductsToUser[] ctou = _ctx.ProductsToUsers.ToArray();
+                    foreach (var cu in ctou)
+                    {
+                        var productName = GetProductInformation(cu.ProductID).Name;
+                        var data = productInfo.FirstOrDefault(d => d.ProductName == productName);
+                        if(data != null)
+                            data.TotalWeight += _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id).Select(cd => cd.Weight).Sum();
+                        else
+                        {
+                            productInfo.Add(new ProductInfoModel()
+                            {
+                                ProductName = productName,
+                                TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id).Select(cd => cd.Weight).Sum()
+                            });
+                        }
+                    }
+                    return productInfo;
                 }
             }
             catch (Exception ex)
@@ -634,7 +650,6 @@ namespace SWM.Models.Repositories
                 return userMonths;
             }
         }
-
         public PublicDashboardModel GetDashBoardForPublic()
         {
             PublicDashboardModel publicDashboard = new PublicDashboardModel();

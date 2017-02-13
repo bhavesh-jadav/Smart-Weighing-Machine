@@ -52,6 +52,16 @@ namespace SWM.Controllers.Api
                 return BadRequest("Unable to process requrest");
         }
 
+        [HttpGet("product_info")]
+        public IActionResult GetProductInfo()
+        {
+            List<ProductInfoModel> productInfos = _repo.GetProductInfoByUserName("");
+            if (productInfos.Count > 0)
+                return Ok(productInfos);
+            else
+                return BadRequest("Unable to process requrest");
+        }
+
         [HttpGet("{userName}/product_info_month_wise/{startMonth}/{startYear}/{endMonth}/{endYear}")]
         public IActionResult GetProductInforMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear)
         {

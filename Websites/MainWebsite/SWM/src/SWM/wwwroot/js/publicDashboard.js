@@ -3,7 +3,8 @@
     var dates = [];
     var monthLabels = [];
     var products = [];
-    var max_x_label = 8;
+    var chart2_max_x_label = 10;
+    var chart1_max_x_label = 15;
     var monthNames = [
                          "January", "February", "March",
                          "April", "May", "June", "July",
@@ -16,29 +17,39 @@
     //getting instance of module and adding controller to the modules
     angular.module("public").controller("chartsController", ["$scope", "$http", chartsController]);
     function chartsController($scope, $http) {
-        $scope.isBusyChart1 = true;
+        $scope.isBusyChart2 = $scope.isBusyChart1 = true;
         $http.get("/api/user_dates").then(function (response) {
             dates = response.data;
             for (var i = 0; i < dates.length; i++) {
                 var date = new Date(dates[i])
                 monthLabels.push(monthNames[date.getMonth()] + " " + date.getFullYear());
             }
+
+            $scope.monthLabels = monthLabels;
             
-            //decide min and max bound for charts
-            if (dates.length >= max_x_label)
-                var min_x = dates.length - max_x_label;
+            //decide min and max bound for chart1
+            if (dates.length >= chart1_max_x_label)
+                var min_x = dates.length - chart1_max_x_label;
             else
                 var min_x = 0;
             var max_x = dates.length;
-            $scope.monthLabels = monthLabels;
-
             $scope.chart1StartDate = monthLabels[min_x];
             $scope.chart1EndDate = monthLabels[max_x - 1];
 
+            //decide min and max bound for chart2
+            if (dates.length >= chart2_max_x_label)
+                var min_x = dates.length - chart2_max_x_label;
+            else
+                var min_x = 0;
+            var max_x = dates.length;
+            $scope.chart2StartDate = monthLabels[min_x];
+            $scope.chart2EndDate = monthLabels[max_x - 1];
+
             $scope.displayChart1();
+            $scope.displayChart2();
         }, function (error) {
             $scope.chart1Error = "Unable to display chart";
-            $scope.isBusyChart1 = false;
+            $scope.isBusyChart1 = $scope.isBusyChart2 = false;
         });
 
         $scope.displayChart1 = function () {
@@ -54,6 +65,7 @@
             if (min_x > max_x)
                 return $scope.chart1Error = "Start month must come before end month";
             $scope.isBusyChart1 = true;
+
             var startDate, endDate;
             for (var i = 0; i < dates.length; i++) {
                 if (monthLabels[i] == $scope.chart1StartDate)
@@ -68,6 +80,32 @@
                 $scope.isBusyChart1 = false;
                 $scope.chart1Error = "Unable to display chart";
             });
+        }
+
+        $scope.displayChart2 = function () {
+            if ($scope.chart2StartDate == $scope.chart2EndDate)
+                return $scope.chart2Error = "Start month and end month must not have same value";
+            var max_x, min_x;
+            for (var i = 0; i < monthLabels.length; i++) {
+                if (monthLabels[i] === $scope.chart2StartDate)
+                    min_x = i;
+                else if (monthLabels[i] === $scope.chart2EndDate)
+                    max_x = i;
+            }
+            if (min_x > max_x)
+                return $scope.chart2Error = "Start month must come before end month";
+            $scope.isBusyChart2 = true;
+
+            var startDate, endDate;
+            for (var i = 0; i < dates.length; i++) {
+                if (monthLabels[i] == $scope.chart2StartDate)
+                    startDate = new Date(dates[i]);
+                if (monthLabels[i] == $scope.chart2EndDate)
+                    endDate = new Date(dates[i]);
+            }
+
+
+
         }
     }
 
@@ -147,9 +185,6 @@
                     scaleLabel: {
                         display: true,
                         labelString: 'Months'
-                    },
-                    ticks: {
-                        beginAtZero: true
                     }
                 }],
                 yAxes: [{
@@ -157,6 +192,9 @@
                     scaleLabel: {
                         display: true,
                         labelString: 'Weight In Grams'
+                    },
+                    ticks: {
+                        beginAtZero: true
                     }
                 }]
             },
@@ -168,10 +206,10 @@
                 mode: 'single',
                 callbacks: {
                     label: function (tooltipItems, data) {
-                        if (tooltipItems.xLabel <= 1000)
-                            return tooltipItems.xLabel + ' gm';
+                        if (tooltipItems.yLabel <= 1000)
+                            return tooltipItems.yLabel + ' gm';
                         else
-                            return tooltipItems.xLabel / 1000 + ' kg';
+                            return tooltipItems.yLabel / 1000 + ' kg';
                     }
                 },
                 displayColors: false
