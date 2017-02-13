@@ -291,7 +291,8 @@ namespace SWM.Models.Repositories
                     Address = userModel.Address,
                     PinNo = Int32.Parse(userModel.PinNo),
                     StateId = state.Id,
-                    CountryId = country.Id
+                    CountryId = country.Id,
+                    RegisterDate = DateTime.Now
                 }, password);
                 var user = await _userManager.FindByNameAsync(userName);
                 await _userManager.AddToRoleAsync(user, "user");
@@ -572,11 +573,18 @@ namespace SWM.Models.Repositories
             List<ProductDataMonthWiseModel> monthWiseData = new List<ProductDataMonthWiseModel>();
             try
             {
+                List<CropData> cropDatas;
                 DateTime startDate = new DateTime(startYear, startMonth, 1);
                 DateTime endDate = new DateTime(endYear, endMonth, DateTime.DaysInMonth(endYear, endMonth));
-                SwmUser user = _userManager.FindByNameAsync(userName).Result;
-                List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId) && IsBetween(cd.DateTime,startDate, endDate)).ToList();
+                if(userName != "")
+                {
+                    SwmUser user = _userManager.FindByNameAsync(userName).Result;
+                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                    cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId) && IsBetween(cd.DateTime, startDate, endDate)).ToList();
+                }
+                else
+                    cropDatas = _ctx.CropDatas.Where(cd => IsBetween(cd.DateTime, startDate, endDate)).ToList();
+
                 foreach (var cropData in cropDatas)
                 {
                     if (monthWiseData.Any(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year))
@@ -604,16 +612,46 @@ namespace SWM.Models.Repositories
             List<DateTime> userMonths = new List<DateTime>();
             try
             {
-                var user = _userManager.FindByNameAsync(userName).Result;
-                var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).OrderBy(cd => cd.DateTime).GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList();
-                foreach (var cropData in cropDatas)
-                    userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
-                return userMonths;
+                if(userName != "")
+                {
+                    var user = _userManager.FindByNameAsync(userName).Result;
+                    var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                    var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).OrderBy(cd => cd.DateTime).GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList();
+                    foreach (var cropData in cropDatas)
+                        userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
+                    return userMonths;
+                }
+                else
+                {
+                    var cropDatas = _ctx.CropDatas.GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList().OrderBy(cd => cd.Key.Year).ThenBy(cd => cd.Key.Month);
+                    foreach (var cropData in cropDatas)
+                        userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
+                    return userMonths;
+                }
             }
             catch (Exception)
             {
                 return userMonths;
+            }
+        }
+
+        public PublicDashboardModel GetDashBoardForPublic()
+        {
+            PublicDashboardModel publicDashboard = new PublicDashboardModel();
+            try
+            {
+                publicDashboard.TotalUsers = _ctx.SwmUsers.ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).Count();
+                publicDashboard.TotalWeight = _ctx.CropDatas.Select(cd => cd.Weight).Sum();
+                publicDashboard.TotalMachines = _ctx.MachineInformations.Count();
+                publicDashboard.TotalProducts = _ctx.ProductInformations.Count();
+                publicDashboard.TotalUserLocations = _ctx.UserLocations.Count();
+                publicDashboard.LastUserRegisterd = _ctx.SwmUsers.OrderByDescending(u => u.RegisterDate).ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).First().FullName;
+
+                return publicDashboard;
+            }
+            catch(Exception ex)
+            {
+                return publicDashboard;
             }
         }
     }

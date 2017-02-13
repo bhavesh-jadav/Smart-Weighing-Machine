@@ -10,12 +10,15 @@ namespace SWM.ViewModels
     {
         public PublicDashboardModel()
         {
-            this.TotalMachines = this.TotalProducts = this.TotalUserLocations = this.TotalUsers = this.TotalWeight = 0;
+            this.TotalMachines = this.TotalProducts = this.TotalUserLocations = this.TotalUsers = 0;
+            this.TotalWeight = 0;
+            this.LastUserRegisterd = "";
         }
         public int TotalUsers { get; set; }
-        public int TotalWeight { get; set; }
+        public long TotalWeight { get; set; }
         public int TotalProducts { get; set; }
         public int TotalMachines { get; set; }
         public int TotalUserLocations { get; set; }
+        public string LastUserRegisterd { get; set; }
     }
 }

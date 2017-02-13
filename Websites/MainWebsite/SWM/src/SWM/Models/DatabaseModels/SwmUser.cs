@@ -22,5 +22,7 @@ namespace SWM.Models
         public int StateId { get; set; }
         [Required]
         public int CountryId { get; set; }
+        [Required]
+        public DateTime RegisterDate { get; set; }
     }
 }

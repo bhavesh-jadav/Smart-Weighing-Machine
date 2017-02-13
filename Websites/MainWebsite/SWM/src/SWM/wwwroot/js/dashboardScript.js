@@ -46,7 +46,7 @@
         $scope.showMonthlyCharts = true;
         $scope.chartClass = "col-md-6";
         $scope.isBusyChart2 = $scope.isBusyChart4 = $scope.isBusyChart3 = true;
-        $http.get("/api/" + username + "/user_months").then(function (response) {
+        $http.get("/api/" + username + "/user_dates").then(function (response) {
             dates = response.data;
             if (dates.length > 1) {
                 for (var i = 0; i < dates.length; i++) {

@@ -78,7 +78,8 @@ namespace SWM.Models
                     Address = "Malad east, Mumbai",
                     PinNo = 400097,
                     StateId = 1,
-                    CountryId = 1
+                    CountryId = 1,
+                    RegisterDate = DateTime.Now
                 };
 
                 await _userManager.CreateAsync(user, "bhavesh@9769194780");
@@ -100,7 +101,8 @@ namespace SWM.Models
                     Address = "Borivali, Mumbai",
                     PinNo = 400097,
                     StateId = 1,
-                    CountryId = 1
+                    CountryId = 1,
+                    RegisterDate = DateTime.Now
                 };
 
                 await _userManager.CreateAsync(user, "kaushal123");
@@ -122,7 +124,8 @@ namespace SWM.Models
                     Address = "Malad, Mumbai",
                     PinNo = 400097,
                     StateId = 1,
-                    CountryId = 1
+                    CountryId = 1,
+                    RegisterDate = DateTime.Now
                 };
 
                 await _userManager.CreateAsync(user, "bhavesh123");

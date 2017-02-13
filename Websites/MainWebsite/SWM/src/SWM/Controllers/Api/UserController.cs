@@ -62,10 +62,30 @@ namespace SWM.Controllers.Api
                 return BadRequest("Unable to process requrest");
         }
 
-        [HttpGet("{userName}/user_months")]
+        [HttpGet("product_info_month_wise/{startMonth}/{startYear}/{endMonth}/{endYear}")]
+        public IActionResult GetProductInforMonthWise(int startMonth, int startYear, int endMonth, int endYear)
+        {
+            var res = _repo.GetProductDataMonthWise("", startMonth, startYear, endMonth, endYear);
+            if (res.Count > 0)
+                return Ok(res);
+            else
+                return BadRequest("Unable to process requrest");
+        }
+
+        [HttpGet("{userName}/user_dates")]
         public IActionResult UserMonths(string userName)
         {
             var res = _repo.GetUserMonths(userName);
+            if (res.Count > 0)
+                return Ok(res);
+            else
+                return BadRequest("Unable to process requrest");
+        }
+
+        [HttpGet("user_dates")]
+        public IActionResult UserMonths()
+        {
+            var res = _repo.GetUserMonths("");
             if (res.Count > 0)
                 return Ok(res);
             else
