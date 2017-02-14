@@ -8,8 +8,8 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    [Migration("20161016112027_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20170214155529_InitialMigrations")]
+    partial class InitialMigrations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -148,9 +148,9 @@ namespace SWM.Migrations
 
                     b.Property<DateTime>("DateTime");
 
-                    b.Property<int>("FarmLocationId");
-
                     b.Property<int>("TroughId");
+
+                    b.Property<int>("UserLocationToMachineId");
 
                     b.Property<int>("Weight");
 
@@ -199,18 +199,6 @@ namespace SWM.Migrations
                     b.HasKey("Name");
 
                     b.ToTable("OtherDatas");
-                });
-
-            modelBuilder.Entity("SWM.Models.PinNumber", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Pin");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PinNumbers");
                 });
 
             modelBuilder.Entity("SWM.Models.ProductInformation", b =>
@@ -275,8 +263,14 @@ namespace SWM.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 200);
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
+
+                    b.Property<int>("CountryId");
 
                     b.Property<string>("Email")
                         .HasAnnotation("MaxLength", 256);
@@ -303,7 +297,13 @@ namespace SWM.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed");
 
+                    b.Property<int>("PinNo");
+
+                    b.Property<DateTime>("RegisterDate");
+
                     b.Property<string>("SecurityStamp");
+
+                    b.Property<int>("StateId");
 
                     b.Property<bool>("TwoFactorEnabled");
 
@@ -335,7 +335,7 @@ namespace SWM.Migrations
                     b.Property<string>("Name")
                         .IsRequired();
 
-                    b.Property<int>("PinId");
+                    b.Property<int>("PinNo");
 
                     b.Property<int>("StateId");
 
@@ -365,7 +365,7 @@ namespace SWM.Migrations
                 {
                     b.Property<string>("UserID");
 
-                    b.Property<int>("SubscriptionId");
+                    b.Property<string>("SubscriptionId");
 
                     b.Property<int>("SubscriptionTypeId");
 

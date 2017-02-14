@@ -13,5 +13,6 @@ namespace SWM.ViewModels
         public string ProductsIntoAccount { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
+        public string SubId { get; set; }
     }
 }

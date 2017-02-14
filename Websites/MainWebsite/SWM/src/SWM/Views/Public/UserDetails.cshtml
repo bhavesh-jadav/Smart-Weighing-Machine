@@ -1,4 +1,8 @@
-﻿@section css{
+﻿@model UserDetailsModel
+@{ 
+    string products = "";
+}
+@section css{
     <link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 }
 <section class="content">
@@ -6,29 +10,40 @@
         <div class="col-lg-offset-1 col-lg-5 col-md-6 col-xs-12">
             <div class="box box-widget widget-user">
                 <div class="widget-user-header bg-aqua-active">
-                    <h3 class="widget-user-username">Alexander Pierce</h3>
-                    <h5 class="widget-user-desc">Founder &amp; CEO</h5>
+                    <h3 class="widget-user-username">@Model.FullName</h3>
+                    <h5 class="widget-user-desc">@Model.SubType</h5>
                 </div>
                 <div class="widget-user-image">
-                    <img class="img-circle" src="~/distribution/images/default-user-image.png" alt="User Avatar"/>
+                    <img class="img-circle" src="~/distribution/images/default-user-image.png" alt="User Avatar" />
                 </div>
                 <div class="box-footer">
                     <div class="row">
                         <div class="col-sm-4 border-right">
                             <div class="description-block">
-                                <h5 class="description-header">3,200</h5>
+                                <h5 class="description-header">@Model.ProductsIntoAccount.Count</h5>
                                 <span class="description-text">Products</span>
                             </div>
                         </div>
                         <div class="col-sm-4 border-right">
                             <div class="description-block">
-                                <h5 class="description-header">13,000</h5>
+                                @if (Model.TotalWeight >= 1000000)
+                                {
+                                    <h5 class="description-header">@((Model.TotalWeight / 1000000.0).ToString("n2")) Tonne(s)</h5>
+                                }
+                                else if (Model.TotalWeight >= 1000)
+                                {
+                                    <h5 class="description-header">@((Model.TotalWeight / 1000.0).ToString("n2")) KG(s)</h5>
+                                }
+                                else
+                                {
+                                    <h5 class="description-header">@Model.TotalWeight Gram(s)</h5>
+                                }
                                 <span class="description-text">Weight</span>
                             </div>
                         </div>
                         <div class="col-sm-4">
                             <div class="description-block">
-                                <h5 class="description-header">35</h5>
+                                <h5 class="description-header">@Model.UserLocations.Count</h5>
                                 <span class="description-text">Locations</span>
                             </div>
                         </div>
@@ -40,7 +55,16 @@
                     <h3 class="box-title">Products Into Accounts</h3>
                 </div>
                 <div class="box-body">
-                    
+                    @{
+                        foreach (var product in Model.ProductsIntoAccount)
+                        {
+                            products += product.Name;
+                            products += " ";
+                        }
+                        products = products.TrimEnd();
+                        products = products.Replace(" ", ", ");
+                    }
+                    @products
                 </div>
             </div>
             <div class="box box-danger">
@@ -48,7 +72,21 @@
                     <h3 class="box-title">Locations</h3>
                 </div>
                 <div class="box-body">
-
+                    @if (Model.UserLocations != null)
+                    {
+                        foreach (var location in Model.UserLocations)
+                        {
+                            <div style="margin-bottom:10px;">
+                                <P style="margin:0"><b>Farm Name:</b> @location.Name</P>
+                                <P style="margin:0"><b>Address:</b> @location.Address</P>
+                                <div style="overflow-x:auto">
+                                    <span><b>Pin No:</b> @location.PinNo, </span>
+                                    <span><b>State:</b> @location.State, </span>
+                                    <span><b>Country:</b> @location.Country, </span>
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
             <div class="box box-success">
@@ -56,7 +94,8 @@
                     <h3 class="box-title">Contact Information</h3>
                 </div>
                 <div class="box-body">
-
+                    <p>Email: @Model.Email</p>
+                    <p>Contact No. @Model.ContactNo</p>
                 </div>
             </div>
         </div>
@@ -78,7 +117,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                
+                                @foreach (var tableData in Model.LatestUpdatedTables)
+                                {
+                                    <tr>
+                                        <td>@tableData.No</td>
+                                        <td>@tableData.ProductName</td>
+                                        <td>@tableData.DateAndTime</td>
+                                        <td>@tableData.Weight</td>
+                                        <td>@tableData.Location</td>
+                                    </tr>
+                                }
                             </tbody>
                             <tfoot>
                                 <tr>
@@ -103,7 +151,7 @@
       $(function () {
           $("#data-table").DataTable({
               "responsive": true,
-              "iDisplayLength": 25
+              "iDisplayLength": 15
           });
       });
     </script>

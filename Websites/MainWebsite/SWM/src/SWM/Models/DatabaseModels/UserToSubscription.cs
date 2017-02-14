@@ -12,7 +12,7 @@ namespace SWM.Models
         [Required]
         public string UserID { get; set; }
         [Required]
-        public int SubscriptionId { get; set; }
+        public string SubscriptionId { get; set; }
         [Required]
         public int SubscriptionTypeId { get; set; }
     }

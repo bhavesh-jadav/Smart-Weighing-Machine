@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace SWM.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class InitialMigrations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -57,8 +57,8 @@ namespace SWM.Migrations
                 {
                     CropToUserId = table.Column<int>(nullable: false),
                     DateTime = table.Column<DateTime>(nullable: false),
-                    FarmLocationId = table.Column<int>(nullable: false),
                     TroughId = table.Column<int>(nullable: false),
+                    UserLocationToMachineId = table.Column<int>(nullable: false),
                     Weight = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -103,19 +103,6 @@ namespace SWM.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OtherDatas", x => x.Name);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PinNumbers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Pin = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PinNumbers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -178,7 +165,9 @@ namespace SWM.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
+                    Address = table.Column<string>(maxLength: 200, nullable: false),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
+                    CountryId = table.Column<int>(nullable: false),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     FullName = table.Column<string>(maxLength: 200, nullable: false),
@@ -189,7 +178,10 @@ namespace SWM.Migrations
                     PasswordHash = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
+                    PinNo = table.Column<int>(nullable: false),
+                    RegisterDate = table.Column<DateTime>(nullable: false),
                     SecurityStamp = table.Column<string>(nullable: true),
+                    StateId = table.Column<int>(nullable: false),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     UserName = table.Column<string>(maxLength: 256, nullable: true)
                 },
@@ -207,7 +199,7 @@ namespace SWM.Migrations
                     Address = table.Column<string>(nullable: false),
                     CountryId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: false),
-                    PinId = table.Column<int>(nullable: false),
+                    PinNo = table.Column<int>(nullable: false),
                     StateId = table.Column<int>(nullable: false),
                     UserId = table.Column<string>(nullable: false)
                 },
@@ -235,7 +227,7 @@ namespace SWM.Migrations
                 columns: table => new
                 {
                     UserID = table.Column<string>(nullable: false),
-                    SubscriptionId = table.Column<int>(nullable: false),
+                    SubscriptionId = table.Column<string>(nullable: false),
                     SubscriptionTypeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -402,9 +394,6 @@ namespace SWM.Migrations
 
             migrationBuilder.DropTable(
                 name: "OtherDatas");
-
-            migrationBuilder.DropTable(
-                name: "PinNumbers");
 
             migrationBuilder.DropTable(
                 name: "ProductInformations");

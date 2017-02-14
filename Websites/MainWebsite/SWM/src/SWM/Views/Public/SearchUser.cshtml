@@ -26,7 +26,7 @@
                                 {
                                     <tr>
                                         <td>@tableData.No</td>
-                                        <td>@tableData.FullName</td>
+                                        <td><a href="/Public/User/@tableData.SubId">@tableData.FullName</a></td>
                                         <td>@tableData.ProductsIntoAccount</td>
                                         <td>@tableData.State</td>
                                         <td>@tableData.Country</td>
@@ -55,8 +55,7 @@
     <script>
       $(function () {
           $("#data-table").DataTable({
-              "responsive": true,
-              "iDisplayLength": 25
+              "responsive": true
           });
       });
     </script>

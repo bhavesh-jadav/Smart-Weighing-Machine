@@ -168,8 +168,8 @@ namespace SWM.Models
                     new UserLocation()
                     {
                         UserId = user.Id,
-                        Name = "Farm 1",
-                        Address = "Palghar, Thane",
+                        Name = "Farm 3",
+                        Address = "Vasai Road, Thane",
                         PinNo = 401404,
                         StateId = 1,
                         CountryId = 1
@@ -177,8 +177,8 @@ namespace SWM.Models
                     new UserLocation()
                     {
                         UserId = user.Id,
-                        Name = "Farm 2",
-                        Address = "Bhuj, Kutch",
+                        Name = "Farm 4",
+                        Address = "Junagadh, Kutch",
                         PinNo = 370001,
                         StateId = 2,
                         CountryId = 1
@@ -214,7 +214,7 @@ namespace SWM.Models
             {
                 OtherData[] otherdatas =
                 {
-                    new OtherData(){ Name = "SubscriptionCount", Value = "100" },
+                    new OtherData(){ Name = "UserCounts", Value = "100" },
                     new OtherData(){ Name = "WebEnv", Value = "Development" }
                 };
                 _ctx.OtherDatas.AddRange(otherdatas);
@@ -224,7 +224,7 @@ namespace SWM.Models
             if (!_ctx.UserToSubscriptions.Any())
             {
                 var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "pqr@lolol.com");
-                var scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
+                var scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "UserCounts");
                 int count = Convert.ToInt16(scount.Value);
                 count++;
                 var subtype = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name == "Farming");
@@ -233,14 +233,14 @@ namespace SWM.Models
                 {
                     UserID = user.Id,
                     SubscriptionTypeId = subtype.Id,
-                    SubscriptionId = count
+                    SubscriptionId = Guid.NewGuid().ToString().Replace("-", "")
                 };
                 _ctx.UserToSubscriptions.Add(utos);
                 scount.Value = count.ToString();
                 await _ctx.SaveChangesAsync();
 
                 user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
-                scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
+                scount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "UserCounts");
                 count = Convert.ToInt16(scount.Value);
                 count++;
                 subtype = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name == "Farming");
@@ -249,7 +249,7 @@ namespace SWM.Models
                 {
                     UserID = user.Id,
                     SubscriptionTypeId = subtype.Id,
-                    SubscriptionId = count
+                    SubscriptionId = Guid.NewGuid().ToString().Replace("-", "")
                 };
                 _ctx.UserToSubscriptions.Add(utos);
                 scount.Value = count.ToString();
@@ -320,20 +320,29 @@ namespace SWM.Models
             if(!_ctx.CropDatas.Any())
             {
                 Random random = new Random();
-                int dataSize = 600;
+                int dataSize = 300;
 
-                //before adding data into this table verify data in ProductsToUser and UserLocationToMachine tables
-                CropData[] cropDatas = new CropData[dataSize];
-                for (int i = 0; i < dataSize; i++)
-                    cropDatas[i] = new CropData
-                    {
-                        CropToUserId = random.Next(1, 15),
-                        DateTime = new DateTime(random.Next(2015, 2017), random.Next(1, 13), random.Next(1, 29), random.Next(0, 23), random.Next(0, 60), random.Next(0, 60)),
-                        UserLocationToMachineId = random.Next(1,5),
-                        Weight = random.Next(1, 3001)
-                    };
-                _ctx.AddRange(cropDatas);
-                await _ctx.SaveChangesAsync();
+                var users = _ctx.SwmUsers.ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result || _userManager.IsInRoleAsync(u, "testuser").Result).ToList();
+                foreach (var user in users)
+                {
+                    var ptous = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).Select(pu => pu.Id).ToArray();
+                    var uls = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
+                    var utoms = _ctx.UserLocationToMachines.Where(um => uls.Any(ul => ul.Id == um.UserLocationId)).Select(um => um.Id).ToArray();
+
+                    //before adding data into this table verify data in ProductsToUser and UserLocationToMachine tables
+                    CropData[] cropDatas = new CropData[dataSize];
+                    for (int i = 0; i < dataSize; i++)
+                        cropDatas[i] = new CropData
+                        {
+                            CropToUserId = ptous[random.Next(0, ptous.Length)],
+                            DateTime = new DateTime(random.Next(2015, 2017), random.Next(1, 13), random.Next(1, 29), random.Next(0, 23), random.Next(0, 60), random.Next(0, 60)),
+                            UserLocationToMachineId = utoms[random.Next(0, utoms.Length)],
+                            Weight = random.Next(1, 3001)
+                        };
+                    _ctx.AddRange(cropDatas);
+                    await _ctx.SaveChangesAsync();
+
+                }
             }
 
             await _ctx.SaveChangesAsync();

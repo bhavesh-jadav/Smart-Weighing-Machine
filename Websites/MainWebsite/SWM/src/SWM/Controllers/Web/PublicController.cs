@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace SWM.Controllers.Web
 {
-    [Route("Public")]
     public class PublicController : Controller
     {
         private ISwmRepository _repo;
@@ -32,10 +31,12 @@ namespace SWM.Controllers.Web
             return View(results);
         }
 
-        [Route("User/{subId}")]
-        public IActionResult UserDetails(string userName)
+        [Route("Public/User/{subId}")]
+        public IActionResult UserDetails(string subId)
         {
-            return View();
+            ViewBag.Title = "User Details";
+            var result = _repo.GetUserDetails(subId);
+            return View(result);
         }
     }
 }

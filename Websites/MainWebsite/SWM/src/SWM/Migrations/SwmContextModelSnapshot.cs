@@ -364,7 +364,7 @@ namespace SWM.Migrations
                 {
                     b.Property<string>("UserID");
 
-                    b.Property<int>("SubscriptionId");
+                    b.Property<string>("SubscriptionId");
 
                     b.Property<int>("SubscriptionTypeId");
 

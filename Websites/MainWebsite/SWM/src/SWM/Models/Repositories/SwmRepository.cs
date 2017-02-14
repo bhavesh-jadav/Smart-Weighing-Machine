@@ -241,7 +241,7 @@ namespace SWM.Models.Repositories
                 //Key locationId value locationname
                 Dictionary<int, string> locationInfo = new Dictionary<int, string>();
                 foreach (var data in userLocationToMachine)
-                    locationInfo.Add(data.UserLocationId, _ctx.UserLocations.FirstOrDefault(ul => ul.Id == data.UserLocationId).Name);
+                    locationInfo.Add(data.UserLocationId, _ctx.UserLocations.FirstOrDefault(ul => ul.Id == data.UserLocationId).Address);
 
                 foreach (var cropData in cropDatas)
                 {
@@ -314,14 +314,15 @@ namespace SWM.Models.Repositories
                 await _userManager.AddToRoleAsync(user, "user");
 
                 var subscriptionTypeId = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Name.ToLower() == userModel.SubscriptionTypes[0].ToLower()).Id;
-                var subscriptionCount = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "SubscriptionCount");
-                var subscriptionId = Int32.Parse(subscriptionCount.Value);
-                subscriptionId++;
-                _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionTypeId = subscriptionTypeId, SubscriptionId = subscriptionId });
-                subscriptionCount.Value = subscriptionId.ToString();
+                var UserCounts = _ctx.OtherDatas.FirstOrDefault(c => c.Name == "UserCounts");
+                int userCounts = Int32.Parse(UserCounts.Value);
+                userCounts++;
+
+                _ctx.UserToSubscriptions.Add(new UserToSubscription() { UserID = user.Id, SubscriptionTypeId = subscriptionTypeId, SubscriptionId = Guid.NewGuid().ToString().Replace("-", "") });
+                UserCounts.Value = userCounts.ToString();
                 _ctx.SaveChanges();
 
-                userName = userModel.SubscriptionTypes[0].Trim().ToLower() + subscriptionId.ToString();
+                userName = userModel.SubscriptionTypes[0].Trim().ToLower() + userCounts.ToString();
                 user.UserName = userName;
                 await _userManager.UpdateAsync(user);
 
@@ -670,7 +671,6 @@ namespace SWM.Models.Repositories
                 return publicDashboard;
             }
         }
-
         public List<SearchUserModel> GetSearchResultForUserByFullName(string fullName)
         {
             List<SearchUserModel> result = new List<SearchUserModel>();
@@ -699,7 +699,8 @@ namespace SWM.Models.Repositories
                             FullName = user.FullName,
                             Country = countries[user.CountryId],
                             State = states[user.StateId],
-                            ProductsIntoAccount = products
+                            ProductsIntoAccount = products,
+                            SubId = _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId
                         });
                     }
                 }
@@ -708,6 +709,77 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return result;
+            }
+        }
+        public UserDetailsModel GetUserDetails(string subId)
+        {
+            UserDetailsModel userDetails = new UserDetailsModel();
+            try
+            {
+                Dictionary<int, string> countries = _ctx.Countries.ToDictionary(c => c.Id, c => c.Name);
+                Dictionary<int, string> states = _ctx.States.ToDictionary(c => c.Id, c => c.Name);
+                Dictionary<int, string> productsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
+                SwmUser user = _ctx.SwmUsers.FirstOrDefault(u => u.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).UserID);
+                List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
+                Dictionary<int, int> userLocationToMachine = _ctx.UserLocationToMachines.Where(um => userLocations.Count(ul => ul.Id == um.UserLocationId) > 0).
+                    ToDictionary(um => um.Id, um => um.UserLocationId);
+                List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                Dictionary<int, int> productToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+
+                userDetails.FullName = user.FullName;
+                userDetails.SubType = _ctx.SubscriptionTypes.FirstOrDefault(st => st.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).SubscriptionTypeId).Name;
+                userDetails.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
+                userDetails.ContactNo = user.PhoneNumber;
+                userDetails.Email = user.Email;
+
+                var co = _ctx.CropDatas.Where(c => c.CropToUserId == 3).ToList();
+
+                List<CropData> sortedCropData;
+                int maxDisplayAmount = 15;
+                if(cropDatas.Count > maxDisplayAmount)
+                    sortedCropData = cropDatas.OrderByDescending(cd => cd.DateTime).Take(maxDisplayAmount).ToList();
+                else
+                    sortedCropData = cropDatas.OrderByDescending(cd => cd.DateTime).ToList();
+
+                int counter = 1;
+                foreach (var cropdata in sortedCropData)
+                {
+                    userDetails.LatestUpdatedTables.Add(new UserDetailsLatestUpdatedTableModel()
+                    {
+                        No = counter++,
+                        DateAndTime = cropdata.DateTime,
+                        Location = userLocations.FirstOrDefault(ul => ul.Id == userLocationToMachine[cropdata.UserLocationToMachineId]).Address,
+                        ProductName = productsInfo[productToUsers[cropdata.CropToUserId]],
+                        Weight = cropdata.Weight
+                    });
+                }
+
+                foreach (var data in productToUsers)
+                {
+                    userDetails.ProductsIntoAccount.Add(new ProductInformation()
+                    {
+                        Name = productsInfo[data.Value]
+                    });
+                }
+                
+                foreach (var userLocation in userLocations)
+                {
+                    userDetails.UserLocations.Add(new AddNewLocationModel()
+                    {
+                        Name = userLocation.Name,
+                        Address = userLocation.Address,
+                        Country = countries[userLocation.CountryId],
+                        State = states[userLocation.StateId],
+                        PinNo = userLocation.PinNo.ToString()
+                    });
+                }
+
+                return userDetails;
+            }
+            catch (Exception ex)
+            {
+                return userDetails;
             }
         }
     }
