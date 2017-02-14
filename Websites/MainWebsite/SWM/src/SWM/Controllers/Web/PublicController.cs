@@ -38,5 +38,17 @@ namespace SWM.Controllers.Web
             var result = _repo.GetUserDetails(subId);
             return View(result);
         }
+
+        public IActionResult AdvanceSearch()
+        {
+            ViewBag.Title = "Advance Search";
+            return View();
+        }
+
+        public IActionResult ShowAllUsers()
+        {
+            ViewBag.Title = "All Users";
+            return View();
+        }
     }
 }
