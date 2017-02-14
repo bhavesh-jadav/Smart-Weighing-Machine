@@ -369,7 +369,8 @@ namespace SWM.Models.Repositories
                             LogInUserName = user.UserName,
                             UserId = user.Id,
                             SubscriptionType = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionTypeId).Name,
-                            Address = user.Address + ", Pin: " + user.PinNo + ", State: " + _ctx.States.FirstOrDefault(s => s.Id == user.StateId).Name + ", Country: " + _ctx.Countries.FirstOrDefault(c => c.Id == user.CountryId).Name
+                            Address = user.Address + ", Pin: " + user.PinNo + ", State: " + _ctx.States.FirstOrDefault(s => s.Id == user.StateId).Name + ", Country: " + _ctx.Countries.FirstOrDefault(c => c.Id == user.CountryId).Name,
+                            DateRegisterd = user.RegisterDate
                         });
                     }
                 }
@@ -667,6 +668,46 @@ namespace SWM.Models.Repositories
             catch(Exception ex)
             {
                 return publicDashboard;
+            }
+        }
+
+        public List<SearchUserModel> GetSearchResultForUserByFullName(string fullName)
+        {
+            List<SearchUserModel> result = new List<SearchUserModel>();
+            try
+            {
+                int counter = 1;
+                List<SwmUser> users = _ctx.SwmUsers.Where(u => u.FullName.Contains(fullName) || u.FullName == fullName).ToList();
+                Dictionary<int, string> states = _ctx.States.ToDictionary(s => s.Id, s => s.Name);
+                Dictionary<int, string> countries = _ctx.Countries.ToDictionary(s => s.Id, s => s.Name);
+                foreach (var user in users)
+                {
+                    if(_userManager.IsInRoleAsync(user, "user").Result)
+                    {
+                        string products = "";
+                        Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                        foreach(var product in ptou.Keys)
+                        {
+                            products += _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == ptou[product]).Name;
+                            products += " ";
+                        }
+                        products = products.TrimEnd();
+                        products = products.Replace(" ", ", ");
+                        result.Add(new SearchUserModel()
+                        {
+                            No = counter++,
+                            FullName = user.FullName,
+                            Country = countries[user.CountryId],
+                            State = states[user.StateId],
+                            ProductsIntoAccount = products
+                        });
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return result;
             }
         }
     }

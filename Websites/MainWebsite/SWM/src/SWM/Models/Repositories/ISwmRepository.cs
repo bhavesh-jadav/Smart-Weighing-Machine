@@ -35,5 +35,7 @@ namespace SWM.Models.Repositories
         List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear);
         List<DateTime> GetUserMonths(string userName);
         PublicDashboardModel GetDashBoardForPublic();
+        List<SearchUserModel> GetSearchResultForUserByFullName(string fullName);
+
     }
 }

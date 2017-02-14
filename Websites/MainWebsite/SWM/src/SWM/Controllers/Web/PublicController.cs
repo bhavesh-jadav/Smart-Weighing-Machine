@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SWM.Controllers.Web
 {
+    [Route("Public")]
     public class PublicController : Controller
     {
         private ISwmRepository _repo;
@@ -20,6 +21,21 @@ namespace SWM.Controllers.Web
         {
             ViewBag.Title = "Public";
             return View(_repo.GetDashBoardForPublic());
+        }
+
+        [HttpPost]
+        public IActionResult SearchUser(string FullName)
+        {
+            ViewBag.Title = "Search User";
+            var results = _repo.GetSearchResultForUserByFullName(FullName);
+            ViewBag.SearchResultLength = results.Count;
+            return View(results);
+        }
+
+        [Route("User/{subId}")]
+        public IActionResult UserDetails(string userName)
+        {
+            return View();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+﻿@inject IHttpContextAccessor HttpContextAccessor
+@using Microsoft.AspNetCore.Http;
 @{ 
     ViewBag.FullName = HttpContextAccessor.HttpContext.Request.Cookies["fullName"];
 }
@@ -73,16 +74,21 @@
                                 <i class="fa fa-server"></i> <span>Show Data</span>
                             </a>
                         </li>
-                        <li class="">
-                            <a asp-controller="User" asp-action="AddNewLocation">
-                                <i class="fa fa-globe"></i> <span>Add New Location</span>
-                            </a>
-                        </li>
-                        <li class="">
-                            <a asp-controller="User" asp-action="AddNewProduct">
-                                <i class="fa fa-cube"></i> <span>Add New Product</span>
-                            </a>
-                        </li>
+                        @if ((HttpContextAccessor.HttpContext.Session.GetString("useraccess") == HttpContextAccessor.HttpContext.Request.Cookies["useraccess"])
+                       && !string.IsNullOrEmpty(HttpContextAccessor.HttpContext.Session.GetString("useraccess"))
+                       && !string.IsNullOrEmpty(HttpContextAccessor.HttpContext.Request.Cookies["useraccess"]))
+                        {
+                            <li class="">
+                                <a asp-controller="User" asp-action="AddNewLocation">
+                                    <i class="fa fa-globe"></i> <span>Add New Location</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a asp-controller="User" asp-action="AddNewProduct">
+                                    <i class="fa fa-cube"></i> <span>Add New Product</span>
+                                </a>
+                            </li>
+                        }
                         <li class="">
                             <a asp-controller="Home" asp-action="Contact">
                                 <i class="fa fa-phone"></i> <span>Contact</span>
@@ -113,13 +119,20 @@
                         </li>
                     }
                 </ul>
+
+
+
             </section>
         </aside>
         <div class="content-wrapper">
             @if (User.IsInRole("testuser"))
             {
                 <div class="callout callout-info" style="margin:0;">
-                    <p>This is a test user account. You won't be able to submit any data to database. The purpose of this user account is to demonstrate functionality, design and layout of this website. <a href="/Contact">Contact Us</a> to get a real user account information.</p>
+                    <p>
+                        This is a test user account. You won't be able to submit any data to database. The purpose of this user account is to demonstrate functionality,
+                        design and layout of this website. <a href="/Contact">Contact Us</a> to get a real user account information. All products and locations are added by
+                        admin when creating new a account. Products and locations are added by adming after verification.
+                    </p>
                 </div>
             }
             <section class="content-header">
@@ -140,4 +153,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
     @RenderSection("scripts", false)
 </body>
+
 </html>

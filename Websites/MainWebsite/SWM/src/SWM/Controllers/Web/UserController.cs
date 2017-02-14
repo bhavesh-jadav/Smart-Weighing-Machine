@@ -11,6 +11,10 @@ using SWM.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SWM.Models.Repositories;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace SWM.Controllers.Web
 {
@@ -19,11 +23,13 @@ namespace SWM.Controllers.Web
     {
         private SignInManager<SwmUser> _signInManager;
         private ISwmRepository _repo;
+        private IConfigurationRoot _config;
 
-        public UserController(SignInManager<SwmUser> signInManager, ISwmRepository repo)
+        public UserController(SignInManager<SwmUser> signInManager, ISwmRepository repo, IConfigurationRoot config)
         {
             _signInManager = signInManager;
             _repo = repo;
+            _config = config;
         }
 
         /*---------------------Commen actions between all type of users------------------------------*/
@@ -43,12 +49,17 @@ namespace SWM.Controllers.Web
 
         [AllowAnonymous]
         [Route("/SignOut")]
-        public virtual async Task<IActionResult> SignOut()
+        public async Task<IActionResult> SignOut()
         {
             if (User.Identity.IsAuthenticated)
             {
-                Response.Cookies.Delete("fullName");
                 await _signInManager.SignOutAsync();
+                Response.Cookies.Delete("fullName");
+                if (HttpContext.Session.GetString("useraccess") != "")
+                {
+                    Response.Cookies.Delete("useraccess");
+                    HttpContext.Session.SetString("useraccess", "");
+                }
             }
 
             return RedirectToAction("Index", "Public");
@@ -59,7 +70,7 @@ namespace SWM.Controllers.Web
             return View();
         }
 
-        /*--------------------------------Admin actions--------------------------------------*/
+        /*--------------------------------Admin Actions--------------------------------------*/
 
         [HttpPost]
         [Authorize(Roles = "admin")]
@@ -138,6 +149,55 @@ namespace SWM.Controllers.Web
             return View();
         }
 
+        private string encrypt(string encryptString)
+        {
+            string EncryptionKey = _config["key"];
+            byte[] clearBytes = Encoding.Unicode.GetBytes(encryptString);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] {
+                0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76
+            });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(clearBytes, 0, clearBytes.Length);
+                        cs.Dispose();
+                    }
+                    encryptString = Convert.ToBase64String(ms.ToArray());
+                }
+            }
+            return encryptString;
+        }
+
+        private string decrypt(string cipherText)
+        {
+            string EncryptionKey = _config["key"];
+            cipherText = cipherText.Replace(" ", "+");
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] {
+                0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76
+            });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(cipherBytes, 0, cipherBytes.Length);
+                        cs.Dispose();
+                    }
+                    cipherText = Encoding.Unicode.GetString(ms.ToArray());
+                }
+            }
+            return cipherText;
+        }
+
         [Route("/User/{userName}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> UserAcess(string userName)
@@ -148,10 +208,75 @@ namespace SWM.Controllers.Web
                 await SignOut();
                 await _signInManager.SignInAsync(user, false, null);
                 Response.Cookies.Append("fullName", user.FullName);
+                string ctext = encrypt(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                HttpContext.Session.SetString("useraccess", ctext);
+                Response.Cookies.Append("useraccess", ctext);
             }
             return RedirectToAction("Dashboard", "User");
         }
-        /*--------------------------------User actions--------------------------------------*/
+        /*---------------------------Admin User Access Actions------------------------------*/
+
+        private bool isAllowed()
+        {
+            if (HttpContext.Session.GetString("useraccess") == "" && string.IsNullOrEmpty(HttpContext.Request.Cookies["useraccess"]))
+                return false;
+            return true;
+        }
+        
+        public IActionResult AddNewLocation()
+        {
+            if (isAllowed())
+                return View();
+            else
+                return RedirectToAction("AccessDenied", "Home");
+        }
+        
+        [HttpPost]
+        public IActionResult AddNewLocation(AddNewLocationModel newLocation)
+        {
+            if (isAllowed())
+            {
+                if (_repo.AddNewLocation(newLocation, User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                {
+                    ViewBag.SuccessMessage = "Successfully Added New User";
+                    ModelState.Clear();
+                }
+                else
+                    ModelState.AddModelError("", "Unable to add new location. Try again later");
+                return View();
+            }
+            else
+                return RedirectToAction("AccessDenied", "Home");     
+        }
+        
+        public IActionResult AddNewProduct()
+        {
+            if (isAllowed())
+                return View();
+            else
+                return RedirectToAction("AccessDenied", "Home");
+        }
+        
+        [HttpPost]
+        public IActionResult AddNewProduct(AddNewProductModel newProduct)
+        {
+            if (isAllowed())
+            {
+                if (_repo.AddNewProduct(User.FindFirst(ClaimTypes.NameIdentifier).Value, newProduct))
+                {
+                    ViewBag.SuccessMessage = "Successfully Added New Product";
+                    ModelState.Clear();
+                }
+                else
+                    ModelState.AddModelError("", "Unable to add new product. Try again later");
+                return View();
+            }
+            else
+                return RedirectToAction("AccessDenied", "Home");
+
+        }
+
+        /*--------------------------------User Actions--------------------------------------*/
 
         //[HttpPost]
         //[Authorize(Roles = "user")]
@@ -167,44 +292,6 @@ namespace SWM.Controllers.Web
             return View(tableData);
         }
 
-        [Authorize(Roles = "user,testuser")]
-        public IActionResult AddNewLocation()
-        {
-            return View();
-        }
 
-        [Authorize(Roles = "user")]
-        [HttpPost]
-        public IActionResult AddNewLocation(AddNewLocationModel newLocation)
-        {
-            if(_repo.AddNewLocation(newLocation, User.FindFirst(ClaimTypes.NameIdentifier).Value))
-            {
-                ViewBag.SuccessMessage = "Successfully Added New User";
-                ModelState.Clear();
-            } 
-            else
-                ModelState.AddModelError("", "Unable to add new location. Try again later");
-            return View();
-        }
-
-        [Authorize(Roles = "user,testuser")]
-        public IActionResult AddNewProduct()
-        {
-            return View();
-        }
-
-        [Authorize(Roles = "user")]
-        [HttpPost]
-        public IActionResult AddNewProduct(AddNewProductModel newProduct)
-        {
-            if (_repo.AddNewProduct(User.FindFirst(ClaimTypes.NameIdentifier).Value, newProduct)){
-                ViewBag.SuccessMessage = "Successfully Added New Product";
-                ModelState.Clear();
-            }
-            else
-                ModelState.AddModelError("", "Unable to add new product. Try again later");
-            return View();
-            
-        }
     }
 }

@@ -4,7 +4,7 @@
         <div class="col-md-12">
             <div class="box box-danger">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Website information (read this if you want to know what this website is all about.)</h3>
+                    <h3 class="box-title">Website information (read this if you want to know what this website is all about)</h3>
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse">
                             <i class="fa fa-minus"></i>
@@ -106,23 +106,23 @@
                             All Products Monthly Information
                         </h3>
                         <div class="pull-right">
-                            <span class="input-group-addon" style="width:0;">Show data from</span>
-                            <span class="input-group-btn" style="width:0;">
+                            <span class="input-group-addon" style="width:auto;">Show data from</span>
+                            <span class="input-group-btn" style="width:auto;">
                                 <select class="form-control" ng-model="chart1StartDate">
                                     <option ng-repeat="item in monthLabels" value="{{item}}">
                                         {{item}}
                                     </option>
                                 </select>
                             </span>
-                            <span class="input-group-addon" style="width:0;">to</span>
-                            <span class="input-group-btn" style="width:0;">
+                            <span class="input-group-addon" style="width:auto;">to</span>
+                            <span class="input-group-btn" style="width:auto;">
                                 <select class="form-control" ng-model="chart1EndDate">
                                     <option ng-repeat="item in monthLabels" value="{{item}}">
                                         {{item}}
                                     </option>
                                 </select>
                             </span>
-                            <span class="input-group-btn" style="width:0;">
+                            <span class="input-group-btn" style="width:auto;">
                                 <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart1()">Go!</button>
                             </span>
                         </div>
@@ -149,8 +149,8 @@
                         <div class="pull-right">
                             <div class="row hidden-sm hidden-md hidden-lg">
                                 <div class="col-xs-12">
-                                    <span class="input-group-addon" style="width:0;">For Product</span>
-                                    <span class="input-group-btn" style="width:0;">
+                                    <span class="input-group-addon" style="width:auto;">For Product</span>
+                                    <span class="input-group-btn" style="width:auto;">
                                         <select class="form-control" ng-model="chart2ProductName">
                                             <option ng-repeat="item in products" value="{{item}}">
                                                 {{item}}
@@ -159,8 +159,8 @@
                                     </span>
                                 </div>
                                 <div class="col-xs-12">
-                                    <span class="input-group-addon" style="width:0;">Show data from</span>
-                                    <span class="input-group-btn" style="width:0;">
+                                    <span class="input-group-addon" style="width:auto;">Show data from</span>
+                                    <span class="input-group-btn" style="width:auto;">
                                         <select class="form-control" ng-model="chart2StartDate">
                                             <option ng-repeat="item in monthLabels" value="{{item}}">
                                                 {{item}}
@@ -169,45 +169,45 @@
                                     </span>
                                 </div>
                                 <div class="col-xs-12">
-                                    <span class="input-group-addon" style="width:0;">to</span>
-                                    <span class="input-group-btn" style="width:0;">
+                                    <span class="input-group-addon" style="width:auto;">to</span>
+                                    <span class="input-group-btn" style="width:auto;">
                                         <select class="form-control" ng-model="chart2EndDate">
                                             <option ng-repeat="item in monthLabels" value="{{item}}">
                                                 {{item}}
                                             </option>
                                         </select>
                                     </span>
-                                    <span class="input-group-btn" style="width:0;">
-                                        <button type="button" class="btn btn-primary btn-flat" ng-click="displaychart2()">Go!</button>
+                                    <span class="input-group-btn" style="width:auto;">
+                                        <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart2()">Go!</button>
                                     </span>
                                 </div>
                             </div>
                             <div class="hidden-xs">
-                                <span class="input-group-addon" style="width:0;">For Product</span>
-                                <span class="input-group-btn" style="width:0;">
+                                <span class="input-group-addon" style="width:auto;">For Product</span>
+                                <span class="input-group-btn" style="width:auto;">
                                     <select class="form-control" ng-model="chart2ProductName">
                                         <option ng-repeat="item in products" value="{{item}}">
                                             {{item}}
                                         </option>
                                     </select>
                                 </span>
-                                <span class="input-group-addon" style="width:0;">Show data from</span>
-                                <span class="input-group-btn" style="width:0;">
+                                <span class="input-group-addon" style="width:auto;">Show data from</span>
+                                <span class="input-group-btn" style="width:auto;">
                                     <select class="form-control" ng-model="chart2StartDate">
                                         <option ng-repeat="item in monthLabels" value="{{item}}">
                                             {{item}}
                                         </option>
                                     </select>
                                 </span>
-                                <span class="input-group-addon" style="width:0;">to</span>
-                                <span class="input-group-btn" style="width:0;">
+                                <span class="input-group-addon" style="width:auto;">to</span>
+                                <span class="input-group-btn" style="width:auto;">
                                     <select class="form-control" ng-model="chart2EndDate">
                                         <option ng-repeat="item in monthLabels" value="{{item}}">
                                             {{item}}
                                         </option>
                                     </select>
                                 </span>
-                                <span class="input-group-btn" style="width:0;">
+                                <span class="input-group-btn" style="width:auto;">
                                     <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart2()">Go!</button>
                                 </span>
                             </div>

@@ -60,6 +60,8 @@ namespace SWM
                 //    config.Filters.Add(new RequireHttpsAttribute());
                 
             });
+            services.AddSession();
+            
             services.Configure<RazorViewEngineOptions>(options => {
                 options.ViewLocationExpanders.Add(new ViewLocationExpander());
             });
@@ -85,7 +87,7 @@ namespace SWM
             {
                 appBuilder.UseStatusCodePagesWithRedirects("~/Error/{0}");
             });
-
+            app.UseSession();
             app.UseMvc(config =>
             {
                 config.MapRoute(

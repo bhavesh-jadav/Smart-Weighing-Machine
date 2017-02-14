@@ -15,5 +15,6 @@ namespace SWM.ViewModels
         public string SubscriptionType { get; set; }
         public string Address { get; set; }
         public string ContactNo { get; set; }
+        public DateTime DateRegisterd { get; set; }
     }
 }
