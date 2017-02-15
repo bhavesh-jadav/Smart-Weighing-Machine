@@ -686,6 +686,7 @@ namespace SWM.Models.Repositories
 
                 Dictionary<int, string> states = _ctx.States.ToDictionary(s => s.Id, s => s.Name);
                 Dictionary<int, string> countries = _ctx.Countries.ToDictionary(s => s.Id, s => s.Name);
+                Dictionary<int, string> ProductsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
                 foreach (var user in users)
                 {
                     if(_userManager.IsInRoleAsync(user, "user").Result)
@@ -694,7 +695,7 @@ namespace SWM.Models.Repositories
                         Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
                         foreach(var product in ptou.Keys)
                         {
-                            products += _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == ptou[product]).Name;
+                            products += ProductsInfo[product];
                             products += " ";
                         }
                         products = products.TrimEnd();
@@ -709,6 +710,133 @@ namespace SWM.Models.Repositories
                             SubId = _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId
                         });
                     }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return result;
+            }
+        }
+        public List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters)
+        {
+            List<SearchUserModel> result = new List<SearchUserModel>();
+            try
+            {
+                int satisfyProducts, satisfyLocation, satisfyStates, satisfyCountries;
+
+                Dictionary<int, string> Countries = _ctx.Countries.ToDictionary(c => c.Id, c => c.Name);
+                Dictionary<int, string> States = _ctx.States.ToDictionary(c => c.Id, c => c.Name);
+                Dictionary<int, string> ProductsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
+
+                string[] names, products, states, countries;
+                names = products = states = countries = null;
+                if(!string.IsNullOrEmpty(parameters.FullNames))
+                    names = parameters.FullNames.Split(',');
+                if (!string.IsNullOrEmpty(parameters.Products))
+                    products = parameters.Products.Split(',');
+                if (!string.IsNullOrEmpty(parameters.States))
+                    states = parameters.States.Split(',');
+                if (!string.IsNullOrEmpty(parameters.Countries))
+                    countries = parameters.Countries.Split(',');
+
+                List<SwmUser> users = new List<SwmUser>();
+                if(names != null)
+                {
+                    foreach (var name in names)
+                        users.AddRange(_ctx.SwmUsers.Where(u => u.FullName.Contains(name) || u.FullName == name).ToList()
+                            .Where(u => _userManager.IsInRoleAsync(u, "user").Result).ToList());
+                }
+                else
+                    users = _ctx.SwmUsers.ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).ToList();
+
+                foreach (var user in users)
+                {
+                    satisfyProducts = satisfyLocation = satisfyStates = satisfyCountries = 0;
+                    List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
+                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                    if (products != null)
+                    {
+                        foreach (var product in products)
+                        {
+                            var productId = ProductsInfo.FirstOrDefault(pu => pu.Value.ToLower().Trim() == product.ToLower().Trim()).Key;
+                            if(ptou.Any(pu => pu.ProductID == productId))
+                            {
+                                satisfyProducts = 1;
+                                break;
+                            }
+                        }
+                        if (satisfyProducts == 0)
+                            users.Remove(user);
+                    }
+                    if (parameters.Location != null)
+                    {
+                        foreach (var locaions in userLocations)
+                        {
+                            if (locaions.Address.Contains(parameters.Location))
+                            {
+                                satisfyLocation = 1;
+                                break;
+                            }
+                        }
+                        if (satisfyLocation == 0)
+                            users.Remove(user);
+                    }
+                    if(states != null)
+                    {
+                        foreach (var state in states)
+                        {
+                            foreach (var locations in userLocations)
+                            {
+                                if(locations.StateId == States.FirstOrDefault(s => s.Value.ToLower().Trim() == state.ToLower().Trim()).Key)
+                                {
+                                    satisfyStates = 1;
+                                    break;
+                                }
+                            }
+                            if (satisfyStates == 0)
+                                users.Remove(user);
+                        }
+                    }
+                    if(countries != null)
+                    {
+                        foreach (var state in countries)
+                        {
+                            foreach (var locations in userLocations)
+                            {
+                                if (locations.StateId == Countries.FirstOrDefault(s => s.Value.ToLower().Trim() == state.ToLower().Trim()).Key)
+                                {
+                                    satisfyCountries = 1;
+                                    break;
+                                }
+                            }
+                            if (satisfyCountries == 0)
+                                users.Remove(user);
+                        }
+                    }
+                }
+
+                int counter = 1;
+                foreach (var user in users)
+                {
+                    string productNames = "";
+                    Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                    foreach (var product in ptou.Keys)
+                    {
+                        productNames += ProductsInfo[product];
+                        productNames += " ";
+                    }
+                    productNames = productNames.TrimEnd();
+                    productNames = productNames.Replace(" ", ", ");
+                    result.Add(new SearchUserModel()
+                    {
+                        No = counter++,
+                        FullName = user.FullName,
+                        Country = Countries[user.CountryId],
+                        State = States[user.StateId],
+                        ProductsIntoAccount = productNames,
+                        SubId = _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId
+                    });
                 }
                 return result;
             }
@@ -789,5 +917,6 @@ namespace SWM.Models.Repositories
                 return userDetails;
             }
         }
+        
     }
 }

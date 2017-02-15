@@ -37,5 +37,6 @@ namespace SWM.Models.Repositories
         PublicDashboardModel GetDashBoardForPublic();
         List<SearchUserModel> GetSearchResultForUserByFullName(string fullName);
         UserDetailsModel GetUserDetails(string subId);
+        List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters);
     }
 }

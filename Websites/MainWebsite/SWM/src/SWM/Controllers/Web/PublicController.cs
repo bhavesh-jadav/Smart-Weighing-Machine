@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SWM.Models;
 using SWM.Models.Repositories;
+using SWM.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,8 @@ namespace SWM.Controllers.Web
         public IActionResult AdvanceSearch()
         {
             ViewBag.Title = "Advance Search";
-            return View();
+            
+            return View(new Tuple<AdvanceSearchModel, List<SearchUserModel>>(new AdvanceSearchModel(), new List<SearchUserModel>()));
         }
 
         public IActionResult ShowAllUsers()

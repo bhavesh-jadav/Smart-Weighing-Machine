@@ -152,6 +152,13 @@ namespace SWM.Controllers.Api
         //    return Ok(res);
         //}
 
+        [HttpPost("advance_search")]
+        public IActionResult AdvanceSearch([FromBody]AdvanceSearchModel parameters)
+        {
+            var result = _repo.AdvanceSearchResults(parameters);
+            return Ok(result);
+        }
+
         [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult LogIn([FromBody]LoginViewModel user_login)

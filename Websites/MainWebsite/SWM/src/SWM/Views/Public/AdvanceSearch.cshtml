@@ -1,3 +1,122 @@
-﻿<section class="content">
-    <h1>Coming Soon...</h1>
+﻿@model Tuple<AdvanceSearchModel, List<SearchUserModel>>
+@section css{
+    <link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<section class="content">
+    <div ng-app="advance-search" class="row">
+        <div class="col-lg-offset-1 col-lg-10 col-md-12" ng-controller="searchController">
+            <div class="box box-danger">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Advance Search</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-6 col-xs-12">
+                            <div class="form-group">
+                                <label>Name(Seperate multiple names by comma):</label>
+                                <input ng-model="FullNames" name="FullNames" type="text" class="form-control" value="" placeholder="Enter name(e.g. 'Bhavesh Jadav')" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xs-12">
+                            <div class="form-group">
+                                <label>Product(Seperate multiple products by comma):</label>
+                                <input ng-model="Products" name="Products" type="text" class="form-control" value="" placeholder="Enter product(e.g. 'Rice', 'Rice,Cumin,Wheat')" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-xs-12">
+                            <div class="form-group">
+                                <label>Location:</label>
+                                <input ng-model="Location" name="Location" type="text" class="form-control" value="" placeholder="Enter location(e.g. 'Palghar, Thane')" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-xs-12">
+                            <div class="form-group">
+                                <label>State(Seperate multiple states by comma):</label>
+                                <input ng-model="States" name="States" type="text" class="form-control" value="" placeholder="Enter state(e.g. 'Maharashtra', 'Maharashtra,Gujarat')" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-xs-12">
+                            <div class="form-group">
+                                <label>Country(Seperate multiple countries by comma):</label>
+                                <input ng-model="Countries" name="Countries" type="text" class="form-control" value="" placeholder="Enter country(e.g. 'India', 'India,Russia')" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <div class="row">
+                        <div class="col-lg-offset-4 col-lg-4 col-md-offset-2 col-md-8 col-xs-12">
+                            <button class="btn btn-flat btn-success" style="width:100%;" ng-click="search()">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-info alert-dismissible" ng-show="isBusy">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-info"></i> Alert!</h4>
+                <p>Getting search results...</p>
+                <p>This may take a while.</p>
+            </div>
+            <div class="box box-success" ng-show="showSearchResults">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Found {{searchData.length}} result(s)</h3>
+                </div>
+                <div class="box-body">
+                    <div class="box-body">
+                        <div class="table-responsive" id="search-results-table">
+                            <table datatable="ng" id="data-table" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Full Name</th>
+                                        <th>Products Into Account</th>
+                                        <th>State</th>
+                                        <th>Country</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="data in searchData">
+                                        <td>{{data.no}}</td>
+                                        <td><a href="/Public/User/{{data.subId}}">{{data.fullName}}</a></td>
+                                        <td>{{data.productsIntoAccount}}</td>
+                                        <td>{{data.state}}</td>
+                                        <td>{{data.country}}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Full Name</th>
+                                        <th>Products Into Account</th>
+                                        <th>State</th>
+                                        <th>Country</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="overlay" ng-show="isBusy">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+@section scripts{
+    <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-datatables/0.6.0/angular-datatables.min.js"></script>
+    <script src="~/distribution/js/AdvanceSearch.js"></script>
+    @*<script src="~/js/AdvanceSearch.js"></script>*@
+    <script>
+      $(function () {
+          $("#data-table").DataTable({
+              "responsive": true
+          });
+      });
+    </script>
+}
