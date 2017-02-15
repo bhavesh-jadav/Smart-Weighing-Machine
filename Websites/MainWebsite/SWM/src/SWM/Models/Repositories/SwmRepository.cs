@@ -464,6 +464,7 @@ namespace SWM.Models.Repositories
             Dictionary<int, string> countries = _ctx.Countries.ToDictionary(c => c.Id, c => c.Name);
             Dictionary<int, string> states = _ctx.States.ToDictionary(c => c.Id, c => c.Name);
             Dictionary<int, string> productsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
+            var user = _userManager.FindByIdAsync(userId).Result;
             try
             {
                 if (_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == userId) != null)
@@ -485,7 +486,7 @@ namespace SWM.Models.Repositories
                     userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
                     userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
                     userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
-
+                    userDashboard.FullName = user.FullName;
                     foreach (var cu in ctou)
                     {
                         var product = productsInfo[cu.ProductID];
@@ -493,7 +494,7 @@ namespace SWM.Models.Repositories
                         userDashboard.ProductsIntoAccount += ", ";
                     }
                     userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
-                    userDashboard.UserName = _userManager.FindByIdAsync(userId).Result.UserName;
+                    userDashboard.UserName = user.UserName;
                     if(cropDatas.ToArray().Length > 0)
                     {
                         var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
@@ -677,7 +678,12 @@ namespace SWM.Models.Repositories
             try
             {
                 int counter = 1;
-                List<SwmUser> users = _ctx.SwmUsers.Where(u => u.FullName.Contains(fullName) || u.FullName == fullName).ToList();
+                List<SwmUser> users;
+                if (fullName == "")
+                    users = _ctx.SwmUsers.ToList();
+                else
+                    users = _ctx.SwmUsers.Where(u => u.FullName.Contains(fullName) || u.FullName == fullName).ToList();
+
                 Dictionary<int, string> states = _ctx.States.ToDictionary(s => s.Id, s => s.Name);
                 Dictionary<int, string> countries = _ctx.Countries.ToDictionary(s => s.Id, s => s.Name);
                 foreach (var user in users)
@@ -727,6 +733,7 @@ namespace SWM.Models.Repositories
                 List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
                 Dictionary<int, int> productToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
 
+                userDetails.SubId = subId;
                 userDetails.FullName = user.FullName;
                 userDetails.SubType = _ctx.SubscriptionTypes.FirstOrDefault(st => st.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).SubscriptionTypeId).Name;
                 userDetails.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();

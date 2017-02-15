@@ -1,3 +1,62 @@
-﻿<section class="content">
-    <h1>Coming Soon...</h1>
+﻿@model List<SearchUserModel>
+@section css{
+    <link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+}
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title">All Users</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        <table id="data-table" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Full Name</th>
+                                    <th>Products Into Account</th>
+                                    <th>State</th>
+                                    <th>Country</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tableData in Model)
+                                {
+                                    <tr>
+                                        <td>@tableData.No</td>
+                                        <td><a href="/Public/User/@tableData.SubId">@tableData.FullName</a></td>
+                                        <td>@tableData.ProductsIntoAccount</td>
+                                        <td>@tableData.State</td>
+                                        <td>@tableData.Country</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Full Name</th>
+                                    <th>Products Into Account</th>
+                                    <th>State</th>
+                                    <th>Country</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+@section scripts{
+    <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+    <script>
+      $(function () {
+          $("#data-table").DataTable({
+              "responsive": true
+          });
+      });
+    </script>
+}

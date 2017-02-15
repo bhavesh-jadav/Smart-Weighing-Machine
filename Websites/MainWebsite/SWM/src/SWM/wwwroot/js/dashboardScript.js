@@ -219,9 +219,13 @@
         var labels = [];
         var data = [];
 
-        for (var i = 0; i < locations.length - 1; i++) {
-            labels.push(locations[i]);
+        if (locations.length != 1) {
+            for (var i = 0; i < locations.length - 1; i++) {
+                labels.push(locations[i]);
+            }
         }
+        else
+            labels.push(locations[0]);
         var barChartData = {
             labels: labels,
             datasets: [{

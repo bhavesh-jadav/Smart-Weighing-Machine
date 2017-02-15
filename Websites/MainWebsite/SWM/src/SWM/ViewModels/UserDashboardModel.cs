@@ -20,6 +20,7 @@ namespace SWM.ViewModels
             this.UserName = "";
             this.IsNewUser = false;
             this.HaveSomeData = true;
+            this.FullName = "";
         }
         public List<AddNewLocationModel> UserLocations { get; set; }
         public long TotalWeight { get; set; }
@@ -30,5 +31,6 @@ namespace SWM.ViewModels
         public string UserName { get; set; }
         public bool IsNewUser { get; set; }
         public bool HaveSomeData { get; set; }
+        public string FullName { get; set; }
     }
 }

@@ -1,0 +1,260 @@
+﻿@model UserDashboardModel
+<div ng-controller="chartsController">
+    <div class="row">
+        <div class="{{chartClass}}">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Location Wise Product Information
+                    </h3>
+                    <div class="pull-right">
+                        <span class="input-group-addon" style="width:auto;">Select location</span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <select class="form-control" ng-model="selectedLocation">
+                                <option ng-repeat="item in locations" value="{{item}}">
+                                    {{item}}
+                                </option>
+                            </select>
+                        </span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart1()">Go!</button>
+                        </span>
+                    </div>
+                    <div style="color:red;">{{chart1Error}}</div>
+                </div>
+                <div id="chart1div" class="box-body">
+                    <div class="chart">
+                        <canvas id="chart1" style="height: 250px;" height="250" width="787"></canvas>
+                    </div>
+                </div>
+                <div class="overlay" ng-show="isBusyChart1">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6" ng-show="showMonthlyCharts">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Location Wise Total Weight
+                    </h3>
+                    <div class="pull-right">
+                        <span class="input-group-addon" style="width:auto;">Show data from</span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <select class="form-control" ng-model="chart4StartDate">
+                                <option ng-repeat="item in monthLabels" value="{{item}}">
+                                    {{item}}
+                                </option>
+                            </select>
+                        </span>
+                        <span class="input-group-addon" style="width:auto;">to</span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <select class="form-control" ng-model="chart4EndDate">
+                                <option ng-repeat="item in monthLabels" value="{{item}}">
+                                    {{item}}
+                                </option>
+                            </select>
+                        </span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart4()">Go!</button>
+                        </span>
+                    </div>
+                    <div style="color:red;">{{chart4Error}}</div>
+                </div>
+                <div class="box-body">
+                    <div id="chart4div" class="chart">
+                        <canvas id="chart4" style="height: 250px;" height="250" width="787"></canvas>
+                    </div>
+                </div>
+                <div class="overlay" ng-show="isBusyChart4">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="showMonthlyCharts">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        All Products Monthly Information
+                    </h3>
+                    <div class="pull-right">
+                        <span class="input-group-addon" style="width:auto;">Show data from</span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <select class="form-control" ng-model="chart2StartDate">
+                                <option ng-repeat="item in monthLabels" value="{{item}}">
+                                    {{item}}
+                                </option>
+                            </select>
+                        </span>
+                        <span class="input-group-addon" style="width:auto;">to</span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <select class="form-control" ng-model="chart2EndDate">
+                                <option ng-repeat="item in monthLabels" value="{{item}}">
+                                    {{item}}
+                                </option>
+                            </select>
+                        </span>
+                        <span class="input-group-btn" style="width:auto;">
+                            <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart2()">Go!</button>
+                        </span>
+                    </div>
+                    <div style="color:red;">{{chart2Error}}</div>
+                </div>
+                <div class="box-body">
+                    <div id="chart2div" class="chart">
+                        <canvas id="chart2" style="height:300px;" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="overlay" ng-show="isBusyChart2">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="showMonthlyCharts">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Single Product Monthly Information
+                    </h3>
+                    <div class="pull-right">
+                        <div class="row hidden-sm hidden-md hidden-lg">
+                            <div class="col-xs-12">
+                                <span class="input-group-addon" style="width:auto;">For Product</span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <select class="form-control" ng-model="chart3ProductName">
+                                        <option ng-repeat="item in products" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div class="col-xs-12">
+                                <span class="input-group-addon" style="width:auto;">Show data from</span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <select class="form-control" ng-model="chart3StartDate">
+                                        <option ng-repeat="item in monthLabels" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div class="col-xs-12">
+                                <span class="input-group-addon" style="width:auto;">to</span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <select class="form-control" ng-model="chart3EndDate">
+                                        <option ng-repeat="item in monthLabels" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart3()">Go!</button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="hidden-xs">
+                            <span class="input-group-addon" style="width:auto;">For Product</span>
+                            <span class="input-group-btn" style="width:auto;">
+                                <select class="form-control" ng-model="chart3ProductName">
+                                    <option ng-repeat="item in products" value="{{item}}">
+                                        {{item}}
+                                    </option>
+                                </select>
+                            </span>
+                            <span class="input-group-addon" style="width:auto;">Show data from</span>
+                            <span class="input-group-btn" style="width:auto;">
+                                <select class="form-control" ng-model="chart3StartDate">
+                                    <option ng-repeat="item in monthLabels" value="{{item}}">
+                                        {{item}}
+                                    </option>
+                                </select>
+                            </span>
+                            <span class="input-group-addon" style="width:auto;">to</span>
+                            <span class="input-group-btn" style="width:auto;">
+                                <select class="form-control" ng-model="chart3EndDate">
+                                    <option ng-repeat="item in monthLabels" value="{{item}}">
+                                        {{item}}
+                                    </option>
+                                </select>
+                            </span>
+                            <span class="input-group-btn" style="width:auto;">
+                                <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart3()">Go!</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div style="color:red;">{{chart3Error}}</div>
+                </div>
+                <div class="box-body">
+                    <div id="chart3div" class="chart">
+                        <canvas id="chart3" style="height:250px;" height="250"></canvas>
+                    </div>
+                </div>
+                <div class="overlay" ng-show="isBusyChart3">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="locationsInfo">
+        <div id="locations" class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Farm Locations</h3>
+                </div>
+                <div class="box-body">
+                    @if (Model.UserLocations != null)
+                    {
+                        foreach (var location in Model.UserLocations)
+                        {
+                            <div style="margin-bottom:10px;">
+                                <P style="margin:0"><b>Farm Name:</b> @location.Name</P>
+                                <P style="margin:0"><b>Address:</b> @location.Address</P>
+                                <div style="overflow-x:auto">
+                                    <span><b>Pin No:</b> @location.PinNo, </span>
+                                    <span><b>State:</b> @location.State, </span>
+                                    <span><b>Country:</b> @location.Country, </span>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Locations Wise Total Weight
+                    </h3>
+                    <div style="color:red;">{{chart1Error}}</div>
+                </div>
+                <div class="box-body">
+                    <div id="chart5div" class="chart">
+                        <canvas id="chart5" style="height: 250px;" height="250" width="787"></canvas>
+                    </div>
+                </div>
+                <div class="overlay" ng-show="isBusyChart5">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="products">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Products Into Account
+                    </h3>
+                </div>
+                <div class="box-body">
+                    @Model.ProductsIntoAccount
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

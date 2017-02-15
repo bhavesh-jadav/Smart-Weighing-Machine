@@ -1,0 +1,76 @@
+﻿@model UserDashboardModel
+<div class="row">
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                @if (Model.TotalWeight >= 1000000)
+                {
+                    <h3>@((Model.TotalWeight / 1000000.0).ToString("n2"))</h3>
+                }
+                else if (Model.TotalWeight > 1000)
+                {
+                    <h3>@((Model.TotalWeight / 1000.0).ToString("n2"))</h3>
+                }
+                else
+                {
+                    <h3>@Model.TotalWeight</h3>
+                }
+                @if (Model.TotalWeight >= 1000000)
+                {
+                    <p>Weight in Tonne(s)</p>
+                }
+                else if (Model.TotalWeight > 1000)
+                {
+                    <p>Weight in KG(s)</p>
+                }
+                else
+                {
+                    <p>Weight in Gram(s)</p>
+                }
+            </div>
+            <div class="icon" style="margin-top:-10px;">
+                <i class="fa  fa-balance-scale" style="font-size:0.73em;"></i>
+            </div>
+            <a asp-action="ShowData" asp-controller="User" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>@Model.TotalProducts</h3>
+
+                <p>Products</p>
+            </div>
+            <div class="icon" style="top:-20px;">
+                <i class="fa  fa-cube" style="font-size:0.8em;"></i>
+            </div>
+            <a href="#products" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-yellow">
+            <div class="inner">
+                <h3>@Model.TotalLocation</h3>
+
+                <p>Locations</p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-android-globe"></i>
+            </div>
+            <a href="#locationsInfo" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>@Model.LastUpdatedProduct</h3>
+
+                <p>Last Updated</p>
+            </div>
+            <div class="icon" style="top:-20px;">
+                <i class="fa  fa-refresh" style="font-size:0.8em;"></i>
+            </div>
+            <a asp-action="ShowData" asp-controller="User" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
