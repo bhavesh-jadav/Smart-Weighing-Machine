@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = "Dashboard";
     ViewBag.PageHeader = "Dashboard";
-    ViewBag.PageHeaderSmall = "Overview of your data";
+    ViewBag.PageHeaderSmall = "Overview of your data. All data except charts are auto updated. To update the charts, either refresh the page or press on 'Go!' button.";
 }
 @section css{
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-default.min.css" />
@@ -38,6 +38,7 @@
     </div>
     @section scripts{
         <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-poller/0.4.5/angular-poller.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
         <script src="~/distribution/js/dashboardScript.js"></script>

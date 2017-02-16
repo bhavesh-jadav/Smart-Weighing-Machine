@@ -13,16 +13,28 @@
     ];
     //Angular part
     //Defining a Module
-    angular.module("public", []);
+    angular.module("public", ['emguo.poller']);
     //getting instance of module and adding controller to the modules
-    angular.module("public").controller("chartsController", ["$scope", "$http", chartsController]);
+    angular.module("public").controller("chartsController", ["$scope", "$http", "poller", chartsController]);
 
-    function chartsController($scope, $http) {
+    function chartsController($scope, $http, poller) {
 
-        $scope.gettingDashboardDetails = true;
-        $http.get("/api/public_dashboard").then(function (response) {
-            $scope.userData = response.data;
-            var data = $scope.userData;
+        var myPoller = poller.get("/api/public_dashboard", {
+            catchError: true,
+            delay: 10000
+        });
+
+        myPoller.promise.then(null, null, function (response) {
+            if (response.data != null) {
+                populateDashboard(response.data);
+                $scope.gettingUserDetails = false;
+            } else {
+                $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and Make sure that it is working fine.</div>');
+                poller.stopAll();
+            }
+        });
+
+        var populateDashboard = function (data) {
             var weight = 0.0;
             if (data.totalWeight >= 1000000) {
                 weight = data.totalWeight / 1000000.0;
@@ -36,21 +48,20 @@
                 weight = data.totalWeight;
                 $scope.unit = "Gram(s)";
             }
-            $scope.gettingDashboardDetails = false;
             setTimeout(function () {
-                $('#TotalWeight').text(weight);
-                $('#TotalProducts').text(data.totalProducts);
-                $('#TotalLocation').text(data.totalLocation);
-                $("#LastUpdatedProduct").fadeToggle(function () {
-                    $('#LastUpdatedProduct').text(data.lastUpdatedProduct);
-                });
-                $("#LastUpdatedProduct").fadeToggle();
+                $('#totalWeight').text(weight);
+                $('#totalProducts').text(data.totalProducts);
+                $('#totalUsers').text(data.totalUsers);
+                $('#totalMachines').text(data.totalMachines);
+                $('#totalUserLocations').text(data.totalUserLocations);
+                if ($('#lastUserRegisterd').text() != data.lastUserRegisterd) {
+                    $("#lastUserRegisterd").fadeToggle(function () {
+                        $('#lastUserRegisterd').text(data.lastUserRegisterd);
+                    });
+                    $("#lastUserRegisterd").fadeToggle();
+                }
             }, 10);
-
-        }, function (error) {
-            $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and it is working fine.</div>');
-            $scope.gettingUserDetails = false;
-        });
+        }
 
         $scope.isBusyChart2 = true;
         $scope.isBusyChart1 = true;

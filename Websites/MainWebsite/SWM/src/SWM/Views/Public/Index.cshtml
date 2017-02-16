@@ -2,157 +2,181 @@
 @section css{
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-default.min.css" />
 }
-<section class="content" ng-app="public" ng-controller="chartsController">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-danger">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Website information (read this if you want to know what this website is all about)</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body">
-                    <p>
-                        Most of the farmer uses pen and paper or some manual data entry method to keep track of their harvest. This method is prone to error and data is limited to farmer itself. The purpose of this website is to store data collected from farmers. This data includes information about
-                        harvest such as its weight, location, date and time on which weight is measured etc. This website works in conjunction with IOT(Internet of things) device which is a weighing machine. Farmer uses a modified weighing machine to measure the weight of the harvest then machine
-                        captures all the information while weighing the harvest and uploads all the information into that specific farmer's account. Farmer can sign in into his/her account to see all that information(click on Sign In button to see test user account).
-                    </p>
-                    <p>
-                        By introducing IOT device such as weighing machine which handles data entry, the process of keeping track of harvest is automated which
-                        reduces error in data entry significantly. Also this data can be made available to public so that transparency between farmer and end consumer
-                        is increased. Retailers can also use this system to contact farmers based on their harvest information on this website.
-                    </p>
-                    <p>
-                        This concept is not limited to only farming industry but can also be expanded into other industries where weighing is
-                        crucial task hence, here crop is referred to as product and farmer is referred to as Users to keep it more generalised.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-orange"><i class="fa fa-balance-scale"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Weight</span>
-                    @*@if (Model.TotalWeight >= 1000000)
-                    {
-                        <span class="info-box-number">@((Model.TotalWeight / 1000000).ToString("n2")) Tonne(s)</span>
-                    }
-                    else if (Model.TotalWeight >= 1000)
-                    {
-                        <span class="info-box-number">@((Model.TotalWeight / 1000).ToString("n2")) KG(s)</span>
-                    }
-                    else
-                    {
-                        <span class="info-box-number">@Model.TotalWeight Gram(s)</span>
-                    }*@
-                    <span id="totalWeight" class="info-box-number odometer"></span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-purple"><i class="fa fa-user"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Users</span>
-                    <span id="totalUsers" class="info-box-number">@Model.TotalUsers</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-green"><i class="fa fa-cube"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Products</span>
-                    <span id="totalProducts" class="info-box-number">@Model.TotalProducts</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-maroon"><i class="fa fa-fax"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Machines</span>
-                    <span id="totalMachines" class="info-box-number">@Model.TotalMachines</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-teal"><i class="fa fa-globe"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Locations</span>
-                    <span id="totalUserLocations" class="info-box-number">@Model.TotalUserLocations</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-aqua"><i class="fa fa-user-plus"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Last User Registerd</span>
-                    <span id="lastUserRegisterd" class="info-box-number">@Model.LastUserRegisterd</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">
-                            All Products Monthly Information(All Users)
-                        </h3>
-                        <div class="pull-right">
-                            <span class="input-group-addon" style="width:auto;">Show data from</span>
-                            <span class="input-group-btn" style="width:auto;">
-                                <select class="form-control" ng-model="chart1StartDate">
-                                    <option ng-repeat="item in monthLabels" value="{{item}}">
-                                        {{item}}
-                                    </option>
-                                </select>
-                            </span>
-                            <span class="input-group-addon" style="width:auto;">to</span>
-                            <span class="input-group-btn" style="width:auto;">
-                                <select class="form-control" ng-model="chart1EndDate">
-                                    <option ng-repeat="item in monthLabels" value="{{item}}">
-                                        {{item}}
-                                    </option>
-                                </select>
-                            </span>
-                            <span class="input-group-btn" style="width:auto;">
-                                <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart1()">Go!</button>
-                            </span>
+<div class="row">
+    <div class="col-lg-offset-1 col-lg-10 col-md-12">
+        <section class="content" ng-app="public" ng-controller="chartsController">
+            <div class="row">
+                <div id="errorMessage"></div>
+                <div class="col-md-12">
+                    <div class="box box-danger">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Website information (read this if you want to know what this website is all about)</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div style="color:red;">{{chart1Error}}</div>
-                    </div>
-                    <div class="box-body">
-                        <div id="chart1div" class="chart">
-                            <canvas id="chart1" style="height:250px;" height="250"></canvas>
+                        <div class="box-body">
+                            <p>
+                                Most of the farmer uses pen and paper or some manual data entry method to keep track of their harvest. This method is prone to error and data is limited to farmer itself. The purpose of this website is to store data collected from farmers. This data includes information about
+                                harvest such as its weight, location, date and time on which weight is measured etc. This website works in conjunction with IOT(Internet of things) device which is a weighing machine. Farmer uses a modified weighing machine to measure the weight of the harvest then machine
+                                captures all the information while weighing the harvest and uploads all the information into that specific farmer's account. Farmer can sign in into his/her account to see all that information(click on Sign In button to see test user account).
+                            </p>
+                            <p>
+                                By introducing IOT device such as weighing machine which handles data entry, the process of keeping track of harvest is automated which
+                                reduces error in data entry significantly. Also this data can be made available to public so that transparency between farmer and end consumer
+                                is increased. Retailers can also use this system to contact farmers based on their harvest information on this website.
+                            </p>
+                            <p>
+                                This concept is not limited to only farming industry but can also be expanded into other industries where weighing is
+                                crucial task hence, here crop is referred to as product and farmer is referred to as Users to keep it more generalised.
+                            </p>
                         </div>
                     </div>
-                    <div class="overlay" ng-show="isBusyChart1">
-                        <i class="fa fa-refresh fa-spin"></i>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-orange"><i class="fa fa-balance-scale"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Weight in {{unit}}</span>
+                            <span id="totalWeight" class="info-box-number odometer"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-purple"><i class="fa fa-user"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Users</span>
+                            <span id="totalUsers" class="info-box-number odometer"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-green"><i class="fa fa-cube"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Products</span>
+                            <span id="totalProducts" class="info-box-number odometer"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-maroon"><i class="fa fa-fax"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Machines</span>
+                            <span id="totalMachines" class="info-box-number odometer"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-teal"><i class="fa fa-globe"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Locations</span>
+                            <span id="totalUserLocations" class="info-box-number odometer"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-aqua"><i class="fa fa-user-plus"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Last User Registerd</span>
+                            <span id="lastUserRegisterd" class="info-box-number">None</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">
-                            Single Product Monthly Information(All Users)
-                        </h3>
-                        <div class="pull-right">
-                            <div class="row hidden-sm hidden-md hidden-lg">
-                                <div class="col-xs-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">
+                                All Products Monthly Information(All Users)
+                            </h3>
+                            <div class="pull-right">
+                                <span class="input-group-addon" style="width:auto;">Show data from</span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <select class="form-control" ng-model="chart1StartDate">
+                                        <option ng-repeat="item in monthLabels" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-addon" style="width:auto;">to</span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <select class="form-control" ng-model="chart1EndDate">
+                                        <option ng-repeat="item in monthLabels" value="{{item}}">
+                                            {{item}}
+                                        </option>
+                                    </select>
+                                </span>
+                                <span class="input-group-btn" style="width:auto;">
+                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart1()">Go!</button>
+                                </span>
+                            </div>
+                            <div style="color:red;">{{chart1Error}}</div>
+                        </div>
+                        <div class="box-body">
+                            <div id="chart1div" class="chart">
+                                <canvas id="chart1" style="height:250px;" height="250"></canvas>
+                            </div>
+                        </div>
+                        <div class="overlay" ng-show="isBusyChart1">
+                            <i class="fa fa-refresh fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">
+                                Single Product Monthly Information(All Users)
+                            </h3>
+                            <div class="pull-right">
+                                <div class="row hidden-sm hidden-md hidden-lg">
+                                    <div class="col-xs-12">
+                                        <span class="input-group-addon" style="width:auto;">For Product</span>
+                                        <span class="input-group-btn" style="width:auto;">
+                                            <select class="form-control" ng-model="chart2ProductName">
+                                                <option ng-repeat="item in products" value="{{item}}">
+                                                    {{item}}
+                                                </option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <span class="input-group-addon" style="width:auto;">Show data from</span>
+                                        <span class="input-group-btn" style="width:auto;">
+                                            <select class="form-control" ng-model="chart2StartDate">
+                                                <option ng-repeat="item in monthLabels" value="{{item}}">
+                                                    {{item}}
+                                                </option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <span class="input-group-addon" style="width:auto;">to</span>
+                                        <span class="input-group-btn" style="width:auto;">
+                                            <select class="form-control" ng-model="chart2EndDate">
+                                                <option ng-repeat="item in monthLabels" value="{{item}}">
+                                                    {{item}}
+                                                </option>
+                                            </select>
+                                        </span>
+                                        <span class="input-group-btn" style="width:auto;">
+                                            <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart2()">Go!</button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="hidden-xs">
                                     <span class="input-group-addon" style="width:auto;">For Product</span>
                                     <span class="input-group-btn" style="width:auto;">
                                         <select class="form-control" ng-model="chart2ProductName">
@@ -161,8 +185,6 @@
                                             </option>
                                         </select>
                                     </span>
-                                </div>
-                                <div class="col-xs-12">
                                     <span class="input-group-addon" style="width:auto;">Show data from</span>
                                     <span class="input-group-btn" style="width:auto;">
                                         <select class="form-control" ng-model="chart2StartDate">
@@ -171,8 +193,6 @@
                                             </option>
                                         </select>
                                     </span>
-                                </div>
-                                <div class="col-xs-12">
                                     <span class="input-group-addon" style="width:auto;">to</span>
                                     <span class="input-group-btn" style="width:auto;">
                                         <select class="form-control" ng-model="chart2EndDate">
@@ -186,55 +206,28 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="hidden-xs">
-                                <span class="input-group-addon" style="width:auto;">For Product</span>
-                                <span class="input-group-btn" style="width:auto;">
-                                    <select class="form-control" ng-model="chart2ProductName">
-                                        <option ng-repeat="item in products" value="{{item}}">
-                                            {{item}}
-                                        </option>
-                                    </select>
-                                </span>
-                                <span class="input-group-addon" style="width:auto;">Show data from</span>
-                                <span class="input-group-btn" style="width:auto;">
-                                    <select class="form-control" ng-model="chart2StartDate">
-                                        <option ng-repeat="item in monthLabels" value="{{item}}">
-                                            {{item}}
-                                        </option>
-                                    </select>
-                                </span>
-                                <span class="input-group-addon" style="width:auto;">to</span>
-                                <span class="input-group-btn" style="width:auto;">
-                                    <select class="form-control" ng-model="chart2EndDate">
-                                        <option ng-repeat="item in monthLabels" value="{{item}}">
-                                            {{item}}
-                                        </option>
-                                    </select>
-                                </span>
-                                <span class="input-group-btn" style="width:auto;">
-                                    <button type="button" class="btn btn-primary btn-flat" ng-click="displayChart2()">Go!</button>
-                                </span>
+                            <div style="color:red;">{{chart2Error}}</div>
+                        </div>
+                        <div class="box-body">
+                            <div id="chart2div" class="chart">
+                                <canvas id="chart2" style="height:250px;" height="250"></canvas>
                             </div>
                         </div>
-                        <div style="color:red;">{{chart2Error}}</div>
-                    </div>
-                    <div class="box-body">
-                        <div id="chart2div" class="chart">
-                            <canvas id="chart2" style="height:250px;" height="250"></canvas>
+                        <div class="overlay" ng-show="isBusyChart2">
+                            <i class="fa fa-refresh fa-spin"></i>
                         </div>
-                    </div>
-                    <div class="overlay" ng-show="isBusyChart2">
-                        <i class="fa fa-refresh fa-spin"></i>
                     </div>
                 </div>
             </div>
-        </div>
+            <p class="text-center" style="margin:0;">Charts are not auto updated. Either refresh the page or press on 'Go!' button to update the charts.</p>
+        </section>
     </div>
-</section>
+</div>
 @section scripts{
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-poller/0.4.5/angular-poller.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-    <script src="~/js/publicDashboard.js"></script>
-    @*<script src="~/distribution/js/publicDashboard.js"></script>*@
+    @*<script src="~/js/publicDashboard.js"></script>*@
+    <script src="~/distribution/js/publicDashboard.js"></script>
 }
