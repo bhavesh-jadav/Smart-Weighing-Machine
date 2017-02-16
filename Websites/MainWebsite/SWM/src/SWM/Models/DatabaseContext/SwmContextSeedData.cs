@@ -7,6 +7,19 @@ using System.Threading.Tasks;
 
 namespace SWM.Models
 {
+    class Address
+    {
+        public Address(string address, int pinNo, string state)
+        {
+            this.address = address;
+            this.pinNo = pinNo;
+            this.state = state;
+        }
+        public string address { get; set; }
+        public int pinNo { get; set; }
+        public string state { get; set; }
+    }
+
     public class SwmContextSeedData
     {
         private SwmContext _ctx;
@@ -22,9 +35,78 @@ namespace SWM.Models
 
         public async Task EnsureSeedData()
         {
-            if(!_ctx.States.Any())
+            string[] indian_names = { "Mangesh Shah", "Parth Yadav", "Siddharth Nakrani", "Kanishk Jain", "Smith Karmarkar", "Karan Thakkar",
+                "Madhav Jain", "Rayan Dsouza", "Jay Pal", "Ritesh Sharma", "Dev Jain", "Nitin Shah", "Harischandra Mehta", "Chinja  Garg"
+            };
+            Address[] indian_user_address =
             {
-                State[] states = { new State { Name = "Maharashtra" }, new State { Name = "Gujarat" } };
+                new Address("366, Old No 200, Triplicane High Road", 600005, " Tamil Nadu"),
+                new Address("Gala No.b-40, Kalina Kutir Society, C S T Road, Kalina, Santacruz(e)", 400098, " Maharashtra"),
+                new Address("208 Ansa Industrial Estate, J Saki Vihar Raod, Saki Naka", 400072, " Maharashtra"),
+                new Address("Kripa Nagar, F-6 S V Road, Vile Parle West (west)", 400056, " Maharashtra"),
+                new Address("106/22, R S Puram, Rs Puram", 641002, "Tamil Nadu"),
+                new Address("2-b, New No 3, Ramanathan Street, T Nagar", 600017, " Tamil Nadu"),
+                new Address("A-11 Pruthvi Complex, Opp Azad Halwai, Ashram Road", 380013, " Gujarat"),
+                new Address("Veera Desai, Nr Veera Desai Bus Stop,nr Sharda V, Andheri (west)", 400058, " Maharashtra"),
+                new Address("3rd Floor, 93/95, Sugar House, Kazi Sayeed Street, Masjid Bunder (w)", 400003, "Maharashtra"),
+                new Address("112, Shankar Estate,kevada, Amraiwadi", 380026, "  Gujarat"),
+                new Address("104/5, Gopalreddy, 1, Tavarekere", 560029, " Karnataka"),
+                new Address("1st Floor Balabhavan Central, Avenue Road Nr Diamond Garden, Chembur", 400071, " Maharashtra"),
+                new Address("19/2, Mittal Estate, Andheri Kurla Road, Andheri(e)", 400059, " Maharashtra"),
+                new Address("312, B-wing, Mittal Towers, M G Road", 560001, " Karnataka"),
+                new Address("151, Hilal Manzil, Kazi Sayed Street, Mandvi", 400003, " Maharashtra"),
+                new Address("159, Sanjay 5-b, Mittal Indl Estate, Andheri Kurla Road, Marol Naka, Andheri(e)", 400059, " Maharashtra"),
+                new Address("Unit No 221, H Building, Ansa Industrial Estate, Chandivli Road, Andheri (e),sakinaka, Andheri (west", 400072, " Maharashtra"),
+                new Address("4, Sardar Nagar, S M Rd, Sion Koliwada", 400037, " Maharashtra"),
+                new Address("5203, Sadar Thana Rd, Sadar Bazar", 110006, " Delhi"),
+                new Address("131 Loheki Chawl, 216/218 M.a Road", 400008, " Maharashtra"),
+                new Address("Kanchpada No 2, Ramchandra Lane Extn, Malad(w)", 400064, " Maharashtra"),
+                new Address("7-73/1, Main Road, Kukatpally", 500072, " Andhra Pradesh"),
+                new Address("6100, Gali Batashe Wali, Khari Baoli", 110006, " Delhi")
+            };
+
+            Address[] indian_farm_address =
+            {
+                new Address(" Mira Bhayander Road", 401104," Maharashtra"),
+                new Address("Commerce Union House, 9, Wallace Street", 400001," Maharashtra"),
+                new Address("159, 5, Amar Industrial Est, Cst Road, Kalina, Santacruz (east)", 400098," Maharashtra"),
+                new Address("Happy Home, Anand Nagar, Dahisar", 400068," Maharashtra"),
+                new Address("105, Sainath Chambers, Sainath Road, Malad (west)", 400064," Maharashtra"),
+                new Address("155, Guru Nanak Auto Market, Kashmere Gate", 110006," Delhi"),
+                new Address("A 57, Part 2, South Extn", 110049," Delhi"),
+                new Address("B 8, 3/4, Balaji Nagar, 90 Feet Rd, Opp New Police Stn,", 400017," Maharashtra"),
+                new Address("Blue Diamond, Fatehgunj", 390002," Gujarat"),
+                new Address("3rd Floor, 61/63 Nagdevi Street, Mandvi", 400003," Maharashtra"),
+                new Address("12, Rajanna Lane, Ganigarpet", 560002," Karnataka"),
+                new Address("Karani Lane, Bhatwadi", 400084," Maharashtra"),
+                new Address("113 Nagdevi Street, Mandvi", 400003," Maharashtra"),
+                new Address("610, Anna Salai, Anna Salai", 600006," Tamil Nadu"),
+                new Address("Plot No.7, Prabhat Centre Annexe, Sec 1a, Belapur (cbd), Navi Mumbai", 400614," Maharashtra"),
+                new Address("11/7, Mathura Road, Faridabad", 121001," Haryana"),
+                new Address("404, Sector 17, Jk Chambers, Vashi", 400705," Maharashtra"),
+                new Address("17 Narasingapuram St, Mount Road", 600002," Tamil Nadu"),
+                new Address("#4009, 100ftrd,jngr,hal2stg Blr-08, Jeevanbimanagar", 560008," Karnataka"),
+                new Address("Metropolitan Mall, Mehrauli Gurgaon Road, Gurgaon, Gurgaon", 122001," Delhi"),
+                new Address("251/53, Fazender House, Ibrahim Rahimtulla Rd, Mandvi", 400003," Maharashtra"),
+                new Address("3-5-1138/1 2, Kachiguda", 500027," Andhra Pradesh"),
+                new Address("1, 1,klsiplyblr-2, Kalasipalyam", 560002," Karnataka"),
+                new Address("#109, Lakdikapul", 500004," Andhra Pradesh"),
+                new Address("Opp. A.s.motors Salatwada, Opp. A.s.motors, Salatwada, Opp. A.s.motors, Salatwada", 390001," Gujarat"),
+                new Address("24/25, Rup Chand Roy Street, Burrabazar", 700007," West Bengal")
+            };
+
+            if (!_ctx.States.Any())
+            {
+                State[] states = { new State { Name = "Maharashtra" },
+                new State { Name = "Gujarat" },
+                new State { Name = "Punjab" },
+                new State { Name = "Haryana" },
+                new State { Name = "Kashmir" },
+                new State { Name = "Tamil Nadu" },
+                new State { Name = "Rajasthan" },
+                new State { Name = "Sikkim" },
+                new State { Name = "Bihar" },
+                new State { Name = "Uttar Pradesh" }};
                 _ctx.States.AddRange(states);
                 await _ctx.SaveChangesAsync();
             }
@@ -141,24 +223,11 @@ namespace SWM.Models
                 var user = _ctx.SwmUsers.FirstOrDefault(u => u.Email == "xyz@lolol.com");
                 UserLocation[] userLocations =
                 {
-                    new UserLocation()
-                    {
-                        UserId = user.Id,
-                        Name = "Farm 1",
-                        Address = "Palghar, Thane",
-                        PinNo = 401404,
-                        StateId = 1,
-                        CountryId = 1
-                    },
-                    new UserLocation()
-                    {
-                        UserId = user.Id,
-                        Name = "Farm 2",
-                        Address = "Bhuj, Kutch",
-                        PinNo = 370001,
-                        StateId = 2,
-                        CountryId = 1
-                    }
+                    new UserLocation() { UserId = "", Name = "Farm 1", Address = "Palghar, Thane", PinNo = 401404, StateId = 1, CountryId = 1 },
+                    new UserLocation() { UserId = "", Name = "Farm 2", Address = "Adivare, Pune", PinNo = 410509, StateId = 2, CountryId = 1 },
+                    new UserLocation() { UserId = "", Name = "Farm 3", Address = "Bhatinda, Punjab", PinNo = 151001, StateId = 2, CountryId = 1 },
+                    new UserLocation() { UserId = "", Name = "Farm 4", Address = "Baded, Haryana", PinNo = 121104, StateId = 2, CountryId = 1 },
+                    new UserLocation() { UserId = "", Name = "Farm 5", Address = "Assar, Kashmir ", PinNo = 182143, StateId = 2, CountryId = 1 },
                 };
                 _ctx.UserLocations.AddRange(userLocations);
 
@@ -258,14 +327,27 @@ namespace SWM.Models
             if(!_ctx.ProductInformations.Any())
             {
                 ProductInformation[] pinfos = {
-                    new ProductInformation { Name = "Rice" },
-                    new ProductInformation { Name = "Wheat" },
-                    new ProductInformation { Name = "Peanut" },
-                    new ProductInformation { Name = "Cotton" },
-                    new ProductInformation { Name = "Millet" },
-                    new ProductInformation { Name = "Sesame" },
-                    new ProductInformation { Name = "Cumin" }
-                };
+                                    new ProductInformation { Name = "Rice" },
+                                    new ProductInformation { Name = "Wheat" },
+                                    new ProductInformation { Name = "Peanut" },
+                                    new ProductInformation { Name = "Cotton" },
+                                    new ProductInformation { Name = "Millet" },
+                                    new ProductInformation { Name = "Tea" },
+                                    new ProductInformation { Name = "Jute" },
+                                    new ProductInformation { Name = "Hemp" },
+                                    new ProductInformation { Name = "Coffee" },
+                                    new ProductInformation { Name = "Orange" },
+                                    new ProductInformation { Name = "Apple" },
+                                    new ProductInformation { Name = "Barley" },
+                                    new ProductInformation { Name = "Ragi" },
+                                    new ProductInformation { Name = "Potato" },
+                                    new ProductInformation { Name = "Tomato" },
+                                    new ProductInformation { Name = "Dates" },
+                                    new ProductInformation { Name = "Cardamom" },
+                                    new ProductInformation { Name = "Linseed" },
+                                    new ProductInformation { Name = "Mulberry" },
+                                    new ProductInformation { Name = "Tobacco" },
+                                };
                 _ctx.ProductInformations.AddRange(pinfos);
                 await _ctx.SaveChangesAsync();
             }

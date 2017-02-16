@@ -27,7 +27,7 @@ namespace SWM.Controllers.Web
         public IActionResult Index()
         {
             ViewBag.Title = "Public";
-            return View(_repo.GetDashBoardForPublic());
+            return View();
         }
 
         [HttpPost]
