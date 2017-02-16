@@ -38,6 +38,12 @@ namespace SWM.Models
             string[] indian_names = { "Mangesh Shah", "Parth Yadav", "Siddharth Nakrani", "Kanishk Jain", "Smith Karmarkar", "Karan Thakkar",
                 "Madhav Jain", "Rayan Dsouza", "Jay Pal", "Ritesh Sharma", "Dev Jain", "Nitin Shah", "Harischandra Mehta", "Chinja  Garg"
             };
+
+            
+
+            string[] products = { "Rice", "Wheat", "Peanut", "Cotton", "Millet", "Tea", "Jute", "Hemp", "Coffee", "Orange",
+                "Apple", "Barley", "Ragi", "Potato", "Tomato", "Dates", "Cardamom", "Linseed", "Mulberry", "Tobacco" };
+
             Address[] indian_user_address =
             {
                 new Address("366, Old No 200, Triplicane High Road", 600005, " Tamil Nadu"),
@@ -324,6 +330,7 @@ namespace SWM.Models
                 scount.Value = count.ToString();
                 await _ctx.SaveChangesAsync();
             }
+
             if(!_ctx.ProductInformations.Any())
             {
                 ProductInformation[] pinfos = {
