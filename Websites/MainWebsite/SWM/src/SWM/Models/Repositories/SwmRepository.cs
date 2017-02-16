@@ -147,32 +147,6 @@ namespace SWM.Models.Repositories
         {
             return _ctx.ProductInformations.FirstOrDefault(p => p.Id == productId);
         }
-        public UserInformationModel GetUserInformationForAPI(string userName)
-        {
-            try
-            {
-                var user = GetUserByUserName(userName).Result;
-                if (user != null)
-                {
-                    UserInformationModel userInformation = new UserInformationModel();
-                    userInformation.TotalProducts = _ctx.ProductsToUsers.Where(p => p.UserId == user.Id).Count();
-
-                    List<ProductInfoModel> productInfo = GetProductInfoByUserName(userName);
-                    foreach (var pinfo in productInfo)
-                        userInformation.TotalWeight += pinfo.TotalWeight;
-
-                    userInformation.SubTypeName = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Id == _ctx.UserToSubscriptions.FirstOrDefault(u => u.UserID == user.Id).SubscriptionTypeId).Name;
-
-                    return userInformation;
-                }
-                else
-                    return new UserInformationModel();
-            }
-            catch (Exception ex)
-            {
-                return new UserInformationModel();
-            }
-        }
         public async Task<bool> CheckUserPassword(SwmUser user, string password)
         {
             return await _userManager.CheckPasswordAsync(user, password);

@@ -24,12 +24,16 @@ namespace SWM.Controllers.Web
         private SignInManager<SwmUser> _signInManager;
         private ISwmRepository _repo;
         private IConfigurationRoot _config;
+        private SwmContext _ctx;
+        private UserManager<SwmUser> _userManager;
 
-        public UserController(SignInManager<SwmUser> signInManager, ISwmRepository repo, IConfigurationRoot config)
+        public UserController(SignInManager<SwmUser> signInManager, ISwmRepository repo, IConfigurationRoot config, SwmContext ctx, UserManager<SwmUser> userManager)
         {
             _signInManager = signInManager;
             _repo = repo;
             _config = config;
+            _ctx = ctx;
+            _userManager = userManager;
         }
 
         /*---------------------Commen actions between all type of users------------------------------*/
@@ -42,7 +46,11 @@ namespace SWM.Controllers.Web
             }
             else if (User.IsInRole("user") || User.IsInRole("testuser"))
             {
-                return View("UserDashboard", _repo.GetDashBoardForUser(User.FindFirst(ClaimTypes.NameIdentifier).Value));
+                var user = _userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result;
+                bool isNewUser = !(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == user.Id) != null);
+                var ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
+                bool haveSomeData = (_ctx.CropDatas.Where(cd => ptou.Any(c => cd.CropToUserId == c.Id)).ToList().Count > 0);
+                return View("UserDashboard", new Tuple<bool, bool, string>(isNewUser, haveSomeData, user.UserName));
             }
             return View();
         }
@@ -238,7 +246,7 @@ namespace SWM.Controllers.Web
             {
                 if (_repo.AddNewLocation(newLocation, User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 {
-                    ViewBag.SuccessMessage = "Successfully Added New User";
+                    ViewBag.SuccessMessage = "Successfully Added New Location";
                     ModelState.Clear();
                 }
                 else

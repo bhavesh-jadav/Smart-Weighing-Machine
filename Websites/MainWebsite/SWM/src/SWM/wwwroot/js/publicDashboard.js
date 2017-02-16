@@ -16,7 +16,42 @@
     angular.module("public", []);
     //getting instance of module and adding controller to the modules
     angular.module("public").controller("chartsController", ["$scope", "$http", chartsController]);
+
     function chartsController($scope, $http) {
+
+        $scope.gettingDashboardDetails = true;
+        $http.get("/api/public_dashboard").then(function (response) {
+            $scope.userData = response.data;
+            var data = $scope.userData;
+            var weight = 0.0;
+            if (data.totalWeight >= 1000000) {
+                weight = data.totalWeight / 1000000.0;
+                $scope.unit = "Tonne(s)"
+            }
+            else if (data.totalWeight >= 1000) {
+                weight = data.totalWeight / 1000.0;
+                $scope.unit = "KG(s)"
+            }
+            else {
+                weight = data.totalWeight;
+                $scope.unit = "Gram(s)";
+            }
+            $scope.gettingDashboardDetails = false;
+            setTimeout(function () {
+                $('#TotalWeight').text(weight);
+                $('#TotalProducts').text(data.totalProducts);
+                $('#TotalLocation').text(data.totalLocation);
+                $("#LastUpdatedProduct").fadeToggle(function () {
+                    $('#LastUpdatedProduct').text(data.lastUpdatedProduct);
+                });
+                $("#LastUpdatedProduct").fadeToggle();
+            }, 10);
+
+        }, function (error) {
+            $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and it is working fine.</div>');
+            $scope.gettingUserDetails = false;
+        });
+
         $scope.isBusyChart2 = true;
         $scope.isBusyChart1 = true;
         $http.get("/api/user_dates").then(function (response) {

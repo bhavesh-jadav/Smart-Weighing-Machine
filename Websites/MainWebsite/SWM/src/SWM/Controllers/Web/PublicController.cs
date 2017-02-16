@@ -6,6 +6,7 @@ using SWM.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -50,9 +51,11 @@ namespace SWM.Controllers.Web
         public IActionResult MoreUserDetails(string subId)
         {
             ViewBag.Title = "More User Details";
-            string userId = _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).UserID;
-            var user = _userManager.FindByIdAsync(userId).Result;
-            return View(_repo.GetDashBoardForUser(userId));
+            var user = _userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result;
+            bool isNewUser = !(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == user.Id) != null);
+            var ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
+            bool haveSomeData = (_ctx.CropDatas.Where(cd => ptou.Any(c => cd.CropToUserId == c.Id)).ToList().Count > 0);
+            return View(new Tuple<bool, bool, string>(isNewUser, haveSomeData, user.UserName));
         }
 
         public IActionResult AdvanceSearch()

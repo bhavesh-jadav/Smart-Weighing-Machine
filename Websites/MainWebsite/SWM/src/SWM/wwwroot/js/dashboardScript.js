@@ -19,9 +19,45 @@
     angular.module("app-dashboard", []);
     //getting instance of module and adding controller to the modules
     angular.module("app-dashboard").controller("chartsController", ["$scope", "$http", chartsController]);
+    angular.module("app-dashboard").controller("userController", ["$scope", "$http", userController]);
+
+    function userController($scope, $http) {
+        $scope.gettingUserDetails = true;
+        $http.get("/api/" + username).then(function (response) {
+            $scope.userData = response.data;
+            var data = $scope.userData;
+            var weight = 0.0;
+            if (data.totalWeight >= 1000000) {
+                weight = data.totalWeight / 1000000.0;
+                $scope.unit = "Tonne(s)"
+            }
+            else if (data.totalWeight >= 1000) {
+                weight = data.totalWeight / 1000.0;
+                $scope.unit = "KG(s)"
+            }
+            else {
+                weight = data.totalWeight;
+                $scope.unit = "Gram(s)";
+            }
+            $scope.gettingUserDetails = false;
+            setTimeout(function () {
+                $('#TotalWeight').text(weight);
+                $('#TotalProducts').text(data.totalProducts);
+                $('#TotalLocation').text(data.totalLocation);
+                $("#LastUpdatedProduct").fadeToggle(function () {
+                    $('#LastUpdatedProduct').text(data.lastUpdatedProduct);
+                });
+                $("#LastUpdatedProduct").fadeToggle();
+            }, 10);
+
+        }, function (error) {
+            $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and it is working fine.</div>');
+            $scope.gettingUserDetails = false;
+        });
+    }
 
     function chartsController($scope, $http) {
-        
+
         //getting chart1 information and drawing chart 1 and 5
         $scope.isBusyChart1 = true;
         $scope.isBusyChart5 = true;
@@ -272,9 +308,10 @@
             }
         }
 
-        var height = $('#locations').height() - Math.floor($('#locations').height() * 0.30);
+        //var height = $('#locations').height() - Math.floor($('#locations').height() * 0.30);
+        var height = (locationsTotalWeight.length * 80);
         $('#chart5div').empty();
-        $('#chart5div').append('<canvas id="chart5" style="height:' + height + '" height="' + height + '" width="787"></canvas>');
+        $('#chart5div').append('<canvas id="chart5" style="height:' + height + 'px;" height="' + height + '" width="787"></canvas>');
         var ctx = document.getElementById("chart5").getContext("2d");
         var chart4 = new Chart(ctx, {
             type: 'horizontalBar',

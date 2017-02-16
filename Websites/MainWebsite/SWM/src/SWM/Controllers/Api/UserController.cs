@@ -27,19 +27,20 @@ namespace SWM.Controllers.Api
         [HttpGet("{userName}")]
         public IActionResult GetUserInfo(string userName)
         {
-            if (User.IsInRole("user"))
+            var user = _userManager.FindByNameAsync(userName).Result;
+            if (user != null)
             {
-                var userInformation = _repo.GetUserInformationForAPI(userName);
-                if (userInformation.TotalProducts > 0)
-                {
-                    userInformation.ProductInforUrl = $"{Request.Host}/api/{userName}/product_info";
-                    userInformation.LocationInfoUrl = $"{Request.Host}/api/{userName}/location_info";
-                    return Ok(userInformation);
-                }
-                else
-                    return BadRequest("Unable to process requrest");
+                var result = _repo.GetDashBoardForUser(user.Id);
+                return Ok(result);
             }
-            return View();
+            else
+                return BadRequest("invalid user");
+        }
+
+        [HttpGet("public_dashboard")]
+        public IActionResult PublicDashboard()
+        {
+            return Ok(_repo.GetDashBoardForPublic());
         }
 
         [HttpGet("{userName}/product_info")]

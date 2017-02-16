@@ -1,5 +1,8 @@
 ﻿@model PublicDashboardModel
-<section class="content" ng-app="public">
+@section css{
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-default.min.css" />
+}
+<section class="content" ng-app="public" ng-controller="chartsController">
     <div class="row">
         <div class="col-md-12">
             <div class="box box-danger">
@@ -36,7 +39,7 @@
                 <span class="info-box-icon bg-orange"><i class="fa fa-balance-scale"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Weight</span>
-                    @if (Model.TotalWeight >= 1000000)
+                    @*@if (Model.TotalWeight >= 1000000)
                     {
                         <span class="info-box-number">@((Model.TotalWeight / 1000000).ToString("n2")) Tonne(s)</span>
                     }
@@ -47,7 +50,8 @@
                     else
                     {
                         <span class="info-box-number">@Model.TotalWeight Gram(s)</span>
-                    }
+                    }*@
+                    <span id="totalWeight" class="info-box-number odometer"></span>
                 </div>
             </div>
         </div>
@@ -56,7 +60,7 @@
                 <span class="info-box-icon bg-purple"><i class="fa fa-user"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Users</span>
-                    <span class="info-box-number">@Model.TotalUsers</span>
+                    <span id="totalUsers" class="info-box-number">@Model.TotalUsers</span>
                 </div>
             </div>
         </div>
@@ -65,7 +69,7 @@
                 <span class="info-box-icon bg-green"><i class="fa fa-cube"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Products</span>
-                    <span class="info-box-number">@Model.TotalProducts</span>
+                    <span id="totalProducts" class="info-box-number">@Model.TotalProducts</span>
                 </div>
             </div>
         </div>
@@ -74,7 +78,7 @@
                 <span class="info-box-icon bg-maroon"><i class="fa fa-fax"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Machines</span>
-                    <span class="info-box-number">@Model.TotalMachines</span>
+                    <span id="totalMachines" class="info-box-number">@Model.TotalMachines</span>
                 </div>
             </div>
         </div>
@@ -83,7 +87,7 @@
                 <span class="info-box-icon bg-teal"><i class="fa fa-globe"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Locations</span>
-                    <span class="info-box-number">@Model.TotalUserLocations</span>
+                    <span id="totalUserLocations" class="info-box-number">@Model.TotalUserLocations</span>
                 </div>
             </div>
         </div>
@@ -92,12 +96,12 @@
                 <span class="info-box-icon bg-aqua"><i class="fa fa-user-plus"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Last User Registerd</span>
-                    <span class="info-box-number">@Model.LastUserRegisterd</span>
+                    <span id="lastUserRegisterd" class="info-box-number">@Model.LastUserRegisterd</span>
                 </div>
             </div>
         </div>
     </div>
-    <div ng-controller="chartsController">
+    <div>
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
@@ -229,7 +233,8 @@
 </section>
 @section scripts{
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-    @*<script src="~/js/publicDashboard.js"></script>*@
-    <script src="~/distribution/js/publicDashboard.js"></script>
+    <script src="~/js/publicDashboard.js"></script>
+    @*<script src="~/distribution/js/publicDashboard.js"></script>*@
 }

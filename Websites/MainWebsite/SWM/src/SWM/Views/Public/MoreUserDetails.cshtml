@@ -1,19 +1,21 @@
-﻿@model UserDashboardModel
-
-@if (!Model.IsNewUser)
+﻿@model Tuple<bool, bool, string>
+@section css{
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-default.min.css" />
+}
+@if (!Model.Item1)
 {
     <div ng-app="app-dashboard" class="row">
-        <div class="col-lg-offset-1 col-lg-10 col-md-12">
+        <div class="col-lg-offset-1 col-lg-10 col-md-12" ng-controller="userController">
             <section class="content-header">
                 <h1>
-                    More details about @Model.FullName
+                    More details about {{userData.fullName}}
                 </h1>
             </section>
             <section class="content">
-                @Html.Partial("UserDashboardPartialTop", Model)
-                @if (Model.HaveSomeData)
+                @Html.Partial("UserDashboardPartialTop")
+                @if (Model.Item2)
                 {
-                    @Html.Partial("UserDashboardPartialMiddle", Model)
+                    @Html.Partial("UserDashboardPartialMiddle")
                 }
                 else
                 {
@@ -25,46 +27,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row" id="locations">
-                        <div class="col-md-12">
-                            <div class="box box-primary">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Farm Locations</h3>
-                                </div>
-                                <div class="box-body">
-                                    @if (Model.UserLocations != null)
-                                    {
-                                        foreach (var location in Model.UserLocations)
-                                        {
-                                            <div style="margin-bottom:10px;">
-                                                <P style="margin:0"><b>Farm Name:</b> @location.Name</P>
-                                                <P style="margin:0"><b>Address:</b> @location.Address</P>
-                                                <div style="overflow-x:auto">
-                                                    <span><b>Pin No:</b> @location.PinNo, </span>
-                                                    <span><b>State:</b> @location.State, </span>
-                                                    <span><b>Country:</b> @location.Country, </span>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row" id="products">
-                        <div class="col-md-12">
-                            <div class="box box-primary">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">
-                                        Products Into Account
-                                    </h3>
-                                </div>
-                                <div class="box-body">
-                                    @Model.ProductsIntoAccount
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 }
 
             </section>
@@ -72,10 +34,11 @@
     </div>
     @section scripts{
         <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-        <script src="~/distribution/js/dashboardScript.js"></script>
-        @*<script src="~/js/dashboardScript.js"></script>*@
-        <script>var username = "@Model.UserName.ToString()"; user_dashboard(username);</script>
+        @*<script src="~/distribution/js/dashboardScript.js"></script>*@
+        <script src="~/js/dashboardScript.js"></script>
+        <script>var username = "@Model.Item3.ToString()"; user_dashboard(username);</script>
     }
 }
 else

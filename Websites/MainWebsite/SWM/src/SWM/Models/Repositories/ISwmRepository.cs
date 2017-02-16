@@ -18,7 +18,6 @@ namespace SWM.Models.Repositories
         string GetCountryName(int countryId);
         List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName);
         ProductInformation GetProductInformation(int productId);
-        UserInformationModel GetUserInformationForAPI(string userName);
         Task<bool> CheckUserPassword(SwmUser user, string password);
         bool AddNewDataFromMachine(DataFromMachineModel data);
         List<TableDataModel> GetDataForDataTable(SwmUser user);
