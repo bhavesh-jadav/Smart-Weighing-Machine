@@ -231,7 +231,7 @@ namespace SWM.Models
                             var userLocation = new UserLocation()
                             {
                                 UserId = Users[i].Id,
-                                Name = Users[i].FullName.Split(' ')[0] + "Farm"+ " " + (_ctx.UserLocations.Where(ul => ul.UserId == Users[i].Id).Count() + 1).ToString(),
+                                Name = Users[i].FullName.Split(' ')[0] + " Farm " + (_ctx.UserLocations.Where(ul => ul.UserId == Users[i].Id).Count() + 1).ToString(),
                                 Address = indian_farm_address[user_location_address_index].address,
                                 PinNo = indian_farm_address[user_location_address_index].pinNo,
                                 StateId = states.FirstOrDefault(s => s.Key.ToLower() == indian_farm_address[user_location_address_index].state.Trim().ToLower()).Value,

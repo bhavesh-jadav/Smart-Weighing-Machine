@@ -553,10 +553,6 @@ namespace SWM.Models.Repositories
                 locations.Add(new KeyValuePair<int, string>(location.Id, location.Name));
             return locations;
         }
-        private string getProductNameFromProductToUserId(int ptouId)
-        {
-            return _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == ptouId).ProductID).Name;
-        }
         private bool IsBetween(DateTime dt, DateTime start, DateTime end)
         {
             return dt >= start && dt <= end;
@@ -586,9 +582,9 @@ namespace SWM.Models.Repositories
                 foreach (var cropData in cropDatas)
                 {
                     var data = monthWiseData.FirstOrDefault(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year);
+                    string productName = products[ptous[cropData.CropToUserId]];
                     if (data != null)
                     {
-                        string productName = products[ptous[cropData.CropToUserId]];
                         var pinfo = data.ProductInformation.FirstOrDefault(pi => pi.ProductName == productName);
                         if (pinfo != null)
                             pinfo.TotalWeight += cropData.Weight;
@@ -596,7 +592,7 @@ namespace SWM.Models.Repositories
                             data.ProductInformation.Add(new ProductInfoModel() { ProductName = productName, TotalWeight = cropData.Weight });
                     }
                     else
-                        monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = getProductNameFromProductToUserId(cropData.CropToUserId), TotalWeight = cropData.Weight } } });
+                        monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = productName, TotalWeight = cropData.Weight } } });
                 }
 
                 return monthWiseData.OrderBy(md => md.Date).ToList();
@@ -730,7 +726,7 @@ namespace SWM.Models.Repositories
                 else
                     users = _ctx.SwmUsers.ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).ToList();
 
-                foreach (var user in users)
+                foreach (var user in users.ToList())
                 {
                     satisfyProducts = satisfyLocation = satisfyStates = satisfyCountries = 0;
                     List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
@@ -753,7 +749,7 @@ namespace SWM.Models.Repositories
                     {
                         foreach (var locaions in userLocations)
                         {
-                            if (locaions.Address.Contains(parameters.Location))
+                            if (locaions.Address.ToLower().Contains(parameters.Location.Trim().ToLower()))
                             {
                                 satisfyLocation = 1;
                                 break;
@@ -780,11 +776,11 @@ namespace SWM.Models.Repositories
                     }
                     if(countries != null)
                     {
-                        foreach (var state in countries)
+                        foreach (var country in countries)
                         {
                             foreach (var locations in userLocations)
                             {
-                                if (locations.StateId == Countries.FirstOrDefault(s => s.Value.ToLower().Trim() == state.ToLower().Trim()).Key)
+                                if (locations.CountryId == Countries.FirstOrDefault(s => s.Value.ToLower().Trim() == country.ToLower().Trim()).Key)
                                 {
                                     satisfyCountries = 1;
                                     break;
@@ -801,7 +797,7 @@ namespace SWM.Models.Repositories
                 {
                     string productNames = "";
                     Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
-                    foreach (var product in ptou.Keys)
+                    foreach (var product in ptou.Values)
                     {
                         productNames += ProductsInfo[product];
                         productNames += " ";

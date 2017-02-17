@@ -10,16 +10,31 @@
             <div class="col-lg-3 col-xs-6">
                 <div class="small-box bg-aqua">
                     <div class="inner">
-                        @if (Model.TotalWeight > 1000)
+                        @if (Model.TotalWeight > 1000000)
                         {
-                            <h3>@((Model.TotalWeight / 1000.0).ToString("n2")) Kg</h3>
+                            <h3>@((Model.TotalWeight / 1000000.0).ToString("n2"))</h3>
+                        }
+                        else if (Model.TotalWeight > 1000)
+                        {
+                            <h3>@((Model.TotalWeight / 1000.0).ToString("n2"))</h3>
                         }
                         else
                         {
-                            <h3>@Model.TotalWeight Grams</h3>
+                            <h3>@Model.TotalWeight</h3>
+                        }
+                        @if (Model.TotalWeight > 1000000)
+                        {
+                            <p>Weight in Tonne(s)</p>
+                        }
+                        else if (Model.TotalWeight > 1000)
+                        {
+                            <p>Weight in KG(s)</p>
+                        }
+                        else
+                        {
+                            <p>Weight Gram(s)</p>
                         }
 
-                        <p>Weight</p>
                     </div>
                     <div class="icon" style="margin-top:-10px;">
                         <i class="fa  fa-balance-scale" style="font-size:0.8em;"></i>
