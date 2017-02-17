@@ -17,7 +17,7 @@
                 "States": $scope.States,
                 "Countries": $scope.Countries
             }
-            $http.post("/api/advance_search", data).then(function (response) {
+            $http.post(document.location.origin+"/api/advance_search", data).then(function (response) {
                 $scope.searchData = response.data;
                 $scope.showSearchResults = true;
                 $scope.isBusy = false;

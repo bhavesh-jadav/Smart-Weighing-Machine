@@ -24,7 +24,7 @@
     function userController($scope, $http, poller) {
 
         $scope.gettingUserDetails = true;
-        var myPoller = poller.get('/api/' + username, {
+        var myPoller = poller.get(document.location.origin+'/api/' + username, {
             catchError: true,
             delay: 10000
         });

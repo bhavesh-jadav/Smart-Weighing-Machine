@@ -18,8 +18,7 @@
     angular.module("public").controller("chartsController", ["$scope", "$http", "poller", chartsController]);
 
     function chartsController($scope, $http, poller) {
-
-        var myPoller = poller.get("/api/public_dashboard", {
+        var myPoller = poller.get("/api/public_dashboard/", {
             catchError: true,
             delay: 10000
         });
