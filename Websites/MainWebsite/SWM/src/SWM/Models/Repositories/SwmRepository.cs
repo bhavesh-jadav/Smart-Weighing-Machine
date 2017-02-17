@@ -567,30 +567,36 @@ namespace SWM.Models.Repositories
             try
             {
                 List<CropData> cropDatas;
+                Dictionary<int, int> ptous;
+                Dictionary<int, string> products = _ctx.ProductInformations.ToDictionary(pi => pi.Id, pi => pi.Name);
                 DateTime startDate = new DateTime(startYear, startMonth, 1);
                 DateTime endDate = new DateTime(endYear, endMonth, DateTime.DaysInMonth(endYear, endMonth));
-                if(userName != "")
+                if (userName != "")
                 {
                     SwmUser user = _userManager.FindByNameAsync(userName).Result;
-                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                    cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId) && IsBetween(cd.DateTime, startDate, endDate)).ToList();
+                    ptous = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                    cropDatas = _ctx.CropDatas.Where(cd => ptous.ContainsKey(cd.CropToUserId) && IsBetween(cd.DateTime, startDate, endDate)).ToList();
                 }
                 else
+                {
                     cropDatas = _ctx.CropDatas.Where(cd => IsBetween(cd.DateTime, startDate, endDate)).ToList();
+                    ptous = _ctx.ProductsToUsers.ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                }
 
                 foreach (var cropData in cropDatas)
                 {
-                    if (monthWiseData.Any(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year))
+                    var data = monthWiseData.FirstOrDefault(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year);
+                    if (data != null)
                     {
-                        var d = monthWiseData.Find(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year);
-                        string productName = getProductNameFromProductToUserId(cropData.CropToUserId);
-                        if (d.ProductInformation.Any(pi => pi.ProductName == productName))
-                            d.ProductInformation.Find(pi => pi.ProductName == productName).TotalWeight += cropData.Weight;
+                        string productName = products[ptous[cropData.CropToUserId]];
+                        var pinfo = data.ProductInformation.FirstOrDefault(pi => pi.ProductName == productName);
+                        if (pinfo != null)
+                            pinfo.TotalWeight += cropData.Weight;
                         else
-                            d.ProductInformation.Add(new ProductInfoModel() { ProductName = productName, TotalWeight = cropData.Weight });
+                            data.ProductInformation.Add(new ProductInfoModel() { ProductName = productName, TotalWeight = cropData.Weight });
                     }
                     else
-                        monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = getProductNameFromProductToUserId(cropData.CropToUserId), TotalWeight = cropData.Weight}}});
+                        monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = getProductNameFromProductToUserId(cropData.CropToUserId), TotalWeight = cropData.Weight } } });
                 }
 
                 return monthWiseData.OrderBy(md => md.Date).ToList();
@@ -667,7 +673,7 @@ namespace SWM.Models.Repositories
                     {
                         string products = "";
                         Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
-                        foreach(var product in ptou.Keys)
+                        foreach(var product in ptou.Values)
                         {
                             products += ProductsInfo[product];
                             products += " ";
