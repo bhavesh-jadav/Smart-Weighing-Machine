@@ -7,7 +7,13 @@
         <div class="col-md-12">
             <div class="box box-primary">
                 <div class="box-header">
-                    <h3 class="box-title">Found @ViewBag.SearchResultLength result(s). Click on Full Name for more details.</h3>
+                    <h3 class="box-title">
+                        Found @ViewBag.SearchResultLength result(s).
+                        @if (ViewBag.SearchResultLength > 0)
+                        {
+                             <span>Click on full name for more details.</span>
+                        }
+                    </h3>
                 </div>
                 <div class="box-body">
                     @Html.Partial("ShowUserPublicPartial", Model)
