@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,14 +24,15 @@ namespace SWM.Models
             _config = config;
         }
 
-        //this maethod make sures that there some data available in database when application starts.
+        //this method make sures that there some data available in database when application starts.
         public async Task EnsureSeedData()
         {
             try
             {
                 var ran = new Random();
+                int max_indian_test_users = 1000; //must be greater than or equal to indian_user_address array
                 int max_user_name_repetition = 2;
-                int max_indian_test_users = 3; //must be greater than indian_user_address array
+                int max_user_locations_per_user = 3;
                 string[] indian_names = new string[] { };
                 Address[] indian_user_address = new Address[] { };
                 Address[] indian_farm_address = new Address[] { };
@@ -44,17 +46,16 @@ namespace SWM.Models
 
                 try
                 {
-                    Address[] add = await populateUserAddressFieldFromCsv(@"RawTestData/IndiaPincodeData.csv");
-                    indian_names = await populateUserFullNamesFieldFromCsv(@"RawTestData/FullName.csv");
-                    indian_user_address = add.Take(max_indian_test_users).ToArray();
-                    indian_farm_address = add.Reverse().Take(add.Length - max_indian_test_users).ToArray();
-                    //if (_userManager.Users.Count() == 0)
-                    //{
-                    //    Address[] add = await populateUserAddressFieldFromCsv(@"RawTestData/IndiaPincodeData.csv");
-                    //    indian_names = await populateUserFullNamesFieldFromCsv(@"RawTestData/FullName.csv");
-                    //    indian_user_address = add.Take(max_indian_test_users).ToArray();
-                    //    indian_farm_address = add.Reverse().Take(add.Length - max_indian_test_users).ToArray();
-                    //}
+                    if (_userManager.Users.Count() == 0)
+                    {
+                        Address[] add = await populateUserAddressFieldFromCsv(@"RawTestData/IndiaPincodeData.csv");
+                        indian_names = await populateUserFullNamesFieldFromCsv(@"RawTestData/FullName.csv");
+                        indian_user_address = add.Take(max_indian_test_users).ToArray();
+                        if((max_user_locations_per_user * max_indian_test_users) < (add.Length - max_indian_test_users))
+                            indian_farm_address = add.Skip(max_indian_test_users).Take(max_user_locations_per_user*max_indian_test_users).ToArray();
+                        else
+                            indian_farm_address = add.Skip(max_indian_test_users).ToArray();
+                    }
 
                 }
                 catch (Exception ex)
@@ -62,82 +63,18 @@ namespace SWM.Models
                     //log error
                 }
 
-
-                //unique to each and very users. Total number of users will be equal to length of this array
-                //Address[] indian_user_address =
-                //{
-                //    new Address("366, Old No 200, Triplicane High Road", 600005, " Tamil Nadu"),
-                //    new Address("Gala No.b-40, Kalina Kutir Society, C S T Road, Kalina, Santacruz(e)", 400098, " Maharashtra"),
-                //    new Address("208 Ansa Industrial Estate, J Saki Vihar Raod, Saki Naka", 400072, " Maharashtra"),
-                //    new Address("Kripa Nagar, F-6 S V Road, Vile Parle West (west)", 400056, " Maharashtra"),
-                //    new Address("106/22, R S Puram, Rs Puram", 641002, "Tamil Nadu"),
-                //    new Address("2-b, New No 3, Ramanathan Street, T Nagar", 600017, " Tamil Nadu"),
-                //    new Address("A-11 Pruthvi Complex, Opp Azad Halwai, Ashram Road", 380013, " Gujarat"),
-                //    new Address("Veera Desai, Nr Veera Desai Bus Stop,nr Sharda V, Andheri (west)", 400058, " Maharashtra"),
-                //    new Address("3rd Floor, 93/95, Sugar House, Kazi Sayeed Street, Masjid Bunder (w)", 400003, "Maharashtra"),
-                //    new Address("112, Shankar Estate,kevada, Amraiwadi", 380026, "  Gujarat"),
-                //    new Address("104/5, Gopalreddy, 1, Tavarekere", 560029, " Karnataka"),
-                //    new Address("1st Floor Balabhavan Central, Avenue Road Nr Diamond Garden, Chembur", 400071, " Maharashtra"),
-                //    new Address("19/2, Mittal Estate, Andheri Kurla Road, Andheri(e)", 400059, " Maharashtra"),
-                //    new Address("312, B-wing, Mittal Towers, M G Road", 560001, " Karnataka"),
-                //    new Address("151, Hilal Manzil, Kazi Sayed Street, Mandvi", 400003, " Maharashtra"),
-                //    new Address("159, Sanjay 5-b, Mittal Indl Estate, Andheri Kurla Road, Marol Naka, Andheri(e)", 400059, " Maharashtra"),
-                //    new Address("Unit No 221, H Building, Ansa Industrial Estate, Chandivli Road, Andheri (e),sakinaka, Andheri (west", 400072, " Maharashtra"),
-                //    new Address("4, Sardar Nagar, S M Rd, Sion Koliwada", 400037, " Maharashtra"),
-                //    new Address("5203, Sadar Thana Rd, Sadar Bazar", 110006, " Delhi"),
-                //    new Address("131 Loheki Chawl, 216/218 M.a Road", 400008, " Maharashtra"),
-                //    new Address("Kanchpada No 2, Ramchandra Lane Extn, Malad(w)", 400064, " Maharashtra"),
-                //    new Address("7-73/1, Main Road, Kukatpally", 500072, " Andhra Pradesh"),
-                //    new Address("6100, Gali Batashe Wali, Khari Baoli", 110006, " Delhi")
-                //};
-
-                ////must be greater than user_address array
-                //Address[] indian_farm_address =
-                //{
-                //    new Address(" Mira Bhayander Road", 401104," Maharashtra"),
-                //    new Address("Commerce Union House, 9, Wallace Street", 400001," Maharashtra"),
-                //    new Address("159, 5, Amar Industrial Est, Cst Road, Kalina, Santacruz (east)", 400098," Maharashtra"),
-                //    new Address("Happy Home, Anand Nagar, Dahisar", 400068," Maharashtra"),
-                //    new Address("105, Sainath Chambers, Sainath Road, Malad (west)", 400064," Maharashtra"),
-                //    new Address("155, Guru Nanak Auto Market, Kashmere Gate", 110006," Delhi"),
-                //    new Address("A 57, Part 2, South Extn", 110049," Delhi"),
-                //    new Address("B 8, 3/4, Balaji Nagar, 90 Feet Rd, Opp New Police Stn,", 400017," Maharashtra"),
-                //    new Address("Blue Diamond, Fatehgunj", 390002," Gujarat"),
-                //    new Address("3rd Floor, 61/63 Nagdevi Street, Mandvi", 400003," Maharashtra"),
-                //    new Address("12, Rajanna Lane, Ganigarpet", 560002," Karnataka"),
-                //    new Address("Karani Lane, Bhatwadi", 400084," Maharashtra"),
-                //    new Address("113 Nagdevi Street, Mandvi", 400003," Maharashtra"),
-                //    new Address("610, Anna Salai, Anna Salai", 600006," Tamil Nadu"),
-                //    new Address("Plot No.7, Prabhat Centre Annexe, Sec 1a, Belapur (cbd), Navi Mumbai", 400614," Maharashtra"),
-                //    new Address("11/7, Mathura Road, Faridabad", 121001," Haryana"),
-                //    new Address("404, Sector 17, Jk Chambers, Vashi", 400705," Maharashtra"),
-                //    new Address("17 Narasingapuram St, Mount Road", 600002," Tamil Nadu"),
-                //    new Address("#4009, 100ftrd,jngr,hal2stg Blr-08, Jeevanbimanagar", 560008," Karnataka"),
-                //    new Address("Metropolitan Mall, Mehrauli Gurgaon Road, Gurgaon, Gurgaon", 122001," Delhi"),
-                //    new Address("251/53, Fazender House, Ibrahim Rahimtulla Rd, Mandvi", 400003," Maharashtra"),
-                //    new Address("3-5-1138/1 2, Kachiguda", 500027," Andhra Pradesh"),
-                //    new Address("1, 1,klsiplyblr-2, Kalasipalyam", 560002," Karnataka"),
-                //    new Address("#109, Lakdikapul", 500004," Andhra Pradesh"),
-                //    new Address("Opp. A.s.motors Salatwada, Opp. A.s.motors, Salatwada, Opp. A.s.motors, Salatwada", 390001," Gujarat"),
-                //    new Address("24/25, Rup Chand Roy Street, Burrabazar", 700007," West Bengal")
-                //};
-
                 if (!_ctx.States.Any())
                 {
+                    List<State> States = new List<State>(); ;
                     foreach (var address in indian_user_address)
-                        if (_ctx.States.FirstOrDefault(s => s.Name.Trim().ToLower() == address.state.Trim().ToLower()) == null)
-                        {
-                            _ctx.States.Add(new State() { Name = address.state.Trim() });
-                            _ctx.SaveChanges();
-                        }
+                        if (address != null ? States.FirstOrDefault(s => s.Name.Trim().ToLower() == address.state.Trim().ToLower()) == null : false)
+                            States.Add(new State() {Name = address.state.Trim() });
                         
                     foreach (var address in indian_farm_address)
-                        if (_ctx.States.FirstOrDefault(s => s.Name.Trim().ToLower() == address.state.Trim().ToLower()) == null)
-                        {
-                            _ctx.States.Add(new State() { Name = address.state.Trim() });
-                            _ctx.SaveChanges();
-                        }
-
+                        if (address != null ? States.FirstOrDefault(s => s.Name.Trim().ToLower() == address.state.Trim().ToLower()) == null : false)
+                            States.Add(new State() { Name = address.state.Trim() });
+                
+                    _ctx.States.AddRange(States.ToArray());
                     await _ctx.SaveChangesAsync();
                 }
                 if (!_ctx.Countries.Any())
@@ -205,9 +142,9 @@ namespace SWM.Models
                             RegisterDate = DateTime.Now
                         };
                         await _userManager.CreateAsync(user, indian_names[user_name_index].Split(' ')[0] + _config["seedUsersPasswordKey"]);
-                        _ctx.SaveChanges();
+                        await _ctx.SaveChangesAsync();
                         await _userManager.AddToRoleAsync(user, "user");
-                        _ctx.SaveChanges();
+                        await _ctx.SaveChangesAsync();
                         address_index++;
                     }
                     _ctx.OtherDatas.FirstOrDefault(od => od.Name == "UserCounts").Value = usercounts.ToString();
@@ -243,18 +180,14 @@ namespace SWM.Models
                     int user_location_address_index = 0, user_locations_assigned = 0;
                     for (int i = 0; i < users.Length; i++)
                     {
-                        int no_of_user_locations = ran.Next(1, 4);
+                        if(user_locations_assigned >= indian_farm_address.Length)
+                            user_locations_assigned = user_location_address_index = 0;
+                        int no_of_user_locations = ran.Next(1, max_user_locations_per_user+1);
                         user_locations_assigned += no_of_user_locations;
                         if ((indian_farm_address.Length - user_locations_assigned) <= (users.Length - 1 - i))
                             no_of_user_locations = 1;
                         for (int j = 0; j < no_of_user_locations; j++)
                         {
-                            var UserId = users[i].Id;
-                            var Name = users[i].FullName.Split(' ')[0] + " Farm " + (_ctx.UserLocations.Where(ul => ul.UserId == users[i].Id).Count() + 1).ToString();
-                            var Address = indian_farm_address[user_location_address_index].address;
-                            var PinNo = indian_farm_address[user_location_address_index].pinNo;
-                            var StateId = states.FirstOrDefault(s => s.Key.ToLower() == indian_farm_address[user_location_address_index].state.Trim().ToLower()).Value;
-                            var CountryId = countries.FirstOrDefault(c => c.Key.ToLower() == "india").Value;
                             var userLocation = new UserLocation()
                             {
                                 UserId = users[i].Id,
@@ -362,16 +295,19 @@ namespace SWM.Models
 
                 if (!_ctx.CropDatas.Any())
                 {
+                    _ctx.ChangeTracker.AutoDetectChangesEnabled = false;
                     Random random = new Random();
                     int dataSize, min_dataSize = 100, max_dataSize = 300;
-
                     var users = _ctx.SwmUsers.ToList();
+                    var productsToUsers = _ctx.ProductsToUsers.ToList();
+                    var userLocations = _ctx.UserLocations.ToList();
+                    var userLocationsToMachines = _ctx.UserLocationToMachines.ToList();
                     foreach (var user in users)
                     {
                         dataSize = random.Next(min_dataSize, max_dataSize+1);
-                        var ptous = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).Select(pu => pu.Id).ToArray();
-                        var uls = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
-                        var utoms = _ctx.UserLocationToMachines.Where(um => uls.Any(ul => ul.Id == um.UserLocationId)).Select(um => um.Id).ToArray();
+                        var ptous = productsToUsers.Where(pu => pu.UserId == user.Id).Select(pu => pu.Id).ToArray();
+                        var uls = userLocations.Where(ul => ul.UserId == user.Id).ToList();
+                        var utoms = userLocationsToMachines.Where(um => uls.Any(ul => ul.Id == um.UserLocationId)).Select(um => um.Id).ToArray();
 
                         //before adding data into this table verify data in ProductsToUser and UserLocationToMachine tables
                         CropData[] cropDatas = new CropData[dataSize];
@@ -384,8 +320,9 @@ namespace SWM.Models
                                 Weight = random.Next(1, 3001)
                             };
                         _ctx.AddRange(cropDatas);
-                        await _ctx.SaveChangesAsync();
                     }
+                    await _ctx.SaveChangesAsync();
+                    _ctx.ChangeTracker.AutoDetectChangesEnabled = true;
                 }
 
                 //adding admin
@@ -419,21 +356,46 @@ namespace SWM.Models
             }
         }
 
+        public static string[] Randomize(string[] items)
+        {
+            Random rand = new Random();
+
+            // For each spot in the array, pick
+            // a random item to swap into that spot.
+            for (int i = 0; i < items.Length - 1; i++)
+            {
+                int j = rand.Next(i, items.Length);
+                string temp = items[i];
+                items[i] = items[j];
+                items[j] = temp;
+            }
+            return items;
+        }
+
         //csv must be in following format
         //PostOfficeName(or)Address,Pincode,City,District,State
         private async Task<Address[]> populateUserAddressFieldFromCsv(string filePath)
         {
             var task = await Task.Run(() =>
             {
-                var datas = File.ReadLines(filePath).SelectMany(a => a.Split(';')).ToArray();
-                Address[] addresess = new Address[datas.Length];
-                for (int i = 1; i < datas.Length; i++)
+                try
                 {
-                    var data = datas[i].Split(',');
-                    if (data.Length >= 5)
-                        addresess[i - 1] = new Address(data[0] + ", " + data[2], Int32.Parse(data[1]), data[4]);
+                    string[] datas = File.ReadLines(filePath).SelectMany(a => a.Split(';')).ToArray();
+                    datas = Randomize(datas);
+                    Address[] addresess = new Address[datas.Length];
+                    for (int i = 1; i < datas.Length; i++)
+                    {
+                        var data = datas[i].Split(',');
+                        if (data.Length >= 5)
+                            addresess[i - 1] = new Address(data[0] + ", " + data[2], int.Parse(data[1].ToString().Trim()), data[4]);
+                    }
+                    return addresess;
                 }
-                return addresess;
+                catch (Exception ex)
+                {
+                    var data = ex.ToString();
+                    return null;
+                }
             });
             return task;
         }
@@ -444,7 +406,8 @@ namespace SWM.Models
         {
             var task = await Task.Run(() =>
             {
-                var datas = File.ReadLines(filePath).SelectMany(a => a.Split(';')).ToArray();
+                string[] datas = File.ReadLines(filePath).SelectMany(a => a.Split(';')).ToArray();
+                datas = Randomize(datas);
                 string[] fullNames = new string[datas.Length];
                 for (int i = 1; i < datas.Length; i++)
                 {

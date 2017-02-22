@@ -160,6 +160,13 @@ namespace SWM.Controllers.Api
             return Ok(result);
         }
 
+        //[HttpPost("get_all_users")]
+        //public IActionResult GetAllUsersForPublic()
+        //{
+        //    var result = _repo.GetSearchResultForUserByFullName("");
+        //    return Ok(result);
+        //}
+
         [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult LogIn([FromBody]LoginViewModel user_login)

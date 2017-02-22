@@ -70,35 +70,38 @@ namespace SWM.Models.Repositories
             try
             {
                 List<ProductInfoModel> productInfo = new List<ProductInfoModel>();
+                Dictionary<int, string> productsInformation = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
                 var user = GetUserByUserName(userName).Result;
                 if (user != null)
                 {
-                    ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
-                    foreach(var cu in ctou)
+                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToList();
+                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                    foreach(var pu in ptou)
                     {
                         productInfo.Add(new ProductInfoModel()
                         {
-                            ProductName = GetProductInformation(cu.ProductID).Name,
-                            TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id).Select(cd => cd.Weight).Sum()
+                            ProductName = productsInformation[pu.ProductID],
+                            TotalWeight = cropDatas.Where(cd => cd.CropToUserId == pu.Id).Select(cd => cd.Weight).Sum()
                         });
                     }
                     return productInfo;
                 }
                 else
                 {
-                    ProductsToUser[] ctou = _ctx.ProductsToUsers.ToArray();
-                    foreach (var cu in ctou)
+                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.ToList();
+                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                    foreach (var pu in ptou)
                     {
-                        var productName = GetProductInformation(cu.ProductID).Name;
+                        var productName = productsInformation[pu.ProductID];
                         var data = productInfo.FirstOrDefault(d => d.ProductName == productName);
                         if(data != null)
-                            data.TotalWeight += _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id).Select(cd => cd.Weight).Sum();
+                            data.TotalWeight += cropDatas.Where(cd => cd.CropToUserId == pu.Id).Select(cd => cd.Weight).Sum();
                         else
                         {
                             productInfo.Add(new ProductInfoModel()
                             {
                                 ProductName = productName,
-                                TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id).Select(cd => cd.Weight).Sum()
+                                TotalWeight = cropDatas.Where(cd => cd.CropToUserId == pu.Id).Select(cd => cd.Weight).Sum()
                             });
                         }
                     }
@@ -650,6 +653,7 @@ namespace SWM.Models.Repositories
         }
         public List<SearchUserModel> GetSearchResultForUserByFullName(string fullName)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             List<SearchUserModel> result = new List<SearchUserModel>();
             try
             {
@@ -663,12 +667,14 @@ namespace SWM.Models.Repositories
                 Dictionary<int, string> states = _ctx.States.ToDictionary(s => s.Id, s => s.Name);
                 Dictionary<int, string> countries = _ctx.Countries.ToDictionary(s => s.Id, s => s.Name);
                 Dictionary<int, string> ProductsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
+                List<ProductsToUser> productsToUsers = _ctx.ProductsToUsers.ToList();
+                Dictionary<string, string> userSubscriptionId = _ctx.UserToSubscriptions.ToDictionary(s => s.UserID, s => s.SubscriptionId);
                 foreach (var user in users)
                 {
                     if(_userManager.IsInRoleAsync(user, "user").Result)
                     {
                         string products = "";
-                        Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                        Dictionary<int, int> ptou = productsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
                         foreach(var product in ptou.Values)
                         {
                             products += ProductsInfo[product];
@@ -683,10 +689,12 @@ namespace SWM.Models.Repositories
                             Country = countries[user.CountryId],
                             State = states[user.StateId],
                             ProductsIntoAccount = products,
-                            SubId = _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId
+                            SubId = userSubscriptionId[user.Id]
                         });
                     }
                 }
+                watch.Stop();
+                var elapsedMs = watch.ElapsedMilliseconds;
                 return result;
             }
             catch (Exception ex)
