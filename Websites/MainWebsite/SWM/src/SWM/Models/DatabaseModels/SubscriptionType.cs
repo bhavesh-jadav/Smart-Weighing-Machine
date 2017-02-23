@@ -10,10 +10,15 @@ namespace SWM.Models
 {
     public class SubscriptionType
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public SubscriptionType()
+        {
+            this.UserToSubscription = new HashSet<UserToSubscription>();
+        }
+        
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
+
+        public virtual ICollection<UserToSubscription> UserToSubscription { get; set; }
     }
 }

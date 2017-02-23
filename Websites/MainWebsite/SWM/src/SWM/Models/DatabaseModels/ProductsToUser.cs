@@ -10,12 +10,23 @@ namespace SWM.Models
 {
     public class ProductsToUser
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ProductsToUser()
+        {
+            this.CropData = new HashSet<CropData>();
+        }
+
         public int Id { get; set; }
         [Required]
         public string UserId { get; set; }
         [Required]
-        public int ProductID { get; set; }
+        public int ProductId { get; set; }
+
+        public virtual ICollection<CropData> CropData { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual SwmUser SwmUser { get; set; }
+        [ForeignKey("ProductId")]
+        public virtual ProductInformation ProductInformation { get; set; }
+
     }
 }

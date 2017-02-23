@@ -10,8 +10,11 @@ namespace SWM.Models
 {
     public class UserLocation
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public UserLocation()
+        {
+            this.UserLocationToMachine = new HashSet<UserLocationToMachine>();
+        }
+        
         public int Id { get; set; }
         [Required]
         public string UserId { get; set; }
@@ -25,5 +28,14 @@ namespace SWM.Models
         public int StateId { get; set; }
         [Required]
         public int CountryId { get; set; }
+
+        public virtual ICollection<UserLocationToMachine>  UserLocationToMachine { get; set; }
+
+        [ForeignKey("CountryId")]
+        public virtual Country Country { get; set; }
+        [ForeignKey("StateId")]
+        public virtual State State { get; set; }
+        [ForeignKey("UserId")]
+        public virtual SwmUser SwmUser { get; set; }
     }
 }

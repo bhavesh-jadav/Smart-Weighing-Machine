@@ -28,7 +28,7 @@ namespace SWM.Models
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<CropData>().HasKey(k => new { k.CropToUserId, k.DateTime });
+            builder.Entity<CropData>().HasKey(k => new { k.ProductToUserId, k.DateTime });
             builder.Entity<MachineToUser>().HasKey(k => new { k.MachineId, k.UserID });
             builder.Entity<UserToSubscription>().HasKey(k => new { k.UserID, k.SubscriptionId });
         }

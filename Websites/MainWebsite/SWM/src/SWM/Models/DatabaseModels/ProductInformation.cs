@@ -10,13 +10,16 @@ namespace SWM.Models
 {
     public class ProductInformation
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ProductInformation()
+        {
+            this.ProductsToUser = new HashSet<ProductsToUser>();
+        }
+        
         public int Id { get; set; }
-
         [Required]
         public string Name { get; set; }
-
         public string Description { get; set; }
+
+        public virtual ICollection<ProductsToUser> ProductsToUser { get; set; }
     }
 }

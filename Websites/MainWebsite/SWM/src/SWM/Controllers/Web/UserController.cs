@@ -49,7 +49,7 @@ namespace SWM.Controllers.Web
                 var user = _userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result;
                 bool isNewUser = !(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == user.Id) != null);
                 var ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
-                bool haveSomeData = (_ctx.CropDatas.Where(cd => ptou.Any(c => cd.CropToUserId == c.Id)).ToList().Count > 0);
+                bool haveSomeData = (_ctx.CropDatas.Where(cd => ptou.Any(c => cd.ProductToUserId == c.Id)).ToList().Count > 0);
                 return View("UserDashboard", new Tuple<bool, bool, string>(isNewUser, haveSomeData, user.UserName));
             }
             return View();

@@ -10,8 +10,14 @@ namespace SWM.Models
 {
     public class MachineInformation
     {
+        public MachineInformation()
+        {
+            this.MachineToUser = new HashSet<MachineToUser>();
+            this.UserLocationToMachine = new HashSet<UserLocationToMachine>();
+        }
+        
         [Key]
-        public int Id { get; set; }
+        public int MachineId { get; set; }
         [Required]
         public DateTime ManufactureDate { get; set; }
         [Required]
@@ -19,5 +25,9 @@ namespace SWM.Models
         [Required]
         public string ManufactureLocation { get; set; }
         public DateTime SellDate { get; set; }
+
+        public virtual ICollection<MachineToUser> MachineToUser { get; set; }
+        public virtual ICollection<UserLocationToMachine> UserLocationToMachine { get; set; }
+
     }
 }

@@ -10,10 +10,17 @@ namespace SWM.Models
 {
     public class Country
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Country()
+        {
+            this.SwmUser = new HashSet<SwmUser>();
+            this.UserLocation = new HashSet<UserLocation>();
+        }
+
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
+
+        public virtual ICollection<SwmUser> SwmUser { get; set; }
+        public virtual ICollection<UserLocation> UserLocation { get; set; }
     }
 }

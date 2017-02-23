@@ -10,12 +10,22 @@ namespace SWM.Models
 {
     public class UserLocationToMachine
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public UserLocationToMachine()
+        {
+            this.CropData = new HashSet<CropData>();
+        }
+
         public int Id { get; set; }
         [Required]
         public int UserLocationId { get; set; }
         [Required]
         public int MachineId { get; set; }
+
+        public virtual ICollection<CropData> CropData { get; set; }
+
+        [ForeignKey("UserLocationId")]
+        public virtual UserLocation UserLocation { get; set; }
+        [ForeignKey("MachineId")]
+        public virtual MachineInformation MachineInformation { get; set; }
     }
 }

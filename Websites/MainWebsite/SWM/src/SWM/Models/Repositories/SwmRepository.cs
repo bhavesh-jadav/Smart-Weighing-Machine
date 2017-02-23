@@ -75,13 +75,13 @@ namespace SWM.Models.Repositories
                 if (user != null)
                 {
                     List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToList();
-                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).ToList();
                     foreach(var pu in ptou)
                     {
                         productInfo.Add(new ProductInfoModel()
                         {
-                            ProductName = productsInformation[pu.ProductID],
-                            TotalWeight = cropDatas.Where(cd => cd.CropToUserId == pu.Id).Select(cd => cd.Weight).Sum()
+                            ProductName = productsInformation[pu.ProductId],
+                            TotalWeight = cropDatas.Where(cd => cd.ProductToUserId == pu.Id).Select(cd => cd.Weight).Sum()
                         });
                     }
                     return productInfo;
@@ -89,19 +89,19 @@ namespace SWM.Models.Repositories
                 else
                 {
                     List<ProductsToUser> ptou = _ctx.ProductsToUsers.ToList();
-                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
+                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).ToList();
                     foreach (var pu in ptou)
                     {
-                        var productName = productsInformation[pu.ProductID];
+                        var productName = productsInformation[pu.ProductId];
                         var data = productInfo.FirstOrDefault(d => d.ProductName == productName);
                         if(data != null)
-                            data.TotalWeight += cropDatas.Where(cd => cd.CropToUserId == pu.Id).Select(cd => cd.Weight).Sum();
+                            data.TotalWeight += cropDatas.Where(cd => cd.ProductToUserId == pu.Id).Select(cd => cd.Weight).Sum();
                         else
                         {
                             productInfo.Add(new ProductInfoModel()
                             {
                                 ProductName = productName,
-                                TotalWeight = cropDatas.Where(cd => cd.CropToUserId == pu.Id).Select(cd => cd.Weight).Sum()
+                                TotalWeight = cropDatas.Where(cd => cd.ProductToUserId == pu.Id).Select(cd => cd.Weight).Sum()
                             });
                         }
                     }
@@ -131,8 +131,8 @@ namespace SWM.Models.Repositories
                     {
                         productInfos.Add(new ProductInfoModel()
                         {
-                            ProductName = GetProductInformation(cu.ProductID).Name,
-                            TotalWeight = _ctx.CropDatas.Where(cd => cd.CropToUserId == cu.Id && 
+                            ProductName = GetProductInformation(cu.ProductId).Name,
+                            TotalWeight = _ctx.CropDatas.Where(cd => cd.ProductToUserId == cu.Id && 
                             cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(ul => ul.UserLocationId == location.Id).Id).Select(cd => cd.Weight).Sum()
                         });
                     }
@@ -159,10 +159,10 @@ namespace SWM.Models.Repositories
             try
             {
                 var user = _userManager.FindByIdAsync(data.UserId).Result;
-                var machine = _ctx.MachineInformations.FirstOrDefault(m => m.Id == data.MachineId);
+                var machine = _ctx.MachineInformations.FirstOrDefault(m => m.MachineId == data.MachineId);
                 var product = _ctx.ProductInformations.FirstOrDefault(p => p.Id == data.ProductId);
                 var location = _ctx.UserLocations.FirstOrDefault(l => (l.Id == data.LocationId) && (l.UserId == data.UserId));
-                var ptou = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.ProductID == data.ProductId && pu.UserId == data.UserId);
+                var ptou = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.ProductId == data.ProductId && pu.UserId == data.UserId);
 
                 if (user != null && machine != null && product != null && location != null && ptou != null)
                 {
@@ -183,7 +183,7 @@ namespace SWM.Models.Repositories
 
                     _ctx.CropDatas.Add(new CropData
                     {
-                        CropToUserId = ptou.Id,
+                        ProductToUserId = ptou.Id,
                         UserLocationToMachineId = utom.Id,
                         DateTime = data.DateAndTime,
                         Weight = data.weight
@@ -206,14 +206,14 @@ namespace SWM.Models.Repositories
                 int counter = 1;
                 List<TableDataModel> tableData = new List<TableDataModel>();
                 List<ProductsToUser> produtToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => produtToUsers.Any(pu => pu.Id == cd.CropToUserId)).OrderByDescending(cd => cd.DateTime).ToList();
+                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => produtToUsers.Any(pu => pu.Id == cd.ProductToUserId)).OrderByDescending(cd => cd.DateTime).ToList();
                 List<UserLocationToMachine> userLocationToMachine = _ctx.UserLocationToMachines.Where(ul => cropDatas.Any(cd => cd.UserLocationToMachineId == ul.Id)).ToList();
                 List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => userLocationToMachine.Any(um => um.UserLocationId == ul.Id)).ToList();
 
                 //key productToUserId value productName
                 Dictionary<int, string> productInformation = new Dictionary<int, string>();
                 foreach (var data in produtToUsers)
-                    productInformation.Add(data.Id, _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == data.ProductID).Name);
+                    productInformation.Add(data.Id, _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == data.ProductId).Name);
 
                 //Key locationId value locationname
                 Dictionary<int, string> locationInfo = new Dictionary<int, string>();
@@ -225,7 +225,7 @@ namespace SWM.Models.Repositories
                     tableData.Add(new TableDataModel()
                     {
                         No = counter++,
-                        Name = productInformation[cropData.CropToUserId],
+                        Name = productInformation[cropData.ProductToUserId],
                         Weight = cropData.Weight,
                         DateAndTime = cropData.DateTime,
                         Location = locationInfo[userLocationToMachine.FirstOrDefault(um => um.Id == cropData.UserLocationToMachineId).UserLocationId],
@@ -370,7 +370,7 @@ namespace SWM.Models.Repositories
                     var pus = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
                     foreach (var row in pus)
                     {
-                        var cds = _ctx.CropDatas.Where(cd => cd.CropToUserId == row.Id).ToList();
+                        var cds = _ctx.CropDatas.Where(cd => cd.ProductToUserId == row.Id).ToList();
                         foreach (var cd in cds)
                             _ctx.Remove(cd);
                         _ctx.Remove(row);
@@ -459,14 +459,14 @@ namespace SWM.Models.Repositories
                         });
                     }
                     var ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == userId).ToArray();
-                    var cropDatas = _ctx.CropDatas.Where(cd => ctou.Any(c => cd.CropToUserId == c.Id));
+                    var cropDatas = _ctx.CropDatas.Where(cd => ctou.Any(c => cd.ProductToUserId == c.Id));
                     userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
                     userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
                     userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
                     userDashboard.FullName = user.FullName;
                     foreach (var cu in ctou)
                     {
-                        var product = productsInfo[cu.ProductID];
+                        var product = productsInfo[cu.ProductId];
                         userDashboard.ProductsIntoAccount += product;
                         userDashboard.ProductsIntoAccount += ", ";
                     }
@@ -474,8 +474,8 @@ namespace SWM.Models.Repositories
                     userDashboard.UserName = user.UserName;
                     if(cropDatas.ToArray().Length > 0)
                     {
-                        var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].CropToUserId;
-                        var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductID;
+                        var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].ProductToUserId;
+                        var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductId;
                         userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
                     }
                     else
@@ -504,10 +504,10 @@ namespace SWM.Models.Repositories
                     _ctx.SaveChanges();
                     product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Name == newProduct.Name);
                 }
-                var productToUser = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId && pu.ProductID == product.Id);
+                var productToUser = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId && pu.ProductId == product.Id);
                 if(productToUser == null)
                 {
-                    _ctx.Add(new ProductsToUser() { UserId = userId, ProductID = product.Id });
+                    _ctx.Add(new ProductsToUser() { UserId = userId, ProductId = product.Id });
                     _ctx.SaveChanges();
                 }
                 return true;
@@ -542,7 +542,7 @@ namespace SWM.Models.Repositories
         public List<KeyValuePair<int, string>> GetProductNames(string userId)
         {
             var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId);
-            var pr = _ctx.ProductInformations.Where(pi => ptou.Any(pu => pu.ProductID == pi.Id)).ToList();
+            var pr = _ctx.ProductInformations.Where(pi => ptou.Any(pu => pu.ProductId == pi.Id)).ToList();
             List<KeyValuePair<int, string>> produts = new List<KeyValuePair<int, string>>();
             foreach (var product in pr)
                 produts.Add(new KeyValuePair<int, string>(product.Id, product.Name));
@@ -573,19 +573,19 @@ namespace SWM.Models.Repositories
                 if (userName != "")
                 {
                     SwmUser user = _userManager.FindByNameAsync(userName).Result;
-                    ptous = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
-                    cropDatas = _ctx.CropDatas.Where(cd => ptous.ContainsKey(cd.CropToUserId) && IsBetween(cd.DateTime, startDate, endDate)).ToList();
+                    ptous = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
+                    cropDatas = _ctx.CropDatas.Where(cd => ptous.ContainsKey(cd.ProductToUserId) && IsBetween(cd.DateTime, startDate, endDate)).ToList();
                 }
                 else
                 {
                     cropDatas = _ctx.CropDatas.Where(cd => IsBetween(cd.DateTime, startDate, endDate)).ToList();
-                    ptous = _ctx.ProductsToUsers.ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                    ptous = _ctx.ProductsToUsers.ToDictionary(pu => pu.Id, pu => pu.ProductId);
                 }
 
                 foreach (var cropData in cropDatas)
                 {
                     var data = monthWiseData.FirstOrDefault(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year);
-                    string productName = products[ptous[cropData.CropToUserId]];
+                    string productName = products[ptous[cropData.ProductToUserId]];
                     if (data != null)
                     {
                         var pinfo = data.ProductInformation.FirstOrDefault(pi => pi.ProductName == productName);
@@ -614,7 +614,7 @@ namespace SWM.Models.Repositories
                 {
                     var user = _userManager.FindByNameAsync(userName).Result;
                     var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                    var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).OrderBy(cd => cd.DateTime).GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList();
+                    var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).OrderBy(cd => cd.DateTime).GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList();
                     foreach (var cropData in cropDatas)
                         userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
                     return userMonths;
@@ -674,7 +674,7 @@ namespace SWM.Models.Repositories
                     if(_userManager.IsInRoleAsync(user, "user").Result)
                     {
                         string products = "";
-                        Dictionary<int, int> ptou = productsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                        Dictionary<int, int> ptou = productsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
                         foreach(var product in ptou.Values)
                         {
                             products += ProductsInfo[product];
@@ -744,7 +744,7 @@ namespace SWM.Models.Repositories
                         foreach (var product in products)
                         {
                             var productId = ProductsInfo.FirstOrDefault(pu => pu.Value.ToLower().Trim() == product.ToLower().Trim()).Key;
-                            if(ptou.Any(pu => pu.ProductID == productId))
+                            if(ptou.Any(pu => pu.ProductId == productId))
                             {
                                 satisfyProducts = 1;
                                 break;
@@ -804,7 +804,7 @@ namespace SWM.Models.Repositories
                 foreach (var user in users)
                 {
                     string productNames = "";
-                    Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                    Dictionary<int, int> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
                     foreach (var product in ptou.Values)
                     {
                         productNames += ProductsInfo[product];
@@ -842,8 +842,8 @@ namespace SWM.Models.Repositories
                 Dictionary<int, int> userLocationToMachine = _ctx.UserLocationToMachines.Where(um => userLocations.Count(ul => ul.Id == um.UserLocationId) > 0).
                     ToDictionary(um => um.Id, um => um.UserLocationId);
                 List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.CropToUserId)).ToList();
-                Dictionary<int, int> productToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductID);
+                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).ToList();
+                Dictionary<int, int> productToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
 
                 userDetails.SubId = subId;
                 userDetails.FullName = user.FullName;
@@ -852,7 +852,7 @@ namespace SWM.Models.Repositories
                 userDetails.ContactNo = user.PhoneNumber;
                 userDetails.Email = user.Email;
 
-                var co = _ctx.CropDatas.Where(c => c.CropToUserId == 3).ToList();
+                var co = _ctx.CropDatas.Where(c => c.ProductToUserId == 3).ToList();
 
                 List<CropData> sortedCropData;
                 int maxDisplayAmount = 15;
@@ -869,7 +869,7 @@ namespace SWM.Models.Repositories
                         No = counter++,
                         DateAndTime = cropdata.DateTime,
                         Location = userLocations.FirstOrDefault(ul => ul.Id == userLocationToMachine[cropdata.UserLocationToMachineId]).Address,
-                        ProductName = productsInfo[productToUsers[cropdata.CropToUserId]],
+                        ProductName = productsInfo[productToUsers[cropdata.ProductToUserId]],
                         Weight = cropdata.Weight
                     });
                 }

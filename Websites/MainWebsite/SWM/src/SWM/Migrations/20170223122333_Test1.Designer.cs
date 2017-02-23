@@ -8,8 +8,8 @@ using SWM.Models;
 namespace SWM.Migrations
 {
     [DbContext(typeof(SwmContext))]
-    [Migration("20170214155529_InitialMigrations")]
-    partial class InitialMigrations
+    [Migration("20170223122333_Test1")]
+    partial class Test1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -144,24 +144,26 @@ namespace SWM.Migrations
 
             modelBuilder.Entity("SWM.Models.CropData", b =>
                 {
-                    b.Property<int>("CropToUserId");
+                    b.Property<int>("ProductToUserId");
 
                     b.Property<DateTime>("DateTime");
-
-                    b.Property<int>("TroughId");
 
                     b.Property<int>("UserLocationToMachineId");
 
                     b.Property<int>("Weight");
 
-                    b.HasKey("CropToUserId", "DateTime");
+                    b.HasKey("ProductToUserId", "DateTime");
+
+                    b.HasIndex("ProductToUserId");
+
+                    b.HasIndex("UserLocationToMachineId");
 
                     b.ToTable("CropDatas");
                 });
 
             modelBuilder.Entity("SWM.Models.MachineInformation", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MachineId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("IsAssigned");
@@ -173,7 +175,7 @@ namespace SWM.Migrations
 
                     b.Property<DateTime>("SellDate");
 
-                    b.HasKey("Id");
+                    b.HasKey("MachineId");
 
                     b.ToTable("MachineInformations");
                 });
@@ -185,6 +187,10 @@ namespace SWM.Migrations
                     b.Property<string>("UserID");
 
                     b.HasKey("MachineId", "UserID");
+
+                    b.HasIndex("MachineId");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("MachineToUsers");
                 });
@@ -221,12 +227,16 @@ namespace SWM.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("ProductID");
+                    b.Property<int>("ProductId");
 
                     b.Property<string>("UserId")
                         .IsRequired();
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("ProductsToUsers");
                 });
@@ -312,12 +322,16 @@ namespace SWM.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CountryId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasName("UserNameIndex");
+
+                    b.HasIndex("StateId");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -344,6 +358,12 @@ namespace SWM.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("StateId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("UserLocations");
                 });
 
@@ -358,6 +378,10 @@ namespace SWM.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MachineId");
+
+                    b.HasIndex("UserLocationId");
+
                     b.ToTable("UserLocationToMachines");
                 });
 
@@ -370,6 +394,11 @@ namespace SWM.Migrations
                     b.Property<int>("SubscriptionTypeId");
 
                     b.HasKey("UserID", "SubscriptionId");
+
+                    b.HasIndex("SubscriptionTypeId");
+
+                    b.HasIndex("UserID")
+                        .IsUnique();
 
                     b.ToTable("UserToSubscriptions");
                 });
@@ -418,6 +447,102 @@ namespace SWM.Migrations
                     b.HasOne("SWM.Models.SwmUser")
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.CropData", b =>
+                {
+                    b.HasOne("SWM.Models.ProductsToUser", "ProductsToUser")
+                        .WithMany("CropData")
+                        .HasForeignKey("ProductToUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.UserLocationToMachine", "UserLocationToMachine")
+                        .WithMany("CropData")
+                        .HasForeignKey("UserLocationToMachineId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.MachineToUser", b =>
+                {
+                    b.HasOne("SWM.Models.MachineInformation", "MachineInformation")
+                        .WithMany("MachineToUser")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.SwmUser", "SwmUser")
+                        .WithMany("MachineToUser")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.ProductsToUser", b =>
+                {
+                    b.HasOne("SWM.Models.ProductInformation", "ProductInformation")
+                        .WithMany("ProductsToUser")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.SwmUser", "SwmUser")
+                        .WithMany("ProductToUser")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.SwmUser", b =>
+                {
+                    b.HasOne("SWM.Models.Country", "Country")
+                        .WithMany("SwmUser")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.State", "State")
+                        .WithMany("SwmUser")
+                        .HasForeignKey("StateId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.UserLocation", b =>
+                {
+                    b.HasOne("SWM.Models.Country", "Country")
+                        .WithMany("UserLocation")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.State", "State")
+                        .WithMany("UserLocation")
+                        .HasForeignKey("StateId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.SwmUser", "SwmUser")
+                        .WithMany("UserLocation")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.UserLocationToMachine", b =>
+                {
+                    b.HasOne("SWM.Models.MachineInformation", "MachineInformation")
+                        .WithMany("UserLocationToMachine")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.UserLocation", "UserLocation")
+                        .WithMany("UserLocationToMachine")
+                        .HasForeignKey("UserLocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SWM.Models.UserToSubscription", b =>
+                {
+                    b.HasOne("SWM.Models.SubscriptionType", "SubscriptionType")
+                        .WithMany("UserToSubscription")
+                        .HasForeignKey("SubscriptionTypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWM.Models.SwmUser", "SwmUser")
+                        .WithOne("UserToSubscription")
+                        .HasForeignKey("SWM.Models.UserToSubscription", "UserID")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
         }
