@@ -8,6 +8,7 @@ using SWM.Models.ApiModels;
 using SWM.ViewModels;
 using SWM.Services;
 using Microsoft.Extensions.Configuration;
+using System.Collections;
 
 namespace SWM.Models.Repositories
 {
@@ -653,48 +654,88 @@ namespace SWM.Models.Repositories
         }
         public List<SearchUserModel> GetSearchResultForUserByFullName(string fullName)
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             List<SearchUserModel> result = new List<SearchUserModel>();
+
             try
             {
                 int counter = 1;
-                List<SwmUser> users;
                 if (fullName == "")
-                    users = _ctx.SwmUsers.ToList();
-                else
-                    users = _ctx.SwmUsers.Where(u => u.FullName.Contains(fullName) || u.FullName == fullName).ToList();
-
-                Dictionary<int, string> states = _ctx.States.ToDictionary(s => s.Id, s => s.Name);
-                Dictionary<int, string> countries = _ctx.Countries.ToDictionary(s => s.Id, s => s.Name);
-                Dictionary<int, string> ProductsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
-                List<ProductsToUser> productsToUsers = _ctx.ProductsToUsers.ToList();
-                Dictionary<string, string> userSubscriptionId = _ctx.UserToSubscriptions.ToDictionary(s => s.UserID, s => s.SubscriptionId);
-                foreach (var user in users)
                 {
-                    if(_userManager.IsInRoleAsync(user, "user").Result)
+                    var users = _ctx.SwmUsers.
+                        Select(u => new
+                        {
+                            Id = u.Id,
+                            fullName = u.FullName,
+                            state = u.State.Name,
+                            country = u.Country.Name,
+                            subId = u.UserToSubscription.SubscriptionId
+                        });
+
+                    var productsToUsers = _ctx.ProductsToUsers
+                            .Select(pu => new { userId = pu.UserId, productName = pu.ProductInformation.Name });
+
+                    foreach (var user in users.ToList())
                     {
                         string products = "";
-                        Dictionary<int, int> ptou = productsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
-                        foreach(var product in ptou.Values)
+                        var productData = productsToUsers.Where(pu => pu.userId == user.Id).ToList();
+                        foreach (var data in productData)
                         {
-                            products += ProductsInfo[product];
+                            products += data.productName;
                             products += " ";
                         }
+
                         products = products.TrimEnd();
                         products = products.Replace(" ", ", ");
                         result.Add(new SearchUserModel()
                         {
                             No = counter++,
-                            FullName = user.FullName,
-                            Country = countries[user.CountryId],
-                            State = states[user.StateId],
+                            FullName = user.fullName,
+                            Country = user.country,
+                            State = user.state,
                             ProductsIntoAccount = products,
-                            SubId = userSubscriptionId[user.Id]
+                            SubId = user.subId
                         });
                     }
                 }
-                watch.Stop();
-                var elapsedMs = watch.ElapsedMilliseconds;
+                else
+                {
+                    var users = _ctx.SwmUsers
+                        .Where(u => u.FullName.Contains(fullName) || u.FullName == fullName)
+                        .Select(u => new
+                        {
+                            Id = u.Id,
+                            fullName = u.FullName,
+                            state = u.State.Name,
+                            country = u.Country.Name,
+                            subId = u.UserToSubscription.SubscriptionId
+                        });
+
+                    var productsToUsers = _ctx.ProductsToUsers
+                            .Select(pu => new { userId = pu.UserId, productName = pu.ProductInformation.Name });
+
+                    foreach (var user in users.ToList())
+                    {
+                        string products = "";
+                        var productData = productsToUsers.Where(pu => pu.userId == user.Id).ToList();
+                        foreach (var data in productData)
+                        {
+                            products += data.productName;
+                            products += " ";
+                        }
+
+                        products = products.TrimEnd();
+                        products = products.Replace(" ", ", ");
+                        result.Add(new SearchUserModel()
+                        {
+                            No = counter++,
+                            FullName = user.fullName,
+                            Country = user.country,
+                            State = user.state,
+                            ProductsIntoAccount = products,
+                            SubId = user.subId
+                        });
+                    }
+                }
                 return result;
             }
             catch (Exception ex)
