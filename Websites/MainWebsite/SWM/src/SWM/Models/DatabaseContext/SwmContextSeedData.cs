@@ -30,7 +30,7 @@ namespace SWM.Models
             try
             {
                 var ran = new Random();
-                int max_indian_test_users = 10; //must be greater than or equal to indian_user_address array
+                int max_indian_test_users = 500; //must be greater than or equal to indian_user_address array
                 int max_user_name_repetition = 2;
                 int max_user_locations_per_user = 3;
                 string[] indian_names = new string[] { };
@@ -297,7 +297,7 @@ namespace SWM.Models
                 {
                     _ctx.ChangeTracker.AutoDetectChangesEnabled = false;
                     Random random = new Random();
-                    int dataSize, min_dataSize = 50, max_dataSize = 100;
+                    int dataSize, min_dataSize = 300, max_dataSize = 500;
                     var users = _ctx.SwmUsers.ToList();
                     var productsToUsers = _ctx.ProductsToUsers.ToList();
                     var userLocations = _ctx.UserLocations.ToList();
@@ -307,7 +307,7 @@ namespace SWM.Models
                         dataSize = random.Next(min_dataSize, max_dataSize+1);
                         var ptous = productsToUsers.Where(pu => pu.UserId == user.Id).Select(pu => pu.Id).ToArray();
                         var uls = userLocations.Where(ul => ul.UserId == user.Id).ToList();
-                        var utoms = userLocationsToMachines.Where(um => uls.Any(ul => ul.Id == um.UserLocationId)).Select(um => um.Id).ToArray();
+                        var ultoms = userLocationsToMachines.Where(um => uls.Any(ul => ul.Id == um.UserLocationId)).Select(um => um.Id).ToArray();
 
                         //before adding data into this table verify data in ProductsToUser and UserLocationToMachine tables
                         CropData[] cropDatas = new CropData[dataSize];
@@ -316,7 +316,7 @@ namespace SWM.Models
                             {
                                 ProductToUserId = ptous[random.Next(0, ptous.Length)],
                                 DateTime = new DateTime(random.Next(2015, 2017), random.Next(1, 13), random.Next(1, 29), random.Next(0, 23), random.Next(0, 60), random.Next(0, 60)),
-                                UserLocationToMachineId = utoms[random.Next(0, utoms.Length)],
+                                UserLocationToMachineId = ultoms[random.Next(0, ultoms.Length)],
                                 Weight = random.Next(1, 3001)
                             };
                         _ctx.AddRange(cropDatas);

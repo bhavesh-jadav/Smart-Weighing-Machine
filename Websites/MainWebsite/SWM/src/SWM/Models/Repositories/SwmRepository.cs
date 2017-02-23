@@ -700,7 +700,7 @@ namespace SWM.Models.Repositories
                 else
                 {
                     var users = _ctx.SwmUsers
-                        .Where(u => u.FullName.Contains(fullName) || u.FullName == fullName)
+                        .Where(u => u.FullName.ToLower().Contains(fullName.Trim().ToLower()) || u.FullName.ToLower() == fullName.Trim().ToLower())
                         .Select(u => new
                         {
                             Id = u.Id,
@@ -742,6 +742,7 @@ namespace SWM.Models.Repositories
             {
                 return result;
             }
+
         }
         public List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters)
         {
