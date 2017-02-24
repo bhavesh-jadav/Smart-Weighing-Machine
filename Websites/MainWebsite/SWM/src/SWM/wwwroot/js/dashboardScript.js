@@ -13,7 +13,7 @@
                           "August", "September", "October",
                           "November", "December"
     ];
-
+    
     //Angular part
     //Defining a Module
     angular.module("app-dashboard", ['emguo.poller']);

@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var tableData in Model)
+                @*@foreach (var tableData in Model)
                 {
                     <tr>
                         <td>@tableData.No</td>
@@ -21,7 +21,14 @@
                         <td>@tableData.State</td>
                         <td>@tableData.Country</td>
                     </tr>
-                }
+                }*@
+                <tr ng-repeat="datum in userData">
+                    <td>{{datum.no}}</td>
+                    <td><a href="/Public/User/{{datum.subId}}">{{datum.fullName}}</a></td>
+                    <td>{{datum.productsIntoAccount}}</td>
+                    <td>{{datum.state}}</td>
+                    <td>{{datum.country}}</td>
+                </tr>
             </tbody>
             <tfoot>
                 <tr>

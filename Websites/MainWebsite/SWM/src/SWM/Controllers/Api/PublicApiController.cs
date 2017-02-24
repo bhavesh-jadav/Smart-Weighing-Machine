@@ -11,13 +11,13 @@ using System.Security.Claims;
 namespace SWM.Controllers.Api
 {
     [Route("api")]
-    public class UserController : Controller
+    public class PublicApiController : Controller
     {
         private ISwmRepository _repo;
         private UserManager<SwmUser> _userManager;
         private SignInManager<SwmUser> _signInManager;
 
-        public UserController(ISwmRepository repo, UserManager<SwmUser> userManager, SignInManager<SwmUser> signInManager)
+        public PublicApiController(ISwmRepository repo, UserManager<SwmUser> userManager, SignInManager<SwmUser> signInManager)
         {
             _repo = repo;
             _userManager = userManager;
@@ -144,15 +144,7 @@ namespace SWM.Controllers.Api
             else
                 return BadRequest("fail");
         }
-
-        //[HttpGet("{userName}/dashboardInfo")]
-        //public IActionResult GetUserDashBoardInformation(string userName)
-        //{
-        //    var user = _userManager.FindByNameAsync(userName).Result;
-        //    var res = _repo.GetDashBoardForUser(user.Id);
-        //    return Ok(res);
-        //}
-
+        
         [HttpPost("advance_search")]
         public IActionResult AdvanceSearch([FromBody]AdvanceSearchModel parameters)
         {
@@ -160,10 +152,10 @@ namespace SWM.Controllers.Api
             return Ok(result);
         }
 
-        [HttpGet("get_all_users")]
-        public IActionResult GetAllUsersForPublic()
+        [HttpGet("get_all_users/{pageNo:int}")]
+        public IActionResult GetAllUsersForPublic(int pageNo)
         {
-            var result = _repo.GetSearchResultForUserByFullName("");
+            var result = _repo.GetAllUsers(pageNo);
             return Ok(result);
         }
 
