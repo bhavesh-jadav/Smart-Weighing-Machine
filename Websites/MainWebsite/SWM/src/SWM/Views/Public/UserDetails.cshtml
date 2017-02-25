@@ -7,7 +7,7 @@
 }
 <section class="content">
     <div class="row">
-        @if (Model.ProductsIntoAccount.Count < 1 || Model.UserLocations.Count < 1 || Model.LatestUpdatedTables.Count < 1)
+        @if (Model.ProductsIntoAccount.Count < 1 || Model.UserLocations.Count < 1 || Model.LatestUpdatedProductsTableInformation.Count < 1)
         {
             <div class="col-lg-offset-1 col-lg-10 col-md-12 col-xs-12">
                 <div class="callout callout-info">
@@ -129,7 +129,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var tableData in Model.LatestUpdatedTables)
+                                @foreach (var tableData in Model.LatestUpdatedProductsTableInformation)
                                 {
                                     <tr>
                                         <td>@tableData.No</td>

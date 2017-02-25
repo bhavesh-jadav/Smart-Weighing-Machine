@@ -12,7 +12,9 @@ namespace SWM.ViewModels
         public UserDetailsModel()
         {
             this.TotalWeight = 0;
-            this.ContactNo = this.Email = this.SubId = "";
+            this.TotalLocation = this.TotalProducts = 0;
+            this.LastUpdatedProduct = "none";
+            this.ContactNo = this.Email = this.SubId = this.UserName = "";
             this.LatestUpdatedProductsTableInformation = new List<UserDetailsLatestUpdatedTableModel>();
             this.ProductsIntoAccount = new List<ProductInformation>();
             this.UserLocations = new List<AddNewLocationModel>();
@@ -21,6 +23,10 @@ namespace SWM.ViewModels
         }
 
         public string FullName { get; set; }
+        public string UserName { get; set; }
+        public int TotalProducts { get; set; }
+        public int TotalLocation { get; set; }
+        public string LastUpdatedProduct { get; set; }
         public string SubType { get; set; }
         public long TotalWeight { get; set; }
         public string ContactNo { get; set; }

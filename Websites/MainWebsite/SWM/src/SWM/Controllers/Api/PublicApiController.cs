@@ -16,25 +16,21 @@ namespace SWM.Controllers.Api
         private ISwmRepository _repo;
         private UserManager<SwmUser> _userManager;
         private SignInManager<SwmUser> _signInManager;
+        private SwmContext _ctx;
 
-        public PublicApiController(ISwmRepository repo, UserManager<SwmUser> userManager, SignInManager<SwmUser> signInManager)
+        public PublicApiController(ISwmRepository repo, UserManager<SwmUser> userManager, SignInManager<SwmUser> signInManager, SwmContext ctx)
         {
             _repo = repo;
             _userManager = userManager;
             _signInManager = signInManager;
+            _ctx = ctx;
         }
 
         [HttpGet("{userName}")]
         public IActionResult GetUserInfo(string userName)
         {
-            var user = _userManager.FindByNameAsync(userName).Result;
-            if (user != null)
-            {
-                var result = _repo.GetDashBoardForUser(user.Id);
-                return Ok(result);
-            }
-            else
-                return BadRequest("invalid user");
+            var subId = _repo.GetSubIdFromUserName(userName);
+            return Ok(_repo.GetUserDetails(subId));
         }
 
         [HttpGet("public_dashboard")]
@@ -159,7 +155,7 @@ namespace SWM.Controllers.Api
             return Ok(result);
         }
 
-        [HttpGet("get_user_details/{subId}")]
+        [HttpGet("subscription/{subId}")]
         public IActionResult GetUserDetails(string subId)
         {
             var result = _repo.GetUserDetails(subId);

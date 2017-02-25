@@ -21,7 +21,7 @@ namespace SWM.Models.Repositories
         private RoleManager<UserRoleManager> _roleManager;
 
         public SwmRepository(
-            SwmContext ctx, UserManager<SwmUser> userManager, 
+            SwmContext ctx, UserManager<SwmUser> userManager,
             IMailService mailService, IConfigurationRoot config,
             RoleManager<UserRoleManager> roleManager)
         {
@@ -32,14 +32,6 @@ namespace SWM.Models.Repositories
             _roleManager = roleManager;
         }
 
-        public string GetCountryName(int countryId)
-        {
-            return _ctx.Countries.FirstOrDefault(c => c.Id == countryId).Name;
-        }
-        public string GetStateName(int stateId)
-        {
-            return _ctx.States.FirstOrDefault(s => s.Id == stateId).Name;
-        }
         public List<LocationInfoModel> GetLocationInfoByUserName(string userName)
         {
             try
@@ -48,15 +40,15 @@ namespace SWM.Models.Repositories
                 var user = GetUserByUserName(userName).Result;
                 if (user != null)
                 {
-                    UserLocation[] farmLocations = _ctx.UserLocations.Where(f => f.UserId == user.Id).ToArray();
-                    foreach (var floc in farmLocations)
+                    var userLocations = _ctx.UserLocations.Where(f => f.UserId == user.Id)
+                        .Select(ul => new {id = ul.Id, name = ul.Name, address = ul.Address, state = ul.State.Name, country = ul.Country.Name, pinNo = ul.PinNo}).ToList();
+                    foreach (var datum in userLocations)
                     {
                         locationInfos.Add(new LocationInfoModel()
                         {
-                            Name = floc.Name,
-                            Address = floc.Address + ", " + GetStateName(floc.StateId) + ", " + GetCountryName(floc.CountryId) + ", " +
-                                      "Pin Number: " + floc.PinNo.ToString(),
-                            TotalWeight = _ctx.CropDatas.Where(cd => cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(um => um.UserLocationId == floc.Id).Id).Select(cd => cd.Weight).Sum()
+                            Name = datum.name,
+                            Address = datum.address + ", " + datum.state + ", " + datum.country + ", " + "Pin Number: " + datum.pinNo.ToString(),
+                            TotalWeight = _ctx.CropDatas.Where(cd => cd.UserLocationToMachine.UserLocation.Id == datum.id).Sum(cd => Convert.ToInt64(cd.Weight))
                         });
                     }
                     return locationInfos;
@@ -441,64 +433,6 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-        public UserDashboardModel GetDashBoardForUser(string userId)
-        {
-            var userDashboard = new UserDashboardModel();
-            Dictionary<int, string> countries = _ctx.Countries.ToDictionary(c => c.Id, c => c.Name);
-            Dictionary<int, string> states = _ctx.States.ToDictionary(c => c.Id, c => c.Name);
-            Dictionary<int, string> productsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
-            var user = _userManager.FindByIdAsync(userId).Result;
-            try
-            {
-                if (_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == userId) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == userId) != null)
-                {
-                    List<UserLocation> userLocations = _ctx.UserLocations.Where(l => l.UserId == userId).ToList();
-                    foreach (var userLocation in userLocations)
-                    {
-                        userDashboard.UserLocations.Add(new AddNewLocationModel()
-                        {
-                            Name = userLocation.Name,
-                            Address = userLocation.Address,
-                            Country = countries[userLocation.CountryId],
-                            State = states[userLocation.StateId],
-                            PinNo = userLocation.PinNo.ToString()
-                        });
-                    }
-                    var ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == userId).ToArray();
-                    var cropDatas = _ctx.CropDatas.Where(cd => ctou.Any(c => cd.ProductToUserId == c.Id));
-                    userDashboard.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
-                    userDashboard.TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId).ToArray().Length;
-                    userDashboard.TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == userId).ToArray().Length;
-                    userDashboard.FullName = user.FullName;
-                    foreach (var cu in ctou)
-                    {
-                        var product = productsInfo[cu.ProductId];
-                        userDashboard.ProductsIntoAccount += product;
-                        userDashboard.ProductsIntoAccount += ", ";
-                    }
-                    userDashboard.ProductsIntoAccount = userDashboard.ProductsIntoAccount.Substring(0, userDashboard.ProductsIntoAccount.Length - 2);
-                    userDashboard.UserName = user.UserName;
-                    if (cropDatas.ToArray().Length > 0)
-                    {
-                        var cropToUserId = cropDatas.OrderByDescending(cd => cd.DateTime).ToArray()[0].ProductToUserId;
-                        var productId = _ctx.ProductsToUsers.FirstOrDefault(pu => pu.Id == cropToUserId).ProductId;
-                        userDashboard.LastUpdatedProduct = _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == productId).Name;
-                    }
-                    else
-                        userDashboard.HaveSomeData = false;
-                    return userDashboard;
-                }
-                else
-                {
-                    userDashboard.IsNewUser = true;
-                    return userDashboard;
-                }
-            }
-            catch (Exception ex)
-            {
-                return userDashboard;
-            }
-        }
         public bool AddNewProduct(string userId, AddNewProductModel newProduct)
         {
             try
@@ -669,7 +603,7 @@ namespace SWM.Models.Repositories
                 var userRole = _roleManager.FindByNameAsync("user").Result;
                 var users = _ctx.SwmUsers
                     .Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id))
-                    .Skip(pageNo == 1 ? 0 : (pageNo*numberOfUsersPerRequest) - 50)
+                    .Skip(pageNo == 1 ? 0 : (pageNo * numberOfUsersPerRequest) - 50)
                     .Take(numberOfUsersPerRequest)
                     .Select(u => new
                     {
@@ -679,7 +613,6 @@ namespace SWM.Models.Repositories
                         country = u.Country.Name,
                         subId = u.UserToSubscription.SubscriptionId
                     }).ToList();
-
                 var productsToUsers = _ctx.ProductsToUsers
                         .Select(pu => new { userId = pu.UserId, productName = pu.ProductInformation.Name });
 
@@ -895,76 +828,12 @@ namespace SWM.Models.Repositories
             UserDetailsModel userDetails = new UserDetailsModel();
             try
             {
-                //Dictionary<int, string> countries = _ctx.Countries.ToDictionary(c => c.Id, c => c.Name);
-                //Dictionary<int, string> states = _ctx.States.ToDictionary(c => c.Id, c => c.Name);
-                //Dictionary<int, string> productsInfo = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
-                //SwmUser user = _ctx.SwmUsers.FirstOrDefault(u => u.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).UserID);
-                //List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
-                //Dictionary<int, int> userLocationToMachine = _ctx.UserLocationToMachines.Where(um => userLocations.Count(ul => ul.Id == um.UserLocationId) > 0).
-                //    ToDictionary(um => um.Id, um => um.UserLocationId);
-                //List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                //List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).ToList();
-                //Dictionary<int, int> productToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
-
-                //userDetails.SubId = subId;
-                //userDetails.FullName = user.FullName;
-                //userDetails.SubType = _ctx.SubscriptionTypes.FirstOrDefault(st => st.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).SubscriptionTypeId).Name;
-                //userDetails.TotalWeight = cropDatas.Select(cd => cd.Weight).Sum();
-                //userDetails.ContactNo = user.PhoneNumber;
-                //userDetails.Email = user.Email;
-
-                //var co = _ctx.CropDatas.Where(c => c.ProductToUserId == 3).ToList();
-
-                //List<CropData> sortedCropData;
-                //int maxDisplayAmount = 15;
-                //if (cropDatas.Count > maxDisplayAmount)
-                //    sortedCropData = cropDatas.OrderByDescending(cd => cd.DateTime).Take(maxDisplayAmount).ToList();
-                //else
-                //    sortedCropData = cropDatas.OrderByDescending(cd => cd.DateTime).ToList();
-
-                //int counter = 1;
-                //foreach (var cropdata in sortedCropData)
-                //{
-                //    userDetails.LatestUpdatedTables.Add(new UserDetailsLatestUpdatedTableModel()
-                //    {
-                //        No = counter++,
-                //        DateAndTime = cropdata.DateTime,
-                //        Location = userLocations.FirstOrDefault(ul => ul.Id == userLocationToMachine[cropdata.UserLocationToMachineId]).Address,
-                //        ProductName = productsInfo[productToUsers[cropdata.ProductToUserId]],
-                //        Weight = cropdata.Weight
-                //    });
-                //}
-
-                //foreach (var data in productToUsers)
-                //{
-                //    userDetails.ProductsIntoAccount.Add(new ProductInformation()
-                //    {
-                //        Name = productsInfo[data.Value]
-                //    });
-                //}
-
-                //foreach (var userLocation in userLocations)
-                //{
-                //    userDetails.UserLocations.Add(new AddNewLocationModel()
-                //    {
-                //        Name = userLocation.Name,
-                //        Address = userLocation.Address,
-                //        Country = countries[userLocation.CountryId],
-                //        State = states[userLocation.StateId],
-                //        PinNo = userLocation.PinNo.ToString()
-                //    });
-                //}
-
-
                 int maxLatestUpadatedDisplayAmmount = 15;
                 int counter = 1;
                 var subDetails = _ctx.UserToSubscriptions
                     .Where(us => us.SubscriptionId == subId)
                     .Select(us => new { user = us.SwmUser, subType = us.SubscriptionType.Name, subId = us.SubscriptionId })
                     .FirstOrDefault();
-
-                long TotalWeight = (long)_ctx.ProductsToUsers.Where(pu => pu.UserId == subDetails.user.Id).SelectMany(pu => pu.CropData).Sum(cd => (long)cd.Weight);
-
                 if (subDetails != null)
                 {
                     userDetails = _ctx.SwmUsers
@@ -972,8 +841,12 @@ namespace SWM.Models.Repositories
                         .Select(u => new UserDetailsModel()
                         {
                             FullName = u.FullName,
+                            UserName = u.UserName,
                             SubType = subDetails.subType,
-                            TotalWeight = (long)_ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).SelectMany(pu => pu.CropData).Sum(cd => (long)cd.Weight),
+                            TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Count(),
+                            TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count(),
+                            LastUpdatedProduct = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == u.Id).OrderByDescending(cd => cd.DateTime).Select(cd => cd.ProductsToUser.ProductInformation.Name).FirstOrDefault(),
+                            TotalWeight = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).SelectMany(pu => pu.CropData).Sum(cd => Convert.ToInt64(cd.Weight)),
                             ContactNo = u.PhoneNumber,
                             Email = u.Email,
                             SubId = subDetails.subId,
@@ -988,25 +861,43 @@ namespace SWM.Models.Repositories
                                 State = ul.State.Name,
                                 Country = ul.Country.Name
                             }).ToList(),
-                            //LatestUpdatedProductsTableInformation = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == subDetails.user.Id).Take(maxLatestUpadatedDisplayAmmount).OrderByDescending(cd => cd.DateTime)
-                            //.Select(cd => new UserDetailsLatestUpdatedTableModel()
-                            //{
-                            //    DateAndTime = cd.DateTime,
-                            //    Location = cd.UserLocationToMachine.UserLocation.Address,
-                            //    ProductName = cd.ProductsToUser.ProductInformation.Name,
-                            //    Weight = (int)cd.Weight
-                            //}).ToList()
+                            LatestUpdatedProductsTableInformation = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == subDetails.user.Id).OrderByDescending(cd => cd.DateTime).Take(maxLatestUpadatedDisplayAmmount)
+                            .Select(cd => new UserDetailsLatestUpdatedTableModel()
+                            {
+                                DateAndTime = cd.DateTime,
+                                Location = cd.UserLocationToMachine.UserLocation.Address,
+                                ProductName = cd.ProductsToUser.ProductInformation.Name,
+                                Weight = cd.Weight
+                            }).ToList()
                         }).FirstOrDefault();
 
                     foreach (var datum in userDetails.LatestUpdatedProductsTableInformation)
                         datum.No = counter++;
                 }
+
                 return userDetails;
             }
             catch (Exception ex)
             {
                 return userDetails;
             }
+        }
+        public int GetTotalUsers()
+        {
+            try
+            {
+                var userRole = _roleManager.FindByNameAsync("user").Result;
+                return _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).ToList().Count;
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+        }
+        public string GetSubIdFromUserName(string userName)
+        {
+            var user = _userManager.FindByNameAsync(userName).Result;
+            return _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId;
         }
     }
 }

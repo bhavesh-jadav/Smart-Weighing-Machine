@@ -14,8 +14,6 @@ namespace SWM.Models.Repositories
         List<LocationInfoModel> GetLocationInfoByUserName(string userName);
         Task<SwmUser> GetUserByUserName(string userName);
         Task<SwmUser> GetUserByUserId(string id);
-        string GetStateName(int stateId);
-        string GetCountryName(int countryId);
         List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName);
         ProductInformation GetProductInformation(int productId);
         Task<bool> CheckUserPassword(SwmUser user, string password);
@@ -26,7 +24,6 @@ namespace SWM.Models.Repositories
         List<ShowUserModel> GetAllUsers();
         Task<bool> RemoveUser(RemoveUserModel userModel);
         bool AddNewLocation(AddNewLocationModel newLocation, string userId);
-        UserDashboardModel GetDashBoardForUser(string userId);
         bool AddNewProduct(string userId, AddNewProductModel newProduct);
         AdminDashboardModel GetDashBoardForAdmin();
         List<KeyValuePair<int, string>> GetProductNames(string userId);
@@ -38,5 +35,6 @@ namespace SWM.Models.Repositories
         List<SearchUserModel> GetSearchResultForUserByFullName(string fullName);
         UserDetailsModel GetUserDetails(string subId);
         List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters);
+        string GetSubIdFromUserName(string userName);
     }
 }

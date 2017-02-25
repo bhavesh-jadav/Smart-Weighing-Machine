@@ -100,12 +100,8 @@ namespace SWM.Controllers.Web
             try
             {
                 ViewBag.Title = "More User Details";
-                var userId = _ctx.UserToSubscriptions.FirstOrDefault(us => us.SubscriptionId == subId).UserID;
-                var user = _userManager.FindByIdAsync(userId).Result;
-                bool isNewUser = !(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == user.Id) != null);
-                var ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
-                bool haveSomeData = (_ctx.CropDatas.Where(cd => ptou.Any(c => cd.ProductToUserId == c.Id)).ToList().Count > 0);
-                return View(new Tuple<bool, bool, string>(isNewUser, haveSomeData, user.UserName));
+                UserDetailsModel userDetail = _repo.GetUserDetails(subId);
+                return View(userDetail);
             }
             catch (Exception)
             {

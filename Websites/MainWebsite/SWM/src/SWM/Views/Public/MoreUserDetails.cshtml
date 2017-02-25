@@ -1,8 +1,8 @@
-﻿@model Tuple<bool, bool, string>
+﻿@model UserDetailsModel
 @section css{
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-default.min.css" />
 }
-@if (!Model.Item1)
+@if (!Model.IsNewUser)
 {
     <div ng-app="app-dashboard" class="row">
         <div class="col-lg-offset-1 col-lg-10 col-md-12" ng-controller="userController">
@@ -13,7 +13,7 @@
             </section>
             <section class="content">
                 @Html.Partial("UserDashboardPartialTop")
-                @if (Model.Item2)
+                @if (Model.HaveSomeData)
                 {
                     @Html.Partial("UserDashboardPartialMiddle")
                 }
@@ -38,9 +38,9 @@
         <script src="~/distribution/js/angular-poller.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-        @*<script src="~/distribution/js/dashboardScript.js"></script>*@
-        <script src="~/js/dashboardScript.js"></script>
-        <script>var username = "@Model.Item3.ToString()"; user_dashboard(username);</script>
+        <script src="~/distribution/js/dashboardScript.js"></script>
+        @*<script src="~/js/dashboardScript.js"></script>*@
+        <script>var username = "@Model.UserName"; user_dashboard(username);</script>
     }
 }
 else

@@ -92,6 +92,8 @@
             draw_chart5();
         }, function (error) {
             $scope.chart1Error = "Unable to display chart"
+            $scope.isBusyChart1 = false;
+            $scope.isBusyChart5 = false;
         });
 
         //getting user months and calling chart 2, 3 and 4 drawing funcitions
@@ -158,6 +160,7 @@
                     draw_chart1(chart1data);
                 }, function (error) {
                     $scope.chart1Error = "Unable to display chart";
+                    $scope.isBusyChart1 = false;
                 });
             }
             else {
@@ -172,6 +175,7 @@
                             draw_chart1(chart1data);
                         }, function (error) {
                             $scope.chart1Error = "Unable to display chart"
+                            $scope.isBusyChart1 = false;
                         });
                     }
                 }
