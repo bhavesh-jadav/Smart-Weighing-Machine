@@ -679,6 +679,7 @@ namespace SWM.Models.Repositories
                         country = u.Country.Name,
                         subId = u.UserToSubscription.SubscriptionId
                     }).ToList();
+
                 var productsToUsers = _ctx.ProductsToUsers
                         .Select(pu => new { userId = pu.UserId, productName = pu.ProductInformation.Name });
 
@@ -1005,18 +1006,6 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return userDetails;
-            }
-        }
-        public int GetTotalUsers()
-        {
-            try
-            {
-                var userRole = _roleManager.FindByNameAsync("user").Result;
-                return _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).ToList().Count;
-            }
-            catch (Exception ex)
-            {
-                return 0;
             }
         }
     }

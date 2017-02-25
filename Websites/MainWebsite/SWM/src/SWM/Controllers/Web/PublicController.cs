@@ -26,6 +26,53 @@ namespace SWM.Controllers.Web
         }
         public IActionResult Index()
         {
+
+            var random = new Random();
+            var maxRepetitionsCount = 3;
+            var numbers = Enumerable.Range(1, 100)
+                   .SelectMany(i => Enumerable.Repeat(i, maxRepetitionsCount))
+                   .OrderBy(i => random.Next())
+                   .ToList();
+
+            //for storing output
+            List<int> output = new List<int>();
+            //to keep track of numbers
+            Dictionary<int, int> numberTrack = new Dictionary<int, int>();
+            Random ran = new Random();
+            //define max limit and range of numbers
+            int maxLimit = 2, min = 1, max = 100 ;
+            int no, count;
+            //this for loop must run for any number less than max*maxLimit otherwise it will last for long time(may be forever). 
+            for (int i = 0; i < max*maxLimit; i++)
+            {
+                //get random number.
+                no = ran.Next(min, max+1);
+                //check if random number exists in dictionary
+                if (numberTrack.TryGetValue(no, out count))
+                {
+                    //if exists than check for it occurrences 
+                    if (count >= maxLimit)
+                    {
+                        //if occurrence is greater than maxLimit continue for next number.
+                        i--;
+                        continue;
+                    }
+                    else
+                    {
+                        //else add number to output and update its occurrence count
+                        numberTrack[no] += 1;
+                        output.Add(no);
+                    }
+                }
+                else
+                {
+                    //if random number does not exists in the dictionary than add it 
+                    //with occurrence of 1 and also add it to the ouptput.
+                    numberTrack.Add(no, 1);
+                    output.Add(no);
+                }
+            }
+
             ViewBag.Title = "Public";
             return View();
         }
@@ -34,8 +81,9 @@ namespace SWM.Controllers.Web
         public IActionResult SearchUser(string FullName)
         {
             ViewBag.Title = "Search User";
-            ViewBag.FullName = FullName;
-            return View();
+            var results = _repo.GetSearchResultForUserByFullName(FullName);
+            ViewBag.SearchResultLength = results.Count;
+            return View(results);
         }
 
         [Route("Public/User/{subId}")]
@@ -68,13 +116,14 @@ namespace SWM.Controllers.Web
         public IActionResult AdvanceSearch()
         {
             ViewBag.Title = "Advance Search";
+            
             return View(new Tuple<AdvanceSearchModel, List<SearchUserModel>>(new AdvanceSearchModel(), new List<SearchUserModel>()));
         }
 
         public IActionResult ShowAllUsers()
         {
             ViewBag.Title = "All Users";
-            return View();
+            return View(_repo.GetSearchResultForUserByFullName(""));
         }
     }
 }

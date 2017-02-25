@@ -1,4 +1,4 @@
-﻿
+﻿@model List<SearchUserModel>
 <div class="box-body">
     <div class="table-responsive">
         <table id="data-table" class="table table-striped">
@@ -12,6 +12,16 @@
                 </tr>
             </thead>
             <tbody>
+                @*@foreach (var tableData in Model)
+                {
+                    <tr>
+                        <td>@tableData.No</td>
+                        <td><a href="/Public/User/@tableData.SubId">@tableData.FullName</a></td>
+                        <td>@tableData.ProductsIntoAccount</td>
+                        <td>@tableData.State</td>
+                        <td>@tableData.Country</td>
+                    </tr>
+                }*@
                 <tr ng-repeat="datum in userData">
                     <td>{{datum.no}}</td>
                     <td><a href="/Public/User/{{datum.subId}}">{{datum.fullName}}</a></td>
