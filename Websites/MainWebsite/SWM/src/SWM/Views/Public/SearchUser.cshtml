@@ -1,36 +1,33 @@
-﻿@model List<SearchUserModel>
+﻿
 @section css{
     <link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 }
-<section class="content">
+<section class="content" ng-app="app-searchUser" ng-controller="searchUserController">
     <div class="row">
         <div class="col-md-12">
             <div class="box box-primary">
                 <div class="box-header">
                     <h3 class="box-title">
-                        Found @ViewBag.SearchResultLength result(s).
-                        @if (ViewBag.SearchResultLength > 0)
-                        {
-                             <span>Click on full name for more details.</span>
-                        }
+                        Search results for "@ViewBag.FullName". Found {{totalUsers}} result(s).
+                        <span ng-show="totalUsers">Click on full name for more details.</span>
                     </h3>
+                    <h3 ng-show="!totalUsers" style="color:red">{{apiError}}</h3>
                 </div>
-                <div class="box-body">
-                    @Html.Partial("ShowUserPublicPartial", Model)
+                @Html.Partial("ShowUserPublicPartial")
+                <div class="overlay" ng-show="initial">
+                    <i class="fa fa-refresh fa-spin"></i>
                 </div>
             </div>
         </div>
     </div>
 </section>
 @section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+    @*<script src="~/js/searchUser.js"></script>*@
+    <script src="~/distribution/js/searchUser.js"></script>
     <script>
-      $(function () {
-          $("#data-table").DataTable({
-              "responsive": true,
-              "iDisplayLength": 25
-          });
-      });
+        searchUser("@ViewBag.FullName");
     </script>
 }

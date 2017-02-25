@@ -17,7 +17,9 @@ namespace SWM.Controllers.Api
         private UserManager<SwmUser> _userManager;
         private SignInManager<SwmUser> _signInManager;
 
-        public PublicApiController(ISwmRepository repo, UserManager<SwmUser> userManager, SignInManager<SwmUser> signInManager)
+        public PublicApiController(
+            ISwmRepository repo, UserManager<SwmUser> userManager, 
+            SignInManager<SwmUser> signInManager)
         {
             _repo = repo;
             _userManager = userManager;
@@ -155,8 +157,17 @@ namespace SWM.Controllers.Api
         [HttpGet("get_all_users/{pageNo:int}")]
         public IActionResult GetAllUsersForPublic(int pageNo)
         {
+            int totalUsers = _repo.GetTotalUsers();
             var result = _repo.GetAllUsers(pageNo);
-            return Ok(result);
+            return Ok(new { totalUsers = totalUsers, users = result });
+        }
+
+        [HttpGet("search_user/{fullName}")]
+        public IActionResult SearchUser(string fullName)
+        {
+            var result = _repo.GetSearchResultForUserByFullName(fullName);
+            int totalUsers = result.Count;
+            return Ok(new { totalUsers = totalUsers, users = result });
         }
 
         [AllowAnonymous]
