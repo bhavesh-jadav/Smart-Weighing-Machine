@@ -30,7 +30,7 @@ namespace SWM.Models
             try
             {
                 var ran = new Random();
-                int max_indian_test_users = 500; //must be greater than or equal to indian_user_address array
+                int max_indian_test_users = 300; //must be greater than or equal to indian_user_address array
                 int max_user_name_repetition = 2;
                 int max_user_locations_per_user = 3;
                 string[] indian_names = new string[] { };

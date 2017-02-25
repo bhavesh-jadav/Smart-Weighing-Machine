@@ -13,9 +13,11 @@ namespace SWM.ViewModels
         {
             this.TotalWeight = 0;
             this.ContactNo = this.Email = this.SubId = "";
-            this.LatestUpdatedTables = new List<UserDetailsLatestUpdatedTableModel>();
+            this.LatestUpdatedProductsTableInformation = new List<UserDetailsLatestUpdatedTableModel>();
             this.ProductsIntoAccount = new List<ProductInformation>();
             this.UserLocations = new List<AddNewLocationModel>();
+            this.IsNewUser = false;
+            this.HaveSomeData = true;
         }
 
         public string FullName { get; set; }
@@ -24,7 +26,9 @@ namespace SWM.ViewModels
         public string ContactNo { get; set; }
         public string Email { get; set; }
         public string SubId { get; set; }
-        public List<UserDetailsLatestUpdatedTableModel> LatestUpdatedTables { get; set; }
+        public bool IsNewUser { get; set; }
+        public bool HaveSomeData { get; set; }
+        public List<UserDetailsLatestUpdatedTableModel> LatestUpdatedProductsTableInformation { get; set; }
         public List<ProductInformation> ProductsIntoAccount { get; set; }
         public List<AddNewLocationModel> UserLocations { get; set; }
     }

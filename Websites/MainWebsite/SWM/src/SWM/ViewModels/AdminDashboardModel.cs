@@ -10,10 +10,11 @@ namespace SWM.ViewModels
     {
         public AdminDashboardModel()
         {
-            this.TotalLocations = this.TotalPorducts = this.TotalUsers = this.TotalWeight = 0;
+            this.TotalLocations = this.TotalPorducts = this.TotalUsers = 0;
+            this.TotalWeight = 0;
         }
 
-        public int TotalWeight { get; set; }
+        public long TotalWeight { get; set; }
         public int TotalUsers { get; set; }
         public int TotalPorducts { get; set; }
         public int TotalLocations { get; set; }

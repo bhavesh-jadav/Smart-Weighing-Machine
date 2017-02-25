@@ -10,7 +10,7 @@ namespace SWM.ViewModels
     {
         public int No { get; set; }
         public string Name { get; set; }
-        public int Weight { get; set; }
+        public long Weight { get; set; }
         public DateTime DateAndTime { get; set; }
         public string Location { get; set; }
         public int MachineId { get; set; }

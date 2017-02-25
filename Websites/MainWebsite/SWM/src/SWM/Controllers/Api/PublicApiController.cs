@@ -170,6 +170,13 @@ namespace SWM.Controllers.Api
             return Ok(new { totalUsers = totalUsers, users = result });
         }
 
+        [HttpGet("get_user_details/{subId}")]
+        public IActionResult GetUserDetails(string subId)
+        {
+            var result = _repo.GetUserDetails(subId);
+            return Ok(result);
+        }
+
         [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult LogIn([FromBody]LoginViewModel user_login)
