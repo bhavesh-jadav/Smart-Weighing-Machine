@@ -250,7 +250,7 @@ namespace SWM.Controllers.Web
                     ModelState.Clear();
                 }
                 else
-                    ModelState.AddModelError("", "Unable to add new location. Try again later");
+                    ModelState.AddModelError("", "Unable to add new location. Check if location name does not exists already.");
                 return View();
             }
             else

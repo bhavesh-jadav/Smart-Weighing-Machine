@@ -33,6 +33,15 @@
             if (response.data != null) {
                 populateDashboard(response.data);
                 $scope.userData = response.data;
+                $scope.productsIntoAccount = "";
+                var allProducts = $scope.userData.productsIntoAccount;
+                var Products = "";
+                for (var i = 0; i < allProducts.length; i++) {
+                    Products += allProducts[i].name;
+                    if (i < allProducts.length - 1)
+                        Products += ", ";
+                }
+                $scope.productsIntoAccount = Products;
                 $scope.gettingUserDetails = false;
             } else {
                 $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and Make sure that it is working fine.</div>');

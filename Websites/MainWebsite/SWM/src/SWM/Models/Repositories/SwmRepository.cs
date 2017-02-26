@@ -302,31 +302,30 @@ namespace SWM.Models.Repositories
             }
             return res.ToString();
         }
-
         public List<ShowUserModel> GetAllUsers()
         {
             int counter = 1;
             List<ShowUserModel> allUsers = new List<ShowUserModel>();
+            var userRole = _roleManager.FindByNameAsync("user").Result;
             try
             {
-                var users = _ctx.SwmUsers.ToList();
-                foreach (var user in users)
-                {
-                    if (_userManager.IsInRoleAsync(user, "user").Result)
+                allUsers = _ctx.SwmUsers
+                    .Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id))
+                    .Select(u => new ShowUserModel()
                     {
-                        allUsers.Add(new ShowUserModel()
-                        {
-                            No = counter++,
-                            FullName = user.FullName,
-                            ContactNo = user.PhoneNumber,
-                            LogInUserName = user.UserName,
-                            UserId = user.Id,
-                            SubscriptionType = _ctx.SubscriptionTypes.FirstOrDefault(s => s.Id == _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionTypeId).Name,
-                            Address = user.Address + ", Pin: " + user.PinNo + ", State: " + _ctx.States.FirstOrDefault(s => s.Id == user.StateId).Name + ", Country: " + _ctx.Countries.FirstOrDefault(c => c.Id == user.CountryId).Name,
-                            DateRegisterd = user.RegisterDate
-                        });
-                    }
-                }
+                        No = 0,
+                        UserId = u.Id,
+                        LogInUserName = u.UserName,
+                        Address = u.Address,
+                        ContactNo = u.PhoneNumber,
+                        FullName = u.FullName,
+                        DateRegisterd = u.RegisterDate,
+                        SubscriptionType = u.UserToSubscription.SubscriptionType.Name
+                    }).ToList();
+
+                foreach (var user in allUsers)
+                    user.No = counter++;
+                
                 return allUsers;
             }
             catch (Exception ex)
@@ -334,38 +333,43 @@ namespace SWM.Models.Repositories
                 return allUsers;
             }
         }
-
-        public async Task<bool> RemoveUser(RemoveUserModel userModel)
+        public bool AddNewLocation(AddNewLocationModel newLocation, string userId)
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(userModel.UserId.Trim());
-                if (user != null && user.UserName == userModel.UserName.Trim())
+                var existsLocationName = _ctx.SwmUsers
+                    .Where(u => u.Id == userId)
+                    .Where(u => u.UserLocation.Any(ul => ul.Name == newLocation.Name))
+                    .ToList();
+
+                if (existsLocationName.Count == 0)
                 {
-                    await _userManager.DeleteAsync(user);
-                    var pus = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                    foreach (var row in pus)
+                    var state = _ctx.States.FirstOrDefault(s => s.Name.ToLower() == newLocation.State.ToLower().Trim());
+                    var country = _ctx.Countries.FirstOrDefault(s => s.Name.ToLower() == newLocation.Country.ToLower().Trim());
+
+                    if (state == null)
                     {
-                        var cds = _ctx.CropDatas.Where(cd => cd.ProductToUserId == row.Id).ToList();
-                        foreach (var cd in cds)
-                            _ctx.Remove(cd);
-                        _ctx.Remove(row);
+                        _ctx.States.Add(new State() { Name = newLocation.State });
+                        _ctx.SaveChanges();
+                        state = _ctx.States.FirstOrDefault(s => s.Name.ToLower() == newLocation.State.ToLower().Trim());
                     }
-                    var uls = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
-                    foreach (var ul in uls)
+                    if (country == null)
                     {
-                        var ulms = _ctx.UserLocationToMachines.Where(ulm => ulm.UserLocationId == ul.Id).ToList();
-                        foreach (var ulm in ulms)
-                            _ctx.Remove(ulm);
-                        _ctx.Remove(ul);
+                        _ctx.Countries.Add(new Country() { Name = newLocation.Country });
+                        _ctx.SaveChanges();
+                        country = _ctx.Countries.FirstOrDefault(s => s.Name.ToLower() == newLocation.Country.ToLower().Trim());
                     }
-                    var uss = _ctx.UserToSubscriptions.Where(us => us.UserID == user.Id).ToList();
-                    foreach (var us in uss)
-                        _ctx.Remove(us);
-                    var mus = _ctx.MachineToUsers.Where(mu => mu.UserID == user.Id).ToList();
-                    foreach (var mu in mus)
-                        _ctx.Remove(mu);
-                    await _ctx.SaveChangesAsync();
+
+                    _ctx.UserLocations.Add(new UserLocation()
+                    {
+                        Name = newLocation.Name,
+                        Address = newLocation.Address,
+                        StateId = state.Id,
+                        CountryId = country.Id,
+                        PinNo = Int32.Parse(newLocation.PinNo),
+                        UserId = userId
+                    });
+                    _ctx.SaveChanges();
                     return true;
                 }
                 else
@@ -376,47 +380,11 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-        public bool AddNewLocation(AddNewLocationModel newLocation, string userId)
-        {
-            try
-            {
-                var state = _ctx.States.FirstOrDefault(s => s.Name.ToLower() == newLocation.State.ToLower().Trim());
-                var country = _ctx.Countries.FirstOrDefault(s => s.Name.ToLower() == newLocation.Country.ToLower().Trim());
-
-                if (state == null)
-                {
-                    _ctx.States.Add(new State() { Name = newLocation.State });
-                    _ctx.SaveChanges();
-                    state = _ctx.States.FirstOrDefault(s => s.Name.ToLower() == newLocation.State.ToLower().Trim());
-                }
-                if (country == null)
-                {
-                    _ctx.Countries.Add(new Country() { Name = newLocation.Country });
-                    _ctx.SaveChanges();
-                    country = _ctx.Countries.FirstOrDefault(s => s.Name.ToLower() == newLocation.Country.ToLower().Trim());
-                }
-                _ctx.UserLocations.Add(new UserLocation()
-                {
-                    Name = newLocation.Name,
-                    Address = newLocation.Address,
-                    StateId = state.Id,
-                    CountryId = country.Id,
-                    PinNo = Int32.Parse(newLocation.PinNo),
-                    UserId = userId
-                });
-                _ctx.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
         public bool AddNewProduct(string userId, AddNewProductModel newProduct)
         {
             try
             {
-                var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Name == newProduct.Name);
+                var product = _ctx.ProductInformations.FirstOrDefault(pi => pi.Name.ToLower() == newProduct.Name.Trim().ToLower());
                 if (product == null)
                 {
                     _ctx.Add(new ProductInformation() { Name = newProduct.Name });
@@ -436,19 +404,16 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
+
         public AdminDashboardModel GetDashBoardForAdmin()
         {
             AdminDashboardModel adminDashboard = new AdminDashboardModel();
             try
             {
+                var userRole = _roleManager.FindByNameAsync("user").Result;
                 adminDashboard.TotalLocations = _ctx.UserLocations.Count();
-                adminDashboard.TotalPorducts = _ctx.ProductsToUsers.Count();
-                var users = _ctx.SwmUsers.ToList();
-                foreach (var user in users)
-                {
-                    if (_userManager.IsInRoleAsync(user, "user").Result)
-                        adminDashboard.TotalUsers++;
-                }
+                adminDashboard.TotalPorducts = _ctx.ProductInformations.Count();
+                adminDashboard.TotalUsers = _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).Count();
                 adminDashboard.TotalWeight = _ctx.CropDatas.Select(cd => cd.Weight).Sum();
 
                 return adminDashboard;
@@ -877,6 +842,49 @@ namespace SWM.Models.Repositories
         {
             var user = _userManager.FindByNameAsync(userName).Result;
             return _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId;
+        }
+
+
+        public async Task<bool> RemoveUser(RemoveUserModel userModel)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userModel.UserId.Trim());
+                if (user != null && user.UserName == userModel.UserName.Trim())
+                {
+                    await _userManager.DeleteAsync(user);
+                    var pus = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                    foreach (var row in pus)
+                    {
+                        var cds = _ctx.CropDatas.Where(cd => cd.ProductToUserId == row.Id).ToList();
+                        foreach (var cd in cds)
+                            _ctx.Remove(cd);
+                        _ctx.Remove(row);
+                    }
+                    var uls = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
+                    foreach (var ul in uls)
+                    {
+                        var ulms = _ctx.UserLocationToMachines.Where(ulm => ulm.UserLocationId == ul.Id).ToList();
+                        foreach (var ulm in ulms)
+                            _ctx.Remove(ulm);
+                        _ctx.Remove(ul);
+                    }
+                    var uss = _ctx.UserToSubscriptions.Where(us => us.UserID == user.Id).ToList();
+                    foreach (var us in uss)
+                        _ctx.Remove(us);
+                    var mus = _ctx.MachineToUsers.Where(mu => mu.UserID == user.Id).ToList();
+                    foreach (var mu in mus)
+                        _ctx.Remove(mu);
+                    await _ctx.SaveChangesAsync();
+                    return true;
+                }
+                else
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }
