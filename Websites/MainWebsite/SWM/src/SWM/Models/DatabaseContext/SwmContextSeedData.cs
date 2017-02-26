@@ -30,9 +30,10 @@ namespace SWM.Models
             try
             {
                 var ran = new Random();
-                int max_indian_test_users = 300; //must be greater than or equal to indian_user_address array
+                int max_indian_test_users = 500; //must be greater than or equal to indian_user_address array
                 int max_user_name_repetition = 2;
                 int max_user_locations_per_user = 3;
+                int min_dataSize = 100, max_dataSize = 300;
                 string[] indian_names = new string[] { };
                 Address[] indian_user_address = new Address[] { };
                 Address[] indian_farm_address = new Address[] { };
@@ -297,7 +298,7 @@ namespace SWM.Models
                 {
                     _ctx.ChangeTracker.AutoDetectChangesEnabled = false;
                     Random random = new Random();
-                    int dataSize, min_dataSize = 300, max_dataSize = 500;
+                    int dataSize;
                     var users = _ctx.SwmUsers.ToList();
                     var productsToUsers = _ctx.ProductsToUsers.ToList();
                     var userLocations = _ctx.UserLocations.ToList();
