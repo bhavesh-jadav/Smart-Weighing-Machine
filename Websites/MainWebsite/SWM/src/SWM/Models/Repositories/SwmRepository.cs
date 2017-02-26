@@ -937,5 +937,26 @@ namespace SWM.Models.Repositories
                 return adminDashboard;
             }
         }
+
+
+        public dynamic test_method(string userName)
+        {
+            try
+            {
+                var user = _userManager.FindByNameAsync(userName).Result;
+                var data = new
+                {
+                    userId = user.Id,
+                    locationIds = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).Select(ul => ul.Id).ToList(),
+                    productIds = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).Select(pu => pu.ProductId).ToList(),
+                    userMachines = _ctx.UserLocationToMachines.Where(um => um.UserLocation.UserId == user.Id).Select(um => um.MachineId).ToList()
+                };
+                return data;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
     }
 }

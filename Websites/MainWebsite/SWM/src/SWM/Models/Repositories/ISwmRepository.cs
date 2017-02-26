@@ -37,6 +37,7 @@ namespace SWM.Models.Repositories
         List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters);
         string GetSubIdFromUserName(string userName);
         UserDetailsModel GetUserDetailsLight(string subId);
+        dynamic test_method(string userName);
         int GetTotalUsers();
     }
 }

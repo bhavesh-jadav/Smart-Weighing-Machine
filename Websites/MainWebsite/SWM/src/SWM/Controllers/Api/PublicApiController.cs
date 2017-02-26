@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using SWM.ViewModels;
 using SWM.Models.ApiModels;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Hosting;
 
 namespace SWM.Controllers.Api
 {
@@ -17,13 +18,17 @@ namespace SWM.Controllers.Api
         private UserManager<SwmUser> _userManager;
         private SignInManager<SwmUser> _signInManager;
         private SwmContext _ctx;
+        private IHostingEnvironment _env;
 
-        public PublicApiController(ISwmRepository repo, UserManager<SwmUser> userManager, SignInManager<SwmUser> signInManager, SwmContext ctx)
+        public PublicApiController(ISwmRepository repo, UserManager<SwmUser> userManager, 
+            SignInManager<SwmUser> signInManager, SwmContext ctx,
+            IHostingEnvironment env)
         {
             _repo = repo;
             _userManager = userManager;
             _signInManager = signInManager;
             _ctx = ctx;
+            _env = env;
         }
 
         [HttpGet("{userName}")]
@@ -216,6 +221,19 @@ namespace SWM.Controllers.Api
                 return Ok("success");
             else
                 return BadRequest("fail");
+        }
+
+        [HttpGet("test/{userName}")]
+        public IActionResult test(string userName)
+        {
+            if (_env.IsEnvironment("Development"))
+            {
+                var result = _repo.test_method(userName);
+                return Ok(result);
+            }
+            else
+                return
+                    Ok("Hello");
         }
     }
 }
