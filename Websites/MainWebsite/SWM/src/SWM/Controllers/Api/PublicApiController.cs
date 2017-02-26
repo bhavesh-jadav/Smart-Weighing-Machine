@@ -92,7 +92,7 @@ namespace SWM.Controllers.Api
         [HttpGet("{userName}/user_dates")]
         public IActionResult UserMonths(string userName)
         {
-            var res = _repo.GetUserMonths(userName);
+            var res = _repo.GetDateRangeOfUserData(userName);
             if (res.Count > 0)
                 return Ok(res);
             else
@@ -102,7 +102,7 @@ namespace SWM.Controllers.Api
         [HttpGet("user_dates")]
         public IActionResult UserMonths()
         {
-            var res = _repo.GetUserMonths("");
+            var res = _repo.GetDateRangeOfUserData("");
             if (res.Count > 0)
                 return Ok(res);
             else
@@ -155,8 +155,9 @@ namespace SWM.Controllers.Api
         [HttpGet("get_all_users/{pageNo:int}")]
         public IActionResult GetAllUsersForPublic(int pageNo)
         {
-            var result = _repo.GetAllUsers(pageNo);
-            return Ok(result);
+            int totalUsers = _repo.GetTotalUsers();
+            var result = _repo.GetAllUsersForPublic(pageNo);
+            return Ok(new { totalUsers = totalUsers, users = result });
         }
 
         [HttpGet("subscription/{subId}")]

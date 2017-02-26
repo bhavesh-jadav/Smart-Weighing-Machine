@@ -16,28 +16,27 @@
             $http.get("/api/get_all_users/" + pageNo).then(function (response) {
                 if (pageNo === 1) {
                     $scope.initial = false;
-                    $scope.userData = response.data;
+                    $scope.userData = response.data.users;
                     $(function () {
                         datatable = $("#data-table").DataTable({
                             "responsive": true,
-                            "paging": false
+                            "paging": false,
+                            "language": {
+                                "info": "Showing _START_ to _END_ of " + response.data.totalUsers +" users"
+                            }
                         });
                     });
                 }
                 else {
-                    var data = response.data;
+                    var data = response.data.users;
                     for (var i = 0; i < data.length; i++) {
                         datatable.row.add([
                             data[i].no,
-                            data[i].fullName,
+                            '<a href="/Public/User/' + data[i].subId + '">' + data[i].fullName + '</a>',
                             data[i].productsIntoAccount,
                             data[i].state,
                             data[i].country
                         ]).draw(false);
-
-                        $('#data-table tbody tr:last').each(function () {
-                            $(this).find('td:eq(1)').html('<a href="/Public/User/' + data[i].subId + '">' + data[i].fullName + '</a>');
-                        });
                     }
                 }
                 pageNo += 1;
@@ -46,7 +45,7 @@
             }, function (error) {
                 $scope.initial = false;
                 $scope.apiError = "Error loading data.";
-                });
+            });
         };
     }
 

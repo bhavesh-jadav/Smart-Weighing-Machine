@@ -134,7 +134,7 @@ namespace SWM.Controllers.Web
         [Authorize(Roles = "admin")]
         public IActionResult ShowUsers()
         {
-            return View(_repo.GetAllUsers());
+            return View(_repo.GetAllUsersForAdmin());
         }
 
         [Authorize(Roles = "admin")]

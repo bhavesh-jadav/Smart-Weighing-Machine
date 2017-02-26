@@ -581,7 +581,7 @@
 
         function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length) ; i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-        //credit to Christian Zosel on stack overflow. converts json data into chart data
+        //credit to Christian Zosel on stack overflow. converts given json data into chart data format
         var uniq = function uniq(a) {
             return [].concat(_toConsumableArray(new Set(a)));
         };
@@ -616,7 +616,6 @@
                 backgroundColor: getRandomColor()
             };
         });
-
         var chartLabels = [];
         for (var i = min_x; i <= max_x; i++) {
             chartLabels.push(monthLabels[i])

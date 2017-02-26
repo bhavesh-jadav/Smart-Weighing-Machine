@@ -21,7 +21,7 @@ namespace SWM.Models.Repositories
         List<TableDataModel> GetUserDataForDataTable(SwmUser user);
         string[] GetSubscriptionTypes();
         Task<bool> AddNewUser(AddNewUserModel userModel);
-        List<ShowUserModel> GetAllUsers();
+        List<ShowUserModel> GetAllUsersForAdmin();
         Task<bool> RemoveUser(RemoveUserModel userModel);
         bool AddNewLocation(AddNewLocationModel newLocation, string userId);
         bool AddNewProduct(string userId, AddNewProductModel newProduct);
@@ -29,12 +29,13 @@ namespace SWM.Models.Repositories
         List<KeyValuePair<int, string>> GetProductNames(string userId);
         List<KeyValuePair<int, string>> GetLocationNames(string userId);
         List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear);
-        List<DateTime> GetUserMonths(string userName);
+        List<DateTime> GetDateRangeOfUserData(string userName);
         PublicDashboardModel GetDashBoardForPublic();
-        List<SearchUserModel> GetAllUsers(int pageNo);
+        List<SearchUserModel> GetAllUsersForPublic(int pageNo);
         List<SearchUserModel> GetSearchResultForUserByFullName(string fullName);
         UserDetailsModel GetUserDetails(string subId);
         List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters);
         string GetSubIdFromUserName(string userName);
+        int GetTotalUsers();
     }
 }

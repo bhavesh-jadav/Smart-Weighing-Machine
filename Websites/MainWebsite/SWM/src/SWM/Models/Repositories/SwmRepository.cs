@@ -302,7 +302,7 @@ namespace SWM.Models.Repositories
             }
             return res.ToString();
         }
-        public List<ShowUserModel> GetAllUsers()
+        public List<ShowUserModel> GetAllUsersForAdmin()
         {
             int counter = 1;
             List<ShowUserModel> allUsers = new List<ShowUserModel>();
@@ -404,25 +404,6 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-
-        public AdminDashboardModel GetDashBoardForAdmin()
-        {
-            AdminDashboardModel adminDashboard = new AdminDashboardModel();
-            try
-            {
-                var userRole = _roleManager.FindByNameAsync("user").Result;
-                adminDashboard.TotalLocations = _ctx.UserLocations.Count();
-                adminDashboard.TotalPorducts = _ctx.ProductInformations.Count();
-                adminDashboard.TotalUsers = _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).Count();
-                adminDashboard.TotalWeight = _ctx.CropDatas.Select(cd => cd.Weight).Sum();
-
-                return adminDashboard;
-            }
-            catch (Exception ex)
-            {
-                return adminDashboard;
-            }
-        }
         public List<KeyValuePair<int, string>> GetProductNames(string userId)
         {
             var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == userId);
@@ -449,39 +430,51 @@ namespace SWM.Models.Repositories
             List<ProductDataMonthWiseModel> monthWiseData = new List<ProductDataMonthWiseModel>();
             try
             {
-                List<CropData> cropDatas;
-                Dictionary<int, int> ptous;
-                Dictionary<int, string> products = _ctx.ProductInformations.ToDictionary(pi => pi.Id, pi => pi.Name);
                 DateTime startDate = new DateTime(startYear, startMonth, 1);
                 DateTime endDate = new DateTime(endYear, endMonth, DateTime.DaysInMonth(endYear, endMonth));
-                if (userName != "")
+                if (userName == "")
                 {
-                    SwmUser user = _userManager.FindByNameAsync(userName).Result;
-                    ptous = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToDictionary(pu => pu.Id, pu => pu.ProductId);
-                    cropDatas = _ctx.CropDatas.Where(cd => ptous.ContainsKey(cd.ProductToUserId) && IsBetween(cd.DateTime, startDate, endDate)).ToList();
+                    for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
+                    {
+                        monthWiseData.Add(new ProductDataMonthWiseModel()
+                        {
+                            Date = date,
+                            ProductInformation = _ctx.ProductInformations
+                                .Select(pi => new ProductInfoModel()
+                                {
+                                    ProductName = pi.Name,
+                                    TotalWeight = pi.ProductsToUser.SelectMany(pu => pu.CropData)
+                                    .Where(cd => cd.DateTime.Month == date.Month && cd.DateTime.Year == date.Year)
+                                    .Select(cd => Convert.ToInt64(cd.Weight)).Sum()
+                                })
+                                .ToList()
+                        });
+                    }
                 }
                 else
                 {
-                    cropDatas = _ctx.CropDatas.Where(cd => IsBetween(cd.DateTime, startDate, endDate)).ToList();
-                    ptous = _ctx.ProductsToUsers.ToDictionary(pu => pu.Id, pu => pu.ProductId);
-                }
-
-                foreach (var cropData in cropDatas)
-                {
-                    var data = monthWiseData.FirstOrDefault(md => md.Date.Month == cropData.DateTime.Month && md.Date.Year == cropData.DateTime.Year);
-                    string productName = products[ptous[cropData.ProductToUserId]];
-                    if (data != null)
+                    var user = _userManager.FindByNameAsync(userName).Result;
+                    if (user != null)
                     {
-                        var pinfo = data.ProductInformation.FirstOrDefault(pi => pi.ProductName == productName);
-                        if (pinfo != null)
-                            pinfo.TotalWeight += cropData.Weight;
-                        else
-                            data.ProductInformation.Add(new ProductInfoModel() { ProductName = productName, TotalWeight = cropData.Weight });
+                        for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
+                        {
+                            monthWiseData.Add(new ProductDataMonthWiseModel()
+                            {
+                                Date = date,
+                                ProductInformation = _ctx.ProductsToUsers
+                                    .Where(pu => pu.UserId == user.Id)
+                                    .Select(pi => new ProductInfoModel()
+                                    {
+                                        ProductName = pi.ProductInformation.Name,
+                                        TotalWeight = pi.CropData
+                                        .Where(cd => cd.DateTime.Month == date.Month && cd.DateTime.Year == date.Year)
+                                        .Select(cd => Convert.ToInt64(cd.Weight)).Sum()
+                                    })
+                                    .ToList()
+                            });
+                        }
                     }
-                    else
-                        monthWiseData.Add(new ProductDataMonthWiseModel() { Date = new DateTime(cropData.DateTime.Year, cropData.DateTime.Month, 1), ProductInformation = new List<ProductInfoModel>() { new ProductInfoModel() { ProductName = productName, TotalWeight = cropData.Weight } } });
                 }
-
                 return monthWiseData.OrderBy(md => md.Date).ToList();
             }
             catch (Exception ex)
@@ -489,31 +482,31 @@ namespace SWM.Models.Repositories
                 return monthWiseData;
             }
         }
-        public List<DateTime> GetUserMonths(string userName)
+        public List<DateTime> GetDateRangeOfUserData(string userName)
         {
-            List<DateTime> userMonths = new List<DateTime>();
+            List<DateTime> userDates = new List<DateTime>();
             try
             {
+                DateTime startDate;
+                DateTime endDate;
                 if (userName != "")
                 {
                     var user = _userManager.FindByNameAsync(userName).Result;
-                    var ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                    var cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).OrderBy(cd => cd.DateTime).GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList();
-                    foreach (var cropData in cropDatas)
-                        userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
-                    return userMonths;
+                    startDate = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == user.Id).OrderBy(cd => cd.DateTime).FirstOrDefault().DateTime;
+                    endDate = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == user.Id).OrderByDescending(cd => cd.DateTime).FirstOrDefault().DateTime;
                 }
                 else
                 {
-                    var cropDatas = _ctx.CropDatas.GroupBy(cd => new { cd.DateTime.Month, cd.DateTime.Year }).ToList().OrderBy(cd => cd.Key.Year).ThenBy(cd => cd.Key.Month);
-                    foreach (var cropData in cropDatas)
-                        userMonths.Add(new DateTime(cropData.Key.Year, cropData.Key.Month, 1));
-                    return userMonths;
+                    startDate = _ctx.CropDatas.OrderBy(cd => cd.DateTime).FirstOrDefault().DateTime;
+                    endDate = _ctx.CropDatas.OrderByDescending(cd => cd.DateTime).FirstOrDefault().DateTime;
                 }
+                for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
+                    userDates.Add(new DateTime(date.Year, date.Month, 1));
+                return userDates;
             }
             catch (Exception)
             {
-                return userMonths;
+                return userDates;
             }
         }
         public PublicDashboardModel GetDashBoardForPublic()
@@ -521,12 +514,13 @@ namespace SWM.Models.Repositories
             PublicDashboardModel publicDashboard = new PublicDashboardModel();
             try
             {
-                publicDashboard.TotalUsers = _ctx.SwmUsers.ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).Count();
-                publicDashboard.TotalWeight = _ctx.CropDatas.Select(cd => cd.Weight).Sum();
+                var userRole = _roleManager.FindByNameAsync("user").Result;
+                publicDashboard.TotalUsers = _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).Count();
+                publicDashboard.TotalWeight = _ctx.CropDatas.Select(cd => Convert.ToInt64(cd.Weight)).Sum();
                 publicDashboard.TotalMachines = _ctx.MachineInformations.Count();
                 publicDashboard.TotalProducts = _ctx.ProductInformations.Count();
                 publicDashboard.TotalUserLocations = _ctx.UserLocations.Count();
-                publicDashboard.LastUserRegisterd = _ctx.SwmUsers.OrderByDescending(u => u.RegisterDate).ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).First().FullName;
+                publicDashboard.LastUserRegisterd = _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).OrderByDescending(u => u.RegisterDate).First().FullName;
 
                 return publicDashboard;
             }
@@ -535,7 +529,7 @@ namespace SWM.Models.Repositories
                 return publicDashboard;
             }
         }
-        public List<SearchUserModel> GetAllUsers(int pageNo)
+        public List<SearchUserModel> GetAllUsersForPublic(int pageNo)
         {
             List<SearchUserModel> result = new List<SearchUserModel>();
             try
@@ -640,6 +634,83 @@ namespace SWM.Models.Repositories
                 return result;
             }
         }
+        public UserDetailsModel GetUserDetails(string subId)
+        {
+            UserDetailsModel userDetails = new UserDetailsModel();
+            try
+            {
+                int maxLatestUpadatedDisplayAmmount = 15;
+                int counter = 1;
+                var subDetails = _ctx.UserToSubscriptions
+                    .Where(us => us.SubscriptionId == subId)
+                    .Select(us => new { user = us.SwmUser, subType = us.SubscriptionType.Name, subId = us.SubscriptionId })
+                    .FirstOrDefault();
+                if (subDetails != null)
+                {
+                    userDetails = _ctx.SwmUsers
+                        .Where(u => u.Id == subDetails.user.Id)
+                        .Select(u => new UserDetailsModel()
+                        {
+                            FullName = u.FullName,
+                            UserName = u.UserName,
+                            SubType = subDetails.subType,
+                            TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Count(),
+                            TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count(),
+                            LastUpdatedProduct = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == u.Id).OrderByDescending(cd => cd.DateTime).Select(cd => cd.ProductsToUser.ProductInformation.Name).FirstOrDefault(),
+                            TotalWeight = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).SelectMany(pu => pu.CropData).Sum(cd => Convert.ToInt64(cd.Weight)),
+                            ContactNo = u.PhoneNumber,
+                            Email = u.Email,
+                            SubId = subDetails.subId,
+                            IsNewUser = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count() > 0 ? false : true,
+                            HaveSomeData = _ctx.CropDatas.FirstOrDefault(cd => cd.ProductsToUser.UserId == u.Id) != null ? true : false,
+                            ProductsIntoAccount = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Select(pu => pu.ProductInformation).ToList(),
+                            UserLocations = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Select(ul => new AddNewLocationModel()
+                            {
+                                Address = ul.Address,
+                                Name = ul.Name,
+                                PinNo = ul.PinNo.ToString(),
+                                State = ul.State.Name,
+                                Country = ul.Country.Name
+                            }).ToList(),
+                            LatestUpdatedProductsTableInformation = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == subDetails.user.Id).OrderByDescending(cd => cd.DateTime).Take(maxLatestUpadatedDisplayAmmount)
+                            .Select(cd => new UserDetailsLatestUpdatedTableModel()
+                            {
+                                DateAndTime = cd.DateTime,
+                                Location = cd.UserLocationToMachine.UserLocation.Address,
+                                ProductName = cd.ProductsToUser.ProductInformation.Name,
+                                Weight = cd.Weight
+                            }).ToList()
+                        }).FirstOrDefault();
+
+                    foreach (var datum in userDetails.LatestUpdatedProductsTableInformation)
+                        datum.No = counter++;
+                }
+
+                return userDetails;
+            }
+            catch (Exception ex)
+            {
+                return userDetails;
+            }
+        }
+        public int GetTotalUsers()
+        {
+            try
+            {
+                var userRole = _roleManager.FindByNameAsync("user").Result;
+                return _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).ToList().Count;
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+        }
+        public string GetSubIdFromUserName(string userName)
+        {
+            var user = _userManager.FindByNameAsync(userName).Result;
+            return _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId;
+        }
+
         public List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters)
         {
             List<SearchUserModel> result = new List<SearchUserModel>();
@@ -767,84 +838,6 @@ namespace SWM.Models.Repositories
                 return result;
             }
         }
-        public UserDetailsModel GetUserDetails(string subId)
-        {
-            UserDetailsModel userDetails = new UserDetailsModel();
-            try
-            {
-                int maxLatestUpadatedDisplayAmmount = 15;
-                int counter = 1;
-                var subDetails = _ctx.UserToSubscriptions
-                    .Where(us => us.SubscriptionId == subId)
-                    .Select(us => new { user = us.SwmUser, subType = us.SubscriptionType.Name, subId = us.SubscriptionId })
-                    .FirstOrDefault();
-                if (subDetails != null)
-                {
-                    userDetails = _ctx.SwmUsers
-                        .Where(u => u.Id == subDetails.user.Id)
-                        .Select(u => new UserDetailsModel()
-                        {
-                            FullName = u.FullName,
-                            UserName = u.UserName,
-                            SubType = subDetails.subType,
-                            TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Count(),
-                            TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count(),
-                            LastUpdatedProduct = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == u.Id).OrderByDescending(cd => cd.DateTime).Select(cd => cd.ProductsToUser.ProductInformation.Name).FirstOrDefault(),
-                            TotalWeight = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).SelectMany(pu => pu.CropData).Sum(cd => Convert.ToInt64(cd.Weight)),
-                            ContactNo = u.PhoneNumber,
-                            Email = u.Email,
-                            SubId = subDetails.subId,
-                            IsNewUser = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count() > 0 ? false : true,
-                            HaveSomeData = _ctx.CropDatas.FirstOrDefault(cd => cd.ProductsToUser.UserId == u.Id) != null ? true : false,
-                            ProductsIntoAccount = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Select(pu => pu.ProductInformation).ToList(),
-                            UserLocations = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Select(ul => new AddNewLocationModel()
-                            {
-                                Address = ul.Address,
-                                Name = ul.Name,
-                                PinNo = ul.PinNo.ToString(),
-                                State = ul.State.Name,
-                                Country = ul.Country.Name
-                            }).ToList(),
-                            LatestUpdatedProductsTableInformation = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == subDetails.user.Id).OrderByDescending(cd => cd.DateTime).Take(maxLatestUpadatedDisplayAmmount)
-                            .Select(cd => new UserDetailsLatestUpdatedTableModel()
-                            {
-                                DateAndTime = cd.DateTime,
-                                Location = cd.UserLocationToMachine.UserLocation.Address,
-                                ProductName = cd.ProductsToUser.ProductInformation.Name,
-                                Weight = cd.Weight
-                            }).ToList()
-                        }).FirstOrDefault();
-
-                    foreach (var datum in userDetails.LatestUpdatedProductsTableInformation)
-                        datum.No = counter++;
-                }
-
-                return userDetails;
-            }
-            catch (Exception ex)
-            {
-                return userDetails;
-            }
-        }
-        public int GetTotalUsers()
-        {
-            try
-            {
-                var userRole = _roleManager.FindByNameAsync("user").Result;
-                return _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).ToList().Count;
-            }
-            catch (Exception ex)
-            {
-                return 0;
-            }
-        }
-        public string GetSubIdFromUserName(string userName)
-        {
-            var user = _userManager.FindByNameAsync(userName).Result;
-            return _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId;
-        }
-
-
         public async Task<bool> RemoveUser(RemoveUserModel userModel)
         {
             try
@@ -884,6 +877,24 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+        public AdminDashboardModel GetDashBoardForAdmin()
+        {
+            AdminDashboardModel adminDashboard = new AdminDashboardModel();
+            try
+            {
+                var userRole = _roleManager.FindByNameAsync("user").Result;
+                adminDashboard.TotalLocations = _ctx.UserLocations.Count();
+                adminDashboard.TotalPorducts = _ctx.ProductInformations.Count();
+                adminDashboard.TotalUsers = _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).Count();
+                adminDashboard.TotalWeight = _ctx.CropDatas.Select(cd => cd.Weight).Sum();
+
+                return adminDashboard;
+            }
+            catch (Exception ex)
+            {
+                return adminDashboard;
             }
         }
     }
