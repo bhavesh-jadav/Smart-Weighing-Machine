@@ -1,4 +1,4 @@
-﻿@model List<SearchUserModel>
+﻿
 @section css{
     <link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 }
@@ -7,17 +7,17 @@
         <div class="col-md-12">
             <div class="box box-primary">
                 <div class="box-header">
-                    <h3 class="box-title">Total @Model.Count users in system.</h3>
-                    <h3 ng-show="{{apiError}}">{{apiError}}</h3>
+                    <h3 ng-show="totalUsers" class="box-title">Total {{totalUsers}} users in system.</h3>
+                    <h3 ng-show="!totalUsers" style="color:red">{{apiError}}</h3>
                 </div>
-                @Html.Partial("ShowUserPublicPartial", Model)
+                @Html.Partial("ShowUserPublicPartial")
                 <div class="overlay" ng-show="initial">
                     <i class="fa fa-refresh fa-spin"></i>
                 </div>
                 <div class="box-footer">
                     <div class="row">
                         <div class="col-md-offset-5 col-md-2 col-xs-12">
-                            <button ng-disabled="showLoadingIcon" class="btn btn-flat btn-info" style="width:100%" ng-click="loadMoreUsers()">{{loadingMessage}}&nbsp;&nbsp;<i ng-show="showLoadingIcon" class="fa fa-spin fa-refresh"></i></button>
+                            <button ng-disabled="disableLoadMoreButton" class="btn btn-flat btn-info" style="width:100%" ng-click="loadMoreUsers()">{{loadingMessage}}&nbsp;&nbsp;<i ng-show="showLoadingIcon" class="fa fa-spin fa-refresh"></i></button>
                         </div>
                     </div>
                 </div>
@@ -32,6 +32,6 @@
     <script src="~/distribution/js/ShowAllUsers.js"></script>
     @*<script src="~/js/ShowAllUsers.js"></script>*@
     <script>
-      
+
     </script>
 }

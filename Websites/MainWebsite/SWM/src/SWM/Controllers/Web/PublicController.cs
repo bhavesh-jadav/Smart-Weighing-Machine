@@ -81,9 +81,8 @@ namespace SWM.Controllers.Web
         public IActionResult SearchUser(string FullName)
         {
             ViewBag.Title = "Search User";
-            var results = _repo.GetSearchResultForUserByFullName(FullName);
-            ViewBag.SearchResultLength = results.Count;
-            return View(results);
+            ViewBag.FullName = FullName;
+            return View();
         }
 
         [Route("Public/User/{subId}")]
@@ -100,7 +99,7 @@ namespace SWM.Controllers.Web
             try
             {
                 ViewBag.Title = "More User Details";
-                UserDetailsModel userDetail = _repo.GetUserDetails(subId);
+                UserDetailsModel userDetail = _repo.GetUserDetailsLight(subId);
                 return View(userDetail);
             }
             catch (Exception)
@@ -112,14 +111,13 @@ namespace SWM.Controllers.Web
         public IActionResult AdvanceSearch()
         {
             ViewBag.Title = "Advance Search";
-            
             return View(new Tuple<AdvanceSearchModel, List<SearchUserModel>>(new AdvanceSearchModel(), new List<SearchUserModel>()));
         }
 
         public IActionResult ShowAllUsers()
         {
             ViewBag.Title = "All Users";
-            return View(_repo.GetSearchResultForUserByFullName(""));
+            return View();
         }
     }
 }

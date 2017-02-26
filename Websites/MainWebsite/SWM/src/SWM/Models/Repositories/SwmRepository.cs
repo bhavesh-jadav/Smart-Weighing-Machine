@@ -661,8 +661,8 @@ namespace SWM.Models.Repositories
                             ContactNo = u.PhoneNumber,
                             Email = u.Email,
                             SubId = subDetails.subId,
-                            IsNewUser = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count() > 0 ? false : true,
-                            HaveSomeData = _ctx.CropDatas.FirstOrDefault(cd => cd.ProductsToUser.UserId == u.Id) != null ? true : false,
+                            IsNewUser = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count() == 0,
+                            HaveSomeData = _ctx.CropDatas.FirstOrDefault(cd => cd.ProductsToUser.UserId == u.Id) != null,
                             ProductsIntoAccount = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Select(pu => pu.ProductInformation).ToList(),
                             UserLocations = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Select(ul => new AddNewLocationModel()
                             {
@@ -693,6 +693,38 @@ namespace SWM.Models.Repositories
                 return userDetails;
             }
         }
+        public UserDetailsModel GetUserDetailsLight(string subId)
+        {
+            UserDetailsModel userDetails = new UserDetailsModel();
+            try
+            {
+                var subDetails = _ctx.UserToSubscriptions
+                    .Where(us => us.SubscriptionId == subId)
+                    .Select(us => new { user = us.SwmUser, subType = us.SubscriptionType.Name, subId = us.SubscriptionId })
+                    .FirstOrDefault();
+                if (subDetails != null)
+                {
+                    userDetails = _ctx.SwmUsers
+                        .Where(u => u.Id == subDetails.user.Id)
+                        .Select(u => new UserDetailsModel()
+                        {
+                            UserName = u.UserName,
+                            TotalLocation = _ctx.UserLocations.Where(ul => ul.UserId == u.Id).Count(),
+                            TotalProducts = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count(),
+                            LastUpdatedProduct = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == u.Id).OrderByDescending(cd => cd.DateTime).Select(cd => cd.ProductsToUser.ProductInformation.Name).FirstOrDefault(),
+                            TotalWeight = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).SelectMany(pu => pu.CropData).Sum(cd => Convert.ToInt64(cd.Weight)),
+                            IsNewUser = _ctx.ProductsToUsers.Where(pu => pu.UserId == u.Id).Count() == 0,
+                            HaveSomeData = _ctx.CropDatas.FirstOrDefault(cd => cd.ProductsToUser.UserId == u.Id) != null,
+                        }).FirstOrDefault();
+                }
+
+                return userDetails;
+            }
+            catch (Exception ex)
+            {
+                return userDetails;
+            }
+        }
         public int GetTotalUsers()
         {
             try
@@ -707,8 +739,15 @@ namespace SWM.Models.Repositories
         }
         public string GetSubIdFromUserName(string userName)
         {
-            var user = _userManager.FindByNameAsync(userName).Result;
-            return _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId;
+            try
+            {
+                var user = _userManager.FindByNameAsync(userName).Result;
+                return _ctx.UserToSubscriptions.FirstOrDefault(us => us.UserID == user.Id).SubscriptionId;
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
 
         public List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters)
@@ -734,26 +773,35 @@ namespace SWM.Models.Repositories
                     countries = parameters.Countries.Split(',');
 
                 List<SwmUser> users = new List<SwmUser>();
+                var userRole = _roleManager.FindByNameAsync("user").Result;
                 if (names != null)
                 {
                     foreach (var name in names)
-                        users.AddRange(_ctx.SwmUsers.Where(u => u.FullName.Contains(name) || u.FullName == name).ToList()
-                            .Where(u => _userManager.IsInRoleAsync(u, "user").Result).ToList());
+                        users.AddRange(
+                            _ctx.SwmUsers
+                            .Where(u => u.FullName.ToLower().Contains(name.Trim().ToLower()) || u.FullName.ToLower() == name.Trim().ToLower())
+                            .Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).ToList()
+                        );
                 }
                 else
-                    users = _ctx.SwmUsers.ToList().Where(u => _userManager.IsInRoleAsync(u, "user").Result).ToList();
+                    users = _ctx.SwmUsers.Where(u => u.Roles.Any(ur => ur.RoleId == userRole.Id)).ToList();
 
                 foreach (var user in users.ToList())
                 {
                     satisfyProducts = satisfyLocation = satisfyStates = satisfyCountries = 0;
-                    List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => ul.UserId == user.Id).ToList();
-                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
+                    var userLocations = _ctx.UserLocations
+                        .Where(ul => ul.UserId == user.Id)
+                        .Select(ul => new {
+                            address = ul.Address,
+                            state = ul.State.Name,
+                            country = ul.Country.Name
+                        })
+                        .ToList();
                     if (products != null)
                     {
                         foreach (var product in products)
                         {
-                            var productId = ProductsInfo.FirstOrDefault(pu => pu.Value.ToLower().Trim() == product.ToLower().Trim()).Key;
-                            if (ptou.Any(pu => pu.ProductId == productId))
+                            if (_ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).FirstOrDefault(pu => pu.ProductInformation.Name == product) != null)
                             {
                                 satisfyProducts = 1;
                                 break;
@@ -764,13 +812,10 @@ namespace SWM.Models.Repositories
                     }
                     if (parameters.Location != null)
                     {
-                        foreach (var locaions in userLocations)
+                        if (userLocations.Where(ul => ul.address.ToLower().Contains(parameters.Location.Trim().ToLower())).FirstOrDefault() != null)
                         {
-                            if (locaions.Address.ToLower().Contains(parameters.Location.Trim().ToLower()))
-                            {
-                                satisfyLocation = 1;
-                                break;
-                            }
+                            satisfyLocation = 1;
+                            break;
                         }
                         if (satisfyLocation == 0)
                             users.Remove(user);
@@ -779,29 +824,24 @@ namespace SWM.Models.Repositories
                     {
                         foreach (var state in states)
                         {
-                            foreach (var locations in userLocations)
+                            if (userLocations.Where(ul => ul.state.ToLower() == state.ToLower().Trim()).FirstOrDefault() != null)
                             {
-                                if (locations.StateId == States.FirstOrDefault(s => s.Value.ToLower().Trim() == state.ToLower().Trim()).Key)
-                                {
-                                    satisfyStates = 1;
-                                    break;
-                                }
+                                satisfyStates = 1;
+                                break;
                             }
                             if (satisfyStates == 0)
                                 users.Remove(user);
                         }
+                        
                     }
                     if (countries != null)
                     {
                         foreach (var country in countries)
                         {
-                            foreach (var locations in userLocations)
+                            if (userLocations.Where(ul => ul.country.ToLower() == country.ToLower().Trim()).FirstOrDefault() != null)
                             {
-                                if (locations.CountryId == Countries.FirstOrDefault(s => s.Value.ToLower().Trim() == country.ToLower().Trim()).Key)
-                                {
-                                    satisfyCountries = 1;
-                                    break;
-                                }
+                                satisfyCountries = 1;
+                                break;
                             }
                             if (satisfyCountries == 0)
                                 users.Remove(user);

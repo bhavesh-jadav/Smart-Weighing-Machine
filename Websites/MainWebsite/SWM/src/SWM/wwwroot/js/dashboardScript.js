@@ -24,25 +24,34 @@
     function userController($scope, $http, poller) {
 
         $scope.gettingUserDetails = true;
-        var myPoller = poller.get(document.location.origin+'/api/' + username, {
+        var myPoller = poller.get(document.location.origin+'/api/' + username + '/less_details', {
             catchError: true,
-            delay: 10000
+            delay: 1000
+        });
+
+        $http.get('/api/' + username).then(function (response) {
+            
+            populateDashboard(response.data);
+            $scope.userData = response.data;
+            $scope.productsIntoAccount = "";
+            var allProducts = $scope.userData.productsIntoAccount;
+            var Products = "";
+            for (var i = 0; i < allProducts.length; i++) {
+                Products += allProducts[i].name;
+                if (i < allProducts.length - 1)
+                    Products += ", ";
+            }
+            $scope.productsIntoAccount = Products;
+            $scope.gettingUserDetails = false;
+
+        }, function (error) {
+            $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and Make sure that it is working fine.</div>');
+            $scope.gettingUserDetails = false;
         });
 
         myPoller.promise.then(null, null, function (response) {
             if (response.data != null) {
                 populateDashboard(response.data);
-                $scope.userData = response.data;
-                $scope.productsIntoAccount = "";
-                var allProducts = $scope.userData.productsIntoAccount;
-                var Products = "";
-                for (var i = 0; i < allProducts.length; i++) {
-                    Products += allProducts[i].name;
-                    if (i < allProducts.length - 1)
-                        Products += ", ";
-                }
-                $scope.productsIntoAccount = Products;
-                $scope.gettingUserDetails = false;
             } else {
                 $('#errorMessage').append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>There was a problem while getting latest data. Make sure you are connected to the internet and Make sure that it is working fine.</div>');
                 $scope.gettingUserDetails = false;

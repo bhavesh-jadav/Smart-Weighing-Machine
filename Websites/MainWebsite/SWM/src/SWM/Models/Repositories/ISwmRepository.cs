@@ -36,6 +36,7 @@ namespace SWM.Models.Repositories
         UserDetailsModel GetUserDetails(string subId);
         List<SearchUserModel> AdvanceSearchResults(AdvanceSearchModel parameters);
         string GetSubIdFromUserName(string userName);
+        UserDetailsModel GetUserDetailsLight(string subId);
         int GetTotalUsers();
     }
 }

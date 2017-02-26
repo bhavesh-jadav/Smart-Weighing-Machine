@@ -46,11 +46,9 @@ namespace SWM.Controllers.Web
             }
             else if (User.IsInRole("user") || User.IsInRole("testuser"))
             {
-                var user = _userManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result;
-                bool isNewUser = !(_ctx.ProductsToUsers.FirstOrDefault(pu => pu.UserId == user.Id) != null && _ctx.UserLocations.FirstOrDefault(u => u.UserId == user.Id) != null);
-                var ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
-                bool haveSomeData = (_ctx.CropDatas.Where(cd => ptou.Any(c => cd.ProductToUserId == c.Id)).ToList().Count > 0);
-                return View("UserDashboard", new Tuple<bool, bool, string>(isNewUser, haveSomeData, user.UserName));
+                var subId = _repo.GetSubIdFromUserName(_repo.GetUserByUserId(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result.UserName);
+                UserDetailsModel userDetail = _repo.GetUserDetailsLight(subId);
+                return View("UserDashboard", userDetail);
             }
             return View();
         }

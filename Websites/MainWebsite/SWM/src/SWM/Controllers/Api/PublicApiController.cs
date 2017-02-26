@@ -33,6 +33,13 @@ namespace SWM.Controllers.Api
             return Ok(_repo.GetUserDetails(subId));
         }
 
+        [HttpGet("{userName}/less_details")]
+        public IActionResult GetUserInfoLight(string userName)
+        {
+            var subId = _repo.GetSubIdFromUserName(userName);
+            return Ok(_repo.GetUserDetailsLight(subId));
+        }
+
         [HttpGet("public_dashboard")]
         public IActionResult PublicDashboard()
         {
@@ -157,6 +164,14 @@ namespace SWM.Controllers.Api
         {
             int totalUsers = _repo.GetTotalUsers();
             var result = _repo.GetAllUsersForPublic(pageNo);
+            return Ok(new { totalUsers = totalUsers, users = result });
+        }
+
+        [HttpGet("search_user/{fullName}")]
+        public IActionResult SearchUser(string fullName)
+        {
+            var result = _repo.GetSearchResultForUserByFullName(fullName);
+            int totalUsers = result.Count;
             return Ok(new { totalUsers = totalUsers, users = result });
         }
 
