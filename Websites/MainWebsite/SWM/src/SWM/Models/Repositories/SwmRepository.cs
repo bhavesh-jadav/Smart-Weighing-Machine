@@ -109,35 +109,30 @@ namespace SWM.Models.Repositories
         {
             return await _userManager.FindByNameAsync(userName);
         }
-
-
         public List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName)
         {
             try
             {
-                //List<ProductInfoModel> productInfos = new List<ProductInfoModel>();
-                //var user = GetUserByUserName(userName).Result;
-                //var location = _ctx.UserLocations.FirstOrDefault(l => l.Name == locationName);
-                //if (user != null && location != null)
-                //{
-                //    ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
-                //    foreach (var cu in ctou)
-                //    {
-                //        productInfos.Add(new ProductInfoModel()
-                //        {
-                //            ProductName = GetProductInformation(cu.ProductId).Name,
-                //            TotalWeight = _ctx.CropDatas.Where(cd => cd.ProductToUserId == cu.Id &&
-                //            cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(ul => ul.UserLocationId == location.Id).Id).Select(cd => cd.Weight).Sum()
-                //        });
-                //    }
-                //    return productInfos;
-                //}
-                //else
-                    return new List<ProductInfoModel>();
+                List<ProductInfoModel> productInfos = new List<ProductInfoModel>();
+                var user = _userManager.FindByNameAsync(userName).Result;
+                if (user != null)
+                {
+                    productInfos = _ctx.ProductsToUsers
+                        .Where(pu => pu.UserId == user.Id)
+                        .Select(pu => new ProductInfoModel()
+                        {
+                            ProductName = pu.ProductInformation.Name,
+                            TotalWeight = pu.CropData
+                                    .Where(cd => cd.UserLocationToMachine.UserLocation.Name == locationName)
+                                    .Select(cd => Convert.ToInt64(cd.Weight))
+                                    .Sum()
+                        }).ToList();
+                }
+                return productInfos;
             }
             catch (Exception ex)
             {
-                return new List<ProductInfoModel>();
+                return null;
             }
         }
         public async Task<bool> CheckUserPassword(SwmUser user, string password)
@@ -189,39 +184,28 @@ namespace SWM.Models.Repositories
                 return false;
             }
         }
-        public List<TableDataModel> GetDataForDataTable(SwmUser user)
+        public List<TableDataModel> GetUserDataForDataTable(SwmUser user)
         {
             try
             {
                 int counter = 1;
                 List<TableDataModel> tableData = new List<TableDataModel>();
-                List<ProductsToUser> produtToUsers = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
-                List<CropData> cropDatas = _ctx.CropDatas.Where(cd => produtToUsers.Any(pu => pu.Id == cd.ProductToUserId)).OrderByDescending(cd => cd.DateTime).ToList();
-                List<UserLocationToMachine> userLocationToMachine = _ctx.UserLocationToMachines.Where(ul => cropDatas.Any(cd => cd.UserLocationToMachineId == ul.Id)).ToList();
-                List<UserLocation> userLocations = _ctx.UserLocations.Where(ul => userLocationToMachine.Any(um => um.UserLocationId == ul.Id)).ToList();
 
-                //key productToUserId value productName
-                Dictionary<int, string> productInformation = new Dictionary<int, string>();
-                foreach (var data in produtToUsers)
-                    productInformation.Add(data.Id, _ctx.ProductInformations.FirstOrDefault(pi => pi.Id == data.ProductId).Name);
-
-                //Key locationId value locationname
-                Dictionary<int, string> locationInfo = new Dictionary<int, string>();
-                foreach (var data in userLocationToMachine)
-                    locationInfo.Add(data.UserLocationId, _ctx.UserLocations.FirstOrDefault(ul => ul.Id == data.UserLocationId).Address);
-
-                foreach (var cropData in cropDatas)
-                {
-                    tableData.Add(new TableDataModel()
+                tableData = _ctx.CropDatas
+                    .Where(cd => cd.ProductsToUser.UserId == user.Id)
+                    .OrderByDescending(cd => cd.DateTime)
+                    .Select(cd => new TableDataModel()
                     {
-                        No = counter++,
-                        Name = productInformation[cropData.ProductToUserId],
-                        Weight = cropData.Weight,
-                        DateAndTime = cropData.DateTime,
-                        Location = locationInfo[userLocationToMachine.FirstOrDefault(um => um.Id == cropData.UserLocationToMachineId).UserLocationId],
-                        MachineId = userLocationToMachine.FirstOrDefault(um => um.Id == cropData.UserLocationToMachineId).MachineId
-                    });
-                }
+                        No = 0,
+                        DateAndTime = cd.DateTime,
+                        MachineId = cd.UserLocationToMachine.MachineId,
+                        ProductName = cd.ProductsToUser.ProductInformation.Name,
+                        Weight = cd.Weight,
+                        Location = cd.UserLocationToMachine.UserLocation.Address
+                    }).ToList();
+                foreach (var dataum in tableData)
+                    dataum.No = counter++;
+
                 return tableData;
             }
             catch (Exception ex)
@@ -318,6 +302,7 @@ namespace SWM.Models.Repositories
             }
             return res.ToString();
         }
+
         public List<ShowUserModel> GetAllUsers()
         {
             int counter = 1;
@@ -349,6 +334,7 @@ namespace SWM.Models.Repositories
                 return allUsers;
             }
         }
+
         public async Task<bool> RemoveUser(RemoveUserModel userModel)
         {
             try

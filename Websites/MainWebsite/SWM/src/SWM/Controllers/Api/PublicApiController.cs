@@ -123,8 +123,13 @@ namespace SWM.Controllers.Api
         public IActionResult GetProductInfo(string userName, string locationName)
         {
             List<ProductInfoModel> productInfos = _repo.GetProductInfoByUserNameAndLocation(locationName, userName);
-            if (productInfos.Count > 0)
-                return Ok(productInfos);
+            if (productInfos != null)
+            {
+                if (productInfos.Count > 0)
+                    return Ok(productInfos);
+                else
+                    return BadRequest("No data");
+            }
             else
                 return BadRequest("Unable to process requrest");
         }

@@ -296,7 +296,7 @@ namespace SWM.Controllers.Web
         [Authorize(Roles = "user,testuser")]
         public IActionResult ShowData()
         {
-            List<TableDataModel> tableData = _repo.GetDataForDataTable(_repo.GetUserByUserId(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result);
+            List<TableDataModel> tableData = _repo.GetUserDataForDataTable(_repo.GetUserByUserId(User.FindFirst(ClaimTypes.NameIdentifier).Value).Result);
             return View(tableData);
         }
 

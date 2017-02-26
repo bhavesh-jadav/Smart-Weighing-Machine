@@ -18,7 +18,7 @@ namespace SWM.Models.Repositories
         List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName);
         Task<bool> CheckUserPassword(SwmUser user, string password);
         bool AddNewDataFromMachine(DataFromMachineModel data);
-        List<TableDataModel> GetDataForDataTable(SwmUser user);
+        List<TableDataModel> GetUserDataForDataTable(SwmUser user);
         string[] GetSubscriptionTypes();
         Task<bool> AddNewUser(AddNewUserModel userModel);
         List<ShowUserModel> GetAllUsers();
