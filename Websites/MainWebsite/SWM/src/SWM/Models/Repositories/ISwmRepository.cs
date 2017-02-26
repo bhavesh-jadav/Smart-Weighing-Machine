@@ -11,11 +11,11 @@ namespace SWM.Models.Repositories
     public interface ISwmRepository
     {
         List<ProductInfoModel> GetProductInfoByUserName(string userName);
+        List<ProductInfoModel> GetAllProductInformation();
         List<LocationInfoModel> GetLocationInfoByUserName(string userName);
         Task<SwmUser> GetUserByUserName(string userName);
         Task<SwmUser> GetUserByUserId(string id);
         List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName);
-        ProductInformation GetProductInformation(int productId);
         Task<bool> CheckUserPassword(SwmUser user, string password);
         bool AddNewDataFromMachine(DataFromMachineModel data);
         List<TableDataModel> GetDataForDataTable(SwmUser user);

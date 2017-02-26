@@ -43,20 +43,30 @@ namespace SWM.Controllers.Api
         public IActionResult GetProductInfo(string userName)
         {
             List<ProductInfoModel> productInfos = _repo.GetProductInfoByUserName(userName);
-            if (productInfos.Count > 0)
-                return Ok(productInfos);
+            if (productInfos != null)
+            {
+                if (productInfos.Count > 0)
+                    return Ok(productInfos);
+                else
+                    return BadRequest("This user does not have any data");
+            }
             else
-                return BadRequest("Unable to process requrest");
+                return BadRequest("Unable to fetch data");
         }
 
         [HttpGet("product_info")]
         public IActionResult GetProductInfo()
         {
-            List<ProductInfoModel> productInfos = _repo.GetProductInfoByUserName("");
-            if (productInfos.Count > 0)
-                return Ok(productInfos);
+            List<ProductInfoModel> productInfos = _repo.GetAllProductInformation();
+            if (productInfos != null)
+            {
+                if (productInfos.Count > 0)
+                    return Ok(productInfos);
+                else
+                    return BadRequest("No data");
+            }
             else
-                return BadRequest("Unable to process requrest");
+                return BadRequest("Unable to fetch data");
         }
 
         [HttpGet("{userName}/product_info_month_wise/{startMonth}/{startYear}/{endMonth}/{endYear}")]
@@ -130,17 +140,6 @@ namespace SWM.Controllers.Api
             return BadRequest("Error adding subscription");
         }
 
-        [AllowAnonymous]
-        [HttpPost("machine_data")]
-        public IActionResult GetDataFromMachine([FromBody]DataFromMachineModel data)
-        {
-            var res = _repo.AddNewDataFromMachine(data);
-            if (res)
-                return Ok("success");
-            else
-                return BadRequest("fail");
-        }
-        
         [HttpPost("advance_search")]
         public IActionResult AdvanceSearch([FromBody]AdvanceSearchModel parameters)
         {
@@ -183,6 +182,17 @@ namespace SWM.Controllers.Api
                 else
                     return BadRequest("fail");
             }
+            else
+                return BadRequest("fail");
+        }
+
+        [AllowAnonymous]
+        [HttpPost("machine_data")]
+        public IActionResult GetDataFromMachine([FromBody]DataFromMachineModel data)
+        {
+            var res = _repo.AddNewDataFromMachine(data);
+            if (res)
+                return Ok("success");
             else
                 return BadRequest("fail");
         }

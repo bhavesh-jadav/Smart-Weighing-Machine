@@ -67,85 +67,78 @@ namespace SWM.Models.Repositories
             try
             {
                 List<ProductInfoModel> productInfo = new List<ProductInfoModel>();
-                Dictionary<int, string> productsInformation = _ctx.ProductInformations.ToDictionary(p => p.Id, p => p.Name);
-                var user = GetUserByUserName(userName).Result;
+                var user = _userManager.FindByNameAsync(userName).Result;
                 if (user != null)
                 {
-                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToList();
-                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).ToList();
-                    foreach (var pu in ptou)
-                    {
-                        productInfo.Add(new ProductInfoModel()
+                    productInfo = _ctx.ProductsToUsers
+                        .Where(pu => pu.UserId == user.Id)
+                        .Select(pu => new ProductInfoModel()
                         {
-                            ProductName = productsInformation[pu.ProductId],
-                            TotalWeight = cropDatas.Where(cd => cd.ProductToUserId == pu.Id).Select(cd => cd.Weight).Sum()
-                        });
-                    }
-                    return productInfo;
+                            ProductName = pu.ProductInformation.Name,
+                            TotalWeight = pu.CropData.Select(cd => Convert.ToInt64(cd.Weight)).Sum()
+                        })
+                        .ToList();
                 }
-                else
-                {
-                    List<ProductsToUser> ptou = _ctx.ProductsToUsers.ToList();
-                    List<CropData> cropDatas = _ctx.CropDatas.Where(cd => ptou.Any(pu => pu.Id == cd.ProductToUserId)).ToList();
-                    foreach (var pu in ptou)
-                    {
-                        var productName = productsInformation[pu.ProductId];
-                        var data = productInfo.FirstOrDefault(d => d.ProductName == productName);
-                        if (data != null)
-                            data.TotalWeight += cropDatas.Where(cd => cd.ProductToUserId == pu.Id).Select(cd => cd.Weight).Sum();
-                        else
-                        {
-                            productInfo.Add(new ProductInfoModel()
-                            {
-                                ProductName = productName,
-                                TotalWeight = cropDatas.Where(cd => cd.ProductToUserId == pu.Id).Select(cd => cd.Weight).Sum()
-                            });
-                        }
-                    }
-                    return productInfo;
-                }
+                return productInfo;
             }
             catch (Exception ex)
             {
-                return new List<ProductInfoModel>();
+                return null;
+            }
+        }
+        public List<ProductInfoModel> GetAllProductInformation()
+        {
+            try
+            {
+                List<ProductInfoModel> productInfo = new List<ProductInfoModel>();
+                productInfo = _ctx.ProductInformations
+                    .Select(pi => new ProductInfoModel()
+                    {
+                        ProductName = pi.Name,
+                        TotalWeight = pi.ProductsToUser.SelectMany(pu => pu.CropData).Select(cd => Convert.ToInt64(cd.Weight)).Sum()
+                    })
+                    .ToList();
+                return productInfo;
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
         public async Task<SwmUser> GetUserByUserName(string userName)
         {
             return await _userManager.FindByNameAsync(userName);
         }
+
+
         public List<ProductInfoModel> GetProductInfoByUserNameAndLocation(string locationName, string userName)
         {
             try
             {
-                List<ProductInfoModel> productInfos = new List<ProductInfoModel>();
-                var user = GetUserByUserName(userName).Result;
-                var location = _ctx.UserLocations.FirstOrDefault(l => l.Name == locationName);
-                if (user != null && location != null)
-                {
-                    ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
-                    foreach (var cu in ctou)
-                    {
-                        productInfos.Add(new ProductInfoModel()
-                        {
-                            ProductName = GetProductInformation(cu.ProductId).Name,
-                            TotalWeight = _ctx.CropDatas.Where(cd => cd.ProductToUserId == cu.Id &&
-                            cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(ul => ul.UserLocationId == location.Id).Id).Select(cd => cd.Weight).Sum()
-                        });
-                    }
-                    return productInfos;
-                }
-                else
+                //List<ProductInfoModel> productInfos = new List<ProductInfoModel>();
+                //var user = GetUserByUserName(userName).Result;
+                //var location = _ctx.UserLocations.FirstOrDefault(l => l.Name == locationName);
+                //if (user != null && location != null)
+                //{
+                //    ProductsToUser[] ctou = _ctx.ProductsToUsers.Where(cu => cu.UserId == user.Id).ToArray();
+                //    foreach (var cu in ctou)
+                //    {
+                //        productInfos.Add(new ProductInfoModel()
+                //        {
+                //            ProductName = GetProductInformation(cu.ProductId).Name,
+                //            TotalWeight = _ctx.CropDatas.Where(cd => cd.ProductToUserId == cu.Id &&
+                //            cd.UserLocationToMachineId == _ctx.UserLocationToMachines.FirstOrDefault(ul => ul.UserLocationId == location.Id).Id).Select(cd => cd.Weight).Sum()
+                //        });
+                //    }
+                //    return productInfos;
+                //}
+                //else
                     return new List<ProductInfoModel>();
             }
             catch (Exception ex)
             {
                 return new List<ProductInfoModel>();
             }
-        }
-        public ProductInformation GetProductInformation(int productId)
-        {
-            return _ctx.ProductInformations.FirstOrDefault(p => p.Id == productId);
         }
         public async Task<bool> CheckUserPassword(SwmUser user, string password)
         {
