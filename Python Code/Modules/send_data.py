@@ -3,7 +3,7 @@ import MySQLdb as sqldb
 import json
 
 def send():
-	url = "https://swm2016.azurewebsites.net/api/machine_data"
+	url = "https://swmw.me/api/machine_data"
 	headers = {'content-type': 'application/json'}
 	f = '%Y-%m-%d %H:%M:%S'
 	try:

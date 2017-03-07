@@ -356,7 +356,7 @@ def signin():
 		lcd.draw.text("PLEASE WAIT...", 25, 25)
 		lcd.display.commit()
 		
-		url = "https://swm2016.azurewebsites.net/api/login"
+		url = "https://swmw.me/api/login"
 		payload = {'userName':userName, 'Password':password}
 		headers = {'content-type': 'application/json'}
 		response = requests.post(url, data=json.dumps(payload), headers=headers)
@@ -387,7 +387,7 @@ def send_data_to_server():
 	lcd.display.clear()
 	lcd.draw.text("PLEASE WAIT...", 0, 0)
 	lcd.display.commit()
-	url = "https://swm2016.azurewebsites.net/api/machine_data"
+	url = "https://swmw.me/api/machine_data"
 	headers = {'content-type': 'application/json'}
 	f = '%Y-%m-%d %H:%M:%S'
 	try:
@@ -396,28 +396,34 @@ def send_data_to_server():
 		cursor.execute("SELECT * FROM data")
 		rows = cursor.fetchall()
 		no_of_data = len(rows)
-		for row in rows:
-			lcd.draw.clear(0,9,127,19)
-			lcd.draw.text("DATA REMAINING: " + str(no_of_data), 0, 9)
+		if no_of_data > 0:
+			for row in rows:
+				lcd.draw.clear(0,9,127,19)
+				lcd.draw.text("DATA REMAINING: " + str(no_of_data), 0, 9)
+				lcd.display.commit()
+				payload = {
+							'ProductId':int(row[2]),
+							'Weight':int(row[3]),
+							'LocationId':int(row[1]),
+							'DateAndTime':row[4].strftime(f),
+							'UserId':str(row[6]),
+							'MachineId':int(row[5])
+						  }
+				response = requests.post(url, data=json.dumps(payload), headers=headers)
+				if response.status_code == 200:
+					cursor.execute("DELETE FROM data WHERE id = %s", (row[0], ))
+					db.commit()
+				no_of_data -= 1
+			lcd.display.clear()
+			lcd.draw.text("SUCCESSFULLY SENT", 0, 0)
+			lcd.draw.text("DATA TO SERVER", 0, 9)
 			lcd.display.commit()
-			payload = {
-						'ProductId':int(row[2]),
-						'Weight':int(row[3]),
-						'LocationId':int(row[1]),
-						'DateAndTime':row[4].strftime(f),
-						'UserId':str(row[6]),
-						'MachineId':int(row[5])
-					  }
-			response = requests.post(url, data=json.dumps(payload), headers=headers)
-			if response.status_code == 200:
-				cursor.execute("DELETE FROM data WHERE id = %s", (row[0], ))
-				db.commit()
-			no_of_data -= 1
-		lcd.display.clear()
-		lcd.draw.text("SUCCESSFULLY SENT", 0, 0)
-		lcd.draw.text("DATA TO SERVER", 0, 9)
-		lcd.display.commit()
-		time.sleep(4)
+			time.sleep(4)
+		else:
+			lcd.display.clear()
+			lcd.draw.text("NO DATA TO SEND!", 0, 0)
+			lcd.display.commit()
+			time.sleep(4)
 	except Exception as e:
 		print str(e)
 		lcd.display.clear()
