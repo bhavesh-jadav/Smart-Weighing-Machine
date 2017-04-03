@@ -1,6 +1,12 @@
 import serial
-from Modules.global_variables import global_variables
+from global_variables import global_variables
 ser = serial.Serial('/dev/ttyUSB0', 9600, timeout = 0)
+
+def flush_buffer():
+	val = ser.read()
+	if val != "":
+		while ser.inWaiting() > 0:
+			val = ser.read()
 
 def get_value():
 	val_to_send = ""

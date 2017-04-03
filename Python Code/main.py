@@ -13,6 +13,7 @@ from string import whitespace
 import requests
 import MySQLdb as sqldb
 import time
+from Modules import wifi_config
 millis = lambda: int(round(time.time() * 1000))
 
 date_and_time = ""
@@ -140,6 +141,9 @@ def check_internet():
 		key = keypad.get_value()
 		while key != "right":
 			key = keypad.get_value()
+
+def connect_to_wifi():
+	wifi_config.init()
 			
 def restart_script():
 	sys.stdout.flush()
@@ -227,6 +231,10 @@ def add_data():
 			
 	except Exception as e:
 		print str(e)
+		
+	finally:
+		lcd.display.clear()
+		lcd.display.commit()
 	
 def is_signed_in():
 	with open('user_data.json', 'r') as f:
@@ -450,8 +458,11 @@ def call_menu_functions(function):
 		signin()
 	elif function == menu_pages[0][6]:
 		signout()
+	elif function == menu_pages[1][0]:
+		connect_to_wifi() 
 	elif function == menu_pages[1][1]:
 		send_data_to_server()
+
 	
 #displays single menu page used by show_menu()
 def show_menu_page(menu):
@@ -588,12 +599,13 @@ try:
 		key = keypad.get_value()
 		if key == "menu":
 			show_main_menu()
+			keypad.flush_buffer()
 		elif key == "tare":
 			loadcell.tare()
+			keypad.flush_buffer()
 		elif key == "right":
 			add_data()
-			lcd.display.clear()
-			lcd.display.commit()
+			keypad.flush_buffer()
 		
 except Exception as e:
 	GPIO.cleanup()
