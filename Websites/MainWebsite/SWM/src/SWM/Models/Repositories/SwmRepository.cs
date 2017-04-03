@@ -9,6 +9,8 @@ using SWM.ViewModels;
 using SWM.Services;
 using Microsoft.Extensions.Configuration;
 using System.Collections;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace SWM.Models.Repositories
 {
@@ -425,63 +427,6 @@ namespace SWM.Models.Repositories
         {
             return dt >= start && dt <= end;
         }
-        public List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear)
-        {
-            List<ProductDataMonthWiseModel> monthWiseData = new List<ProductDataMonthWiseModel>();
-            try
-            {
-                DateTime startDate = new DateTime(startYear, startMonth, 1);
-                DateTime endDate = new DateTime(endYear, endMonth, DateTime.DaysInMonth(endYear, endMonth));
-                if (userName == "")
-                {
-                    for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
-                    {
-                        monthWiseData.Add(new ProductDataMonthWiseModel()
-                        {
-                            Date = date,
-                            ProductInformation = _ctx.ProductInformations
-                                .Select(pi => new ProductInfoModel()
-                                {
-                                    ProductName = pi.Name,
-                                    TotalWeight = pi.ProductsToUser.SelectMany(pu => pu.CropData)
-                                    .Where(cd => cd.DateTime.Month == date.Month && cd.DateTime.Year == date.Year)
-                                    .Select(cd => Convert.ToInt64(cd.Weight)).Sum()
-                                })
-                                .ToList()
-                        });
-                    }
-                }
-                else
-                {
-                    var user = _userManager.FindByNameAsync(userName).Result;
-                    if (user != null)
-                    {
-                        for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
-                        {
-                            monthWiseData.Add(new ProductDataMonthWiseModel()
-                            {
-                                Date = date,
-                                ProductInformation = _ctx.ProductsToUsers
-                                    .Where(pu => pu.UserId == user.Id)
-                                    .Select(pi => new ProductInfoModel()
-                                    {
-                                        ProductName = pi.ProductInformation.Name,
-                                        TotalWeight = pi.CropData
-                                        .Where(cd => cd.DateTime.Month == date.Month && cd.DateTime.Year == date.Year)
-                                        .Select(cd => Convert.ToInt64(cd.Weight)).Sum()
-                                    })
-                                    .ToList()
-                            });
-                        }
-                    }
-                }
-                return monthWiseData.OrderBy(md => md.Date).ToList();
-            }
-            catch (Exception ex)
-            {
-                return monthWiseData;
-            }
-        }
         public List<DateTime> GetDateRangeOfUserData(string userName)
         {
             List<DateTime> userDates = new List<DateTime>();
@@ -494,11 +439,15 @@ namespace SWM.Models.Repositories
                     var user = _userManager.FindByNameAsync(userName).Result;
                     startDate = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == user.Id).OrderBy(cd => cd.DateTime).FirstOrDefault().DateTime;
                     endDate = _ctx.CropDatas.Where(cd => cd.ProductsToUser.UserId == user.Id).OrderByDescending(cd => cd.DateTime).FirstOrDefault().DateTime;
+                    startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
+                    endDate = new DateTime(endDate.Year, endDate.Month, DateTime.DaysInMonth(endDate.Year, endDate.Month), 23, 59, 59);
                 }
                 else
                 {
                     startDate = _ctx.CropDatas.OrderBy(cd => cd.DateTime).FirstOrDefault().DateTime;
                     endDate = _ctx.CropDatas.OrderByDescending(cd => cd.DateTime).FirstOrDefault().DateTime;
+                    startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
+                    endDate = new DateTime(endDate.Year, endDate.Month, DateTime.DaysInMonth(endDate.Year, endDate.Month), 23, 59, 59);
                 }
                 for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
                     userDates.Add(new DateTime(date.Year, date.Month, 1));
@@ -747,6 +696,65 @@ namespace SWM.Models.Repositories
             catch (Exception ex)
             {
                 return "";
+            }
+        }
+
+        public List<ProductDataMonthWiseModel> GetProductDataMonthWise(string userName, int startMonth, int startYear, int endMonth, int endYear)
+        {
+            List<ProductDataMonthWiseModel> monthWiseData = new List<ProductDataMonthWiseModel>();
+            try
+            {
+                DateTime startDate = new DateTime(startYear, startMonth, 1);
+                DateTime endDate = new DateTime(endYear, endMonth, DateTime.DaysInMonth(endYear, endMonth));
+                if (userName == "")
+                {
+                    for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
+                    {
+                        monthWiseData.Add(new ProductDataMonthWiseModel()
+                        {
+                            Date = date,
+                            ProductInformation = _ctx.ProductInformations
+                                .Select(pi => new ProductInfoModel()
+                                {
+                                    ProductName = pi.Name,
+                                    TotalWeight = pi.ProductsToUser.SelectMany(pu => pu.CropData)
+                                    .Where(cd => cd.DateTime.Month == date.Month && cd.DateTime.Year == date.Year)
+                                    .Select(cd => Convert.ToInt64(cd.Weight)).Sum()
+
+                                })
+                                .ToList()
+                        });
+                    }
+                }
+                else
+                {
+                    var user = _userManager.FindByNameAsync(userName).Result;
+                    if (user != null)
+                    {
+                        for (DateTime date = startDate; date <= endDate; date = date.AddMonths(1))
+                        {
+                            monthWiseData.Add(new ProductDataMonthWiseModel()
+                            {
+                                Date = date,
+                                ProductInformation = _ctx.ProductsToUsers
+                                    .Where(pu => pu.UserId == user.Id)
+                                    .Select(pi => new ProductInfoModel()
+                                    {
+                                        ProductName = pi.ProductInformation.Name,
+                                        TotalWeight = pi.CropData
+                                        .Where(cd => cd.DateTime.Month == date.Month && cd.DateTime.Year == date.Year)
+                                        .Select(cd => Convert.ToInt64(cd.Weight)).Sum()
+                                    })
+                                    .ToList()
+                            });
+                        }
+                    }
+                }
+                return monthWiseData.OrderBy(md => md.Date).ToList();
+            }
+            catch (Exception ex)
+            {
+                return monthWiseData;
             }
         }
 

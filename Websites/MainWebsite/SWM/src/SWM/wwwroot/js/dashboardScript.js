@@ -85,6 +85,7 @@
                     });
                     $("#LastUpdatedProduct").fadeToggle();
                 }
+
             }, 10);
         }
     }
