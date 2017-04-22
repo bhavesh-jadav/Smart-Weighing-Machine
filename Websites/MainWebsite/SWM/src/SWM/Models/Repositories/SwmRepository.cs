@@ -893,7 +893,7 @@ namespace SWM.Models.Repositories
                 var user = await _userManager.FindByIdAsync(userModel.UserId.Trim());
                 if (user != null && user.UserName == userModel.UserName.Trim())
                 {
-                    await _userManager.DeleteAsync(user);
+                    
                     var pus = _ctx.ProductsToUsers.Where(pu => pu.UserId == user.Id).ToList();
                     foreach (var row in pus)
                     {
@@ -916,6 +916,7 @@ namespace SWM.Models.Repositories
                     var mus = _ctx.MachineToUsers.Where(mu => mu.UserID == user.Id).ToList();
                     foreach (var mu in mus)
                         _ctx.Remove(mu);
+                    await _userManager.DeleteAsync(user);
                     await _ctx.SaveChangesAsync();
                     return true;
                 }
